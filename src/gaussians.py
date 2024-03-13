@@ -28,7 +28,7 @@ __author__ = "Alfred J. Reich, Ph.D."
 __contact__ = "al.reich@gmail.com"
 __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 from math import sqrt
 from fractions import Fraction
@@ -149,33 +149,6 @@ class Zi(Complex):
         else:
             raise TypeError(f"Addition by '{other}' not supported")
 
-    # def __mul__(self, other):  # self * other
-    #     """Implements the multiplication operator: self * other
-    #
-    #     other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-    #     """
-    #     a = self.real
-    #     b = self.imag
-    #     if isinstance(other, Zi):
-    #         c = other.real
-    #         d = other.imag
-    #     elif isinstance(other, complex):
-    #         c = round(other.real)
-    #         d = round(other.imag)
-    #     elif isinstance(other, float):
-    #         c = round(other)
-    #         d = 0
-    #     elif isinstance(other, int):
-    #         c = other
-    #         d = 0
-    #     else:
-    #         raise TypeError(f"Multiplication by '{other}' not supported")
-    #     # (a, b) * (c, d) = (a * c - b * d) + (a * d + b * c)
-    #     if d == 0:
-    #         return Zi(a * c, b * c)
-    #     else:
-    #         return Zi(a * c - b * d, a * d + b * c)
-
     def __mul__(self, other):  # self * other
         """Implements the multiplication operator: self * other
 
@@ -195,21 +168,6 @@ class Zi(Complex):
         # (a, b) * (c, d) = (a * c - b * d) + (a * d + b * c)
         return Zi(a * c - b * d, a * d + b * c)
 
-    # def __rmul__(self, other):  # other * self
-    #     """The reflected (swapped) operand for multiplication: other * self
-    #
-    #     other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-    #     """
-    #     if isinstance(other, int):
-    #         return Zi(other * self.real, other * self.imag)
-    #     elif isinstance(other, float):
-    #         oth = round(other)
-    #         return Zi(oth * self.real, oth * self.imag)
-    #     elif isinstance(other, complex):
-    #         return Zi(other) * self
-    #     else:
-    #         raise TypeError(f"Multiplication by '{other}' not supported")
-
     def __rmul__(self, other):  # other * self
         """The reflected (swapped) operand for multiplication: other * self
 
@@ -219,33 +177,6 @@ class Zi(Complex):
             return Zi(other) * self
         else:
             raise TypeError(f"Multiplication by '{other}' not supported")
-
-    # def __imul__(self, other):
-    #     """Implements the *= operation: self *= other
-    #
-    #     other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-    #     """
-    #     a = self.real
-    #     b = self.imag
-    #     if isinstance(other, Zi):
-    #         c = other.real
-    #         d = other.imag
-    #     elif isinstance(other, complex):
-    #         c = round(other.real)
-    #         d = round(other.imag)
-    #     elif isinstance(other, float):
-    #         c = round(other)
-    #         d = 0
-    #     elif isinstance(other, int):
-    #         c = other
-    #         d = 0
-    #     else:
-    #         raise TypeError(f"Multiplication by '{other}' not supported")
-    #     # (a, b) * (c, d) = (a*c - b*d) + (a*d + b*c)
-    #     if d == 0:
-    #         return Zi(a * c, b * c)
-    #     else:
-    #         return Zi(a * c - b * d, a * d + b * c)
 
     def __imul__(self, other):
         """Implements the *= operation: self *= other
@@ -309,22 +240,6 @@ class Zi(Complex):
             return (self.real != other.real) or (self.imag != other.imag)
         else:
             return True
-
-    # def __truediv__(self, other) -> Qi:  # self / other
-    #     """Divide self by other, exactly, and return the resulting Gaussian rational, Qi.
-    #
-    #     Implements the / operator, and returns the exact, Gaussian rational result
-    #     of dividing this Gaussian integer by another Gaussian integer or regular integer.
-    #     """
-    #     if isinstance(other, Zi):
-    #         denom = other.norm
-    #         numer = self * other.conjugate
-    #     elif isinstance(other, int):
-    #         denom = other
-    #         numer = self
-    #     else:
-    #         raise TypeError(f"{other} cannot divide a Gaussian integer")
-    #     return Qi(Fraction(numer.real, denom), Fraction(numer.imag, denom))
 
     def __truediv__(self, other):  # self / other
         """Divide self by other, exactly, and return the resulting Gaussian rational, Qi.
@@ -795,15 +710,4 @@ class Qi(Complex):
             return Qi(sign + re, '-' + im)
         else:
             raise ValueError(f"Can't parse {qi_str}")
-
-    # s1 = "(1/2+3/5j)"
-    # s2 = "(1/2-3/5j)"
-    # s3 = "(-1/2+3/5j)"
-    # s4 = "(-1/2-3/5j)"
-    # s5 = "(+1/2+3/5j)"
-    # s6 = "(+1/2-3/5j)"
-    #
-    # test_strings = [s1, s2, s3, s4, s5, s6]
-    #
-    # for ts in test_strings:
-    #     print(f"{ts} -> {parse_printed_form(ts)}")
+    
