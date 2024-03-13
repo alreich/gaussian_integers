@@ -710,4 +710,3 @@ class Qi(Complex):
             return Qi(sign + re, '-' + im)
         else:
             raise ValueError(f"Can't parse {qi_str}")
-    
