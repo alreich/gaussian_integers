@@ -4,7 +4,9 @@ This module defines two classes, **Zi** and **Qi**, the Gaussian integers and Ga
 
 In mathematical notation, the integers are denoted by $\mathbb{Z}$, the rational numbers by $\mathbb{Q}$, and the complex numbers by $\mathbb{C}$.
 
-The **Gaussian integers** are defined as $\mathbb{Z}[i] = \{a + bi: a, b \in \mathbb{Z}\}$, and the **Gaussian rationals** are defined as $\mathbb{Q}[i] = \{r + si: r, s \in \mathbb{Q}\}$.
+The **Gaussian integers** are defined as $\mathbb{Z}[i] = \lbrace a + bi: a, b \in \mathbb{Z} \rbrace$,
+
+and the **Gaussian rationals** are defined as $\mathbb{Q}[i] = \lbrace r + si: r, s \in \mathbb{Q} \rbrace$.
 
 For detailed information, see the two Jupyter notebooks in the notebooks directory.
 
