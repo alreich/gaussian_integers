@@ -30,7 +30,7 @@ __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
 __version__ = "1.0.0"
 
-from math import sqrt
+from math import sqrt, floor, ceil
 from fractions import Fraction
 from numbers import Complex
 from random import randint
@@ -250,15 +250,18 @@ class Zi(Complex):
         of dividing this Gaussian integer by another Gaussian integer, or an int,
         float, or complex. Floats & complexes will be rounded.
         """
-        if isinstance(other, (int, float, complex)):
-            oth = Zi(other)
-        elif isinstance(other, Zi):
-            oth = other
+        if isinstance(other, Qi):
+            return Qi(self) / other
         else:
-            raise TypeError(f"Cannot divide a Gaussian integer by {other}")
-        numer = self * oth.conjugate
-        denom = oth.norm
-        return Qi(Fraction(numer.real, denom), Fraction(numer.imag, denom))
+            if isinstance(other, (int, float, complex)):
+                oth = Zi(other)
+            elif isinstance(other, Zi):
+                oth = other
+            else:
+                raise TypeError(f"Cannot divide a Gaussian integer by {other}")
+            numer = self * oth.conjugate
+            denom = oth.norm
+            return Qi(Fraction(numer.real, denom), Fraction(numer.imag, denom))
 
     def __rtruediv__(self, other):  # other / self
         """Divide other by self, exactly, and return the resulting Gaussian rational, Qi.
@@ -605,8 +608,25 @@ class Qi(Complex):
         return result
 
     def __truediv__(self, other):
-        """Returns self/other as a Gaussian rational, Qi"""
-        return self * other.inverse
+        """Returns self/other as a Gaussian rational, Qi
+
+        If other is a int, float, complex, or Zi, then it is converted to Qi first.
+        """
+        if isinstance(other, (int, float, complex, Zi)):
+            oth = Qi(other)
+            return self * oth.inverse
+        elif isinstance(other, Qi):
+            return self * other.inverse
+        else:
+            raise TypeError(f"{other} is not a supported type")
+
+    def __rtruediv__(self, other):
+        """Returns other/self as a Gaussian rational, Qi"""
+        if isinstance(other, (int, float, complex, Zi)):
+            oth = Qi(other)
+            return oth * self.inverse
+        else:
+            raise TypeError(f"{other} is not a supported type")
 
     def __neg__(self):
         return Qi(-self.real, -self.imag)
@@ -640,8 +660,14 @@ class Qi(Complex):
     def __rpow__(self, **kwargs):
         return NotImplemented
 
-    def __rtruediv__(self, **kwargs):
-        return NotImplemented
+    def __round__(self) -> Zi:
+        return Zi(round(self.real), round(self.imag))
+
+    def __floor__(self) -> Zi:
+        return Zi(floor(self.real), floor(self.imag))
+
+    def __ceil__(self) -> Zi:
+        return Zi(ceil(self.real), ceil(self.imag))
 
     @property
     def conjugate(self):
