@@ -377,7 +377,7 @@ class Zi(Complex):
         """The divmod algorithm, modified for Gaussian integers.
 
         Returns q & r, such that a = b * q + r, where
-        (1/2) * r.norm < b.norm. This is the Modified Division
+        r.norm < b.norm / 2. This is the Modified Division
         Theorem described in 'The Gaussian Integers' by Keith Conrad
         """
         q = Zi(complex(a * b.conjugate) / b.norm)  # Zi rounds the complex result here
