@@ -167,7 +167,7 @@ class Zi(Complex):
             d = oth.imag
         else:
             raise TypeError(f"Multiplication by '{other}' not supported")
-        # (a, b) * (c, d) = (a * c - b * d) + (a * d + b * c)
+        # (a, b) * (c, d) = (a * c - b * d, a * d + b * c)
         return Zi(a * c - b * d, a * d + b * c)
 
     def __rmul__(self, other):  # other * self
