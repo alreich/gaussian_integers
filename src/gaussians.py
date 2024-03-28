@@ -610,7 +610,7 @@ class Qi(Complex):
     def __truediv__(self, other):
         """Returns self/other as a Gaussian rational, Qi
 
-        If other is a int, float, complex, or Zi, then it is converted to Qi first.
+        If other is an int, float, complex, or Zi, then it is converted to Qi first.
         """
         if isinstance(other, (int, float, complex, Zi)):
             oth = Qi(other)
