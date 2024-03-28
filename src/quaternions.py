@@ -64,6 +64,15 @@ class Hi:
     def __sub__(self, other):
         return Hi(self.array - other.array)
 
+    def __neg__(self):
+        return Hi(-self.array)
+
+    def __eq__(self, other):
+        return self.array == other.array
+
+    def __ne__(self, other):
+        return self.array != other.array
+
     def __mul__(self, other):
         a1, b1, c1, d1 = self.array
         a2, b2, c2, d2 = other.array
