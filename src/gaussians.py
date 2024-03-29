@@ -35,6 +35,8 @@ from fractions import Fraction
 from numbers import Complex
 from random import randint
 
+import numpy as np
+
 
 class Zi(Complex):
     """Gaussian Integer Class with arithmetic and related functionality.
@@ -46,11 +48,11 @@ class Zi(Complex):
     rounded to nearest integers and used as inputs for re & im, respectively.
     """
 
-    def __init__(self, re: (int, float, complex) = 0, im: (int, float) = 0):
+    def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0):
         """Instantiate a Gaussian integer, Zi(re=0, im=0)."""
 
-        if isinstance(re, int):
-            self.__real = re
+        if isinstance(re, (int, np.int64)):
+            self.__real = int(re)
         elif isinstance(re, float):
             self.__real = round(re)
         elif isinstance(re, complex):
@@ -60,8 +62,8 @@ class Zi(Complex):
 
         if isinstance(re, complex):  # This way, im is ignored if re is complex
             self.__imag = round(re.imag)
-        elif isinstance(im, int):
-            self.__imag = im
+        elif isinstance(im, (int, np.int64)):
+            self.__imag = int(im)
         elif isinstance(im, float):
             self.__imag = round(im)
         else:
@@ -370,6 +372,11 @@ class Zi(Complex):
     def to_gaussian_rational(self):
         """Convert this Gaussian integer to an equivalent Gaussian rational."""
         return Qi(self.real, self.imag)
+
+    @staticmethod
+    def from_array(arr):
+        """Convert a two-element array into a Gaussian integer."""
+        return Zi(int(arr[0]), int(arr[1]))
 
     # See https://kconrad.math.uconn.edu/blurbs/ugradnumthy/Zinotes.pdf
     @staticmethod
