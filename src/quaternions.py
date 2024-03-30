@@ -43,66 +43,83 @@ class Hi:
 
     @property
     def gaussian_ints(self):
+        """Return the two Gaussian integers that define this quaternion."""
         arr = self.__arr
         n = len(arr) // 2
         return Zi.from_array(arr[:n]), Zi.from_array(arr[n:])
 
     @property
     def real(self):
+        """Return the 'real' Gaussian integer that defines this quaternion."""
         real, _ = self.gaussian_ints
         return real
 
     @property
     def imag(self):
+        """Return the 'imag' Gaussian integer that defines this quaternion."""
         _, imag = self.gaussian_ints
         return imag
 
     @property
     def array(self):
+        """Return the numpy array that implements this quaternion."""
         return self.__arr
 
     @property
     def conjugate(self):
+        """Return the conjugate of this quaternion."""
         real, imag = self.gaussian_ints
         return Hi(real.conjugate, -imag)
 
     @property
     def norm(self) -> int:
+        """Return the norm squared of this quaternion."""
         tmp = self * self.conjugate
         return int(tmp.array[0])
 
-    def show(self):
-        real, imag = self.gaussian_ints
-        return f"Hi({repr(real)}, {repr(imag)})"
+    # def show(self):
+    #     real, imag = self.gaussian_ints
+    #     return f"Hi({repr(real)}, {repr(imag)})"
 
     def __abs__(self) -> float:
+        """Return the square root of the norm of this quaternion."""
         return math.sqrt(self.norm)
 
     def __repr__(self) -> str:
+        """Return a string that represents this quaternion, and
+        can be used to recreate this quaternion via cut-and-paste."""
         a, b, c, d = self.array
         return f"Hi({a}, {b}, {c}, {d})"
 
     def __str__(self) -> str:
+        """Return a string representation of this quaternion. This string
+        cannot be used, directly, to reconstruct this quaternion, however,
+        Hi.from_string() can reconstruct it."""
         a, b, c, d = self.array
         return f"({a} + {b}i + {c}j + {d}k)"
 
     def __add__(self, other):
+        """Return the sum of two quaternions."""
         return Hi(self.array + other.array)
 
     def __sub__(self, other):
+        """Return the difference of two quaternions."""
         return Hi(self.array - other.array)
 
     def __neg__(self):
+        """Negate the quaternion."""
         return Hi(-self.array)
 
     def __eq__(self, other):
+        """Return True if the two quaternions are equal, otherwise return False."""
         return np.array_equal(self.array, other.array)
 
     def __ne__(self, other):
+        """Return True if the two quaternions are not equal, otherwise return False."""
         return not self == other
 
     def __mul__(self, other):
-        """Multiplication according to the Cayley-Dickson construction"""
+        """Multiplication of two quaternions according to the Cayley-Dickson construction"""
         a, b = self.gaussian_ints
         c, d = other.gaussian_ints
         # (a, b) * (c, d) = (a * c - d.conj * b, d * a + b * c.conj)
@@ -112,7 +129,7 @@ class Hi:
 
     @staticmethod
     def hamilton_product(q1, q2):
-        """Multiplication according to the classic Hamilton product"""
+        """Multiplication of two quaternions according to the classic Hamilton product."""
         a1, b1, c1, d1 = q1.array
         a2, b2, c2, d2 = q2.array
         # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
@@ -123,9 +140,8 @@ class Hi:
         return Hi(a, b, c, d)
 
     def scalar_mul(self, scalar):
-        """Multiply this quaternion by a scalar integer.
-
-        Round the scalar to the nearest integer if necessary.
+        """Multiply this quaternion by a scalar integer. Round the scalar to the nearest
+         integer if necessary.
         """
         return Hi(round(scalar) * self.array)
 
@@ -143,6 +159,7 @@ class Hi:
 
     @staticmethod
     def random(low=-100, high=100):
+        """Generate a random quaternion where each of the four components is between low  and high."""
         return Hi(np.array([rnd.randint(low, high) for _ in range(4)]))
 
     @staticmethod
@@ -157,9 +174,7 @@ class Hi:
     @staticmethod
     def from_string(s):
         """Converts the string form of a Hi back into a Hi.
-
-        Example:
-        Hi.from_string('(46 + -92i + 9j + 23k)') -> Hi(46, -92, 9, 23)
+        e.g., Hi.from_string('(46 + -92i + 9j + 23k)') -> Hi(46, -92, 9, 23)
         """
         return Hi(np.array(list(map(lambda x: int(x),
                                     s.translate({ord(i): None for i in 'ijk'}
