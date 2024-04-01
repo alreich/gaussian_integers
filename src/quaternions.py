@@ -9,6 +9,7 @@ __version__ = "1.0.0"
 import numpy as np
 import random as rnd
 import math
+
 from gaussians import Zi
 
 
@@ -22,21 +23,23 @@ class Hi:
     """
     def __init__(self,
                  # If no inputs are given, then the "zero" quaternion will be returned
-                 z1: (Zi, np.ndarray, int) = Zi(),
-                 z2: (Zi, int) = Zi(),
-                 z3: int = 0,
-                 z4: int = 0):
+                 z1: (int, np.int64, np.ndarray, Zi) = Zi(),
+                 z2: (int, np.int64, Zi) = 0,
+                 z3: (int, np.int64) = 0,
+                 z4: (int, np.int64) = 0):
 
-        # Assumes two Gaussian integers provided, z1 & z2
         if isinstance(z1, Zi):
-            self.__arr = np.array([z1.real, z1.imag, z2.real, z2.imag], dtype=np.int64)
+            if isinstance(z2, Zi):
+                self.__arr = np.array([z1.real, z1.imag, z2.real, z2.imag], dtype=np.int64)
+            elif isinstance(z2, (int, np.int64)):
+                self.__arr = np.array([z1.real, z1.imag, 0, 0], dtype=np.float64)
 
         # Assumes one numpy array containing four np.int64's provided, z1
         elif isinstance(z1, np.ndarray):
             self.__arr = z1
 
         # Assumes four ints or np.int64s provided, z1, ..., z4
-        elif isinstance(z1, (int, np.int64)):
+        elif isinstance(z1, (int, np.int64)) and isinstance(z2, (int, np.int64)):
             self.__arr = np.array([z1, z2, z3, z4], dtype=np.int64)
         else:
             raise ValueError(f"{type(z1)} not supported")
@@ -69,17 +72,13 @@ class Hi:
     def conjugate(self):
         """Return the conjugate of this quaternion."""
         real, imag = self.gaussian_ints
-        return Hi(real.conjugate, -imag)
+        return Hi(real.conjugate, -imag, 0, 0)
 
     @property
     def norm(self) -> int:
         """Return the norm squared of this quaternion."""
         tmp = self * self.conjugate
         return int(tmp.array[0])
-
-    # def show(self):
-    #     real, imag = self.gaussian_ints
-    #     return f"Hi({repr(real)}, {repr(imag)})"
 
     def __abs__(self) -> float:
         """Return the square root of the norm of this quaternion."""
@@ -100,32 +99,63 @@ class Hi:
 
     def __add__(self, other):
         """Return the sum of two quaternions."""
-        return Hi(self.array + other.array)
+        return Hi(self.array + other.array, Zi(), 0, 0)
 
     def __sub__(self, other):
         """Return the difference of two quaternions."""
-        return Hi(self.array - other.array)
+        return Hi(self.array - other.array, Zi(), 0, 0)
 
     def __neg__(self):
         """Negate the quaternion."""
-        return Hi(-self.array)
+        return Hi(-self.array, Zi(), 0, 0)
 
     def __eq__(self, other):
         """Return True if the two quaternions are equal, otherwise return False."""
-        return np.array_equal(self.array, other.array)
+        if isinstance(other, Hi):
+            return np.array_equal(self.array, other.array)
+        else:
+            return False
 
     def __ne__(self, other):
         """Return True if the two quaternions are not equal, otherwise return False."""
-        return not self == other
+        if isinstance(other, Hi):
+            return not self == other
+        else:
+            return True
 
     def __mul__(self, other):
-        """Multiplication of two quaternions according to the Cayley-Dickson construction"""
+        """Multiplication of two quaternions according to the Cayley-Dickson construction
+
+        If other is an int, np.int64, or Zi, then it will first be coerced to a Hi.
+        """
+        if isinstance(other, (int, np.int64)):
+            oth = Hi(other, 0, 0, 0)
+        elif isinstance(other, Zi):
+            oth = Hi(other)
+        elif isinstance(other, Hi):
+            oth = other
+        else:
+            raise TypeError(f"Cannot left multiply by {other}")
         a, b = self.gaussian_ints
-        c, d = other.gaussian_ints
+        c, d = oth.gaussian_ints
         # (a, b) * (c, d) = (a * c - d.conj * b, d * a + b * c.conj)
         z1 = a * c - d.conjugate * b
         z2 = d * a + b * c.conjugate
-        return Hi(z1, z2)
+        return Hi(z1, z2, 0, 0)
+
+    # TODO: Either fix right multiplication by Gaussian integer, ie., Zi * Hi, or remove it
+    def __rmul__(self, other):
+        if isinstance(other, (int, np.int64)):
+            oth = Hi(other, 0, 0, 0)
+        elif isinstance(other, Zi):
+            oth = Hi(other)
+        else:
+            raise TypeError(f"Cannot right multiply by {other}")
+        return oth * self
+
+    def __hash__(self):
+        """Return the hash of the quaternion."""
+        return hash(tuple(self.array))
 
     @staticmethod
     def hamilton_product(q1, q2):
@@ -139,18 +169,12 @@ class Hi:
         d = a1 * d2 + b1 * c2 - c1 * b2 + d1 * a2
         return Hi(a, b, c, d)
 
-    def scalar_mul(self, scalar):
-        """Multiply this quaternion by a scalar integer. Round the scalar to the nearest
-         integer if necessary.
-        """
-        return Hi(round(scalar) * self.array)
-
     def __floordiv__(self, other):
         """Implements the // operator using 'round', instead of 'floor'."""
         numer = self * other.conjugate
         denom = other.norm
         quotient = np.round(numer.array / denom)
-        return Hi(quotient.astype(np.int64))
+        return Hi(quotient.astype(np.int64), Zi(), 0, 0)
 
     def to_gaussian_ints(self):
         """Convert this quaternion into two Gaussian integers"""
@@ -160,7 +184,7 @@ class Hi:
     @staticmethod
     def random(low=-100, high=100):
         """Generate a random quaternion where each of the four components is between low  and high."""
-        return Hi(np.array([rnd.randint(low, high) for _ in range(4)]))
+        return Hi(np.array([rnd.randint(low, high) for _ in range(4)]), Zi(), 0, 0)
 
     @staticmethod
     def modified_divmod(a, b):
@@ -178,4 +202,4 @@ class Hi:
         """
         return Hi(np.array(list(map(lambda x: int(x),
                                     s.translate({ord(i): None for i in 'ijk'}
-                                                )[1:-1].split(' + ')))))
+                                                )[1:-1].split(' + ')))), Zi(), 0, 0)
