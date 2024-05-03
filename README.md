@@ -2,15 +2,22 @@
 
 This module defines two classes, **Zi** and **Qi**, the Gaussian integers and Gaussian rational numbers, respectively.
 
-In mathematical notation, the integers are denoted by $\mathbb{Z}$, the rational numbers by $\mathbb{Q}$, and the complex numbers by $\mathbb{C}$.
+Mathematically, the integers are denoted by $\mathbb{Z}$, the rational numbers by $\mathbb{Q}$, and the complex numbers by $\mathbb{C}$.
 
-The **Gaussian integers** are defined as $\mathbb{Z}[i] = \lbrace a + bi: a, b \in \mathbb{Z} \rbrace$,
+$\mathbb{C} \equiv \lbrace a + bi: a, b \in \mathbb{R} \rbrace$ where $\mathbb{R}$ is the set of real numbers and $i^2 = -1$.
 
-and the **Gaussian rationals** are defined as $\mathbb{Q}[i] = \lbrace r + si: r, s \in \mathbb{Q} \rbrace$.
+The **Gaussian integers** are denoted by $\mathbb{Z}[i] \equiv \lbrace n + mi: n, m \in \mathbb{Z} \rbrace \subset \mathbb{C}$,
 
-For detailed information, see the two Jupyter notebooks in the notebooks directory.
+and the **Gaussian rationals** are denoted by $\mathbb{Q}[i] \equiv \lbrace r + si: r, s \in \mathbb{Q} \rbrace \subset \mathbb{C}$.
 
-For a quick look, see the examples following this plot of Gaussian primes.
+NOTE:
+
+* Python uses $j$ instead of $i$ to represent complex numbers
+* Although, both **Zi** and **Qi** are subclasses of **numbers.Complex**, and $\mathbb{Z}[i] \subset \mathbb{Q}[i] \subset \mathbb{C}$, the class **Zi** is **not** a subclass of the class **Qi**.
+
+For more information, see the two Jupyter notebooks in the notebooks directory.
+
+For a quick look, see the examples following the plot of Gaussian primes, below.
 
 ![alt text](https://github.com/alreich/gaussian_integers/blob/main/gaussian_integers_plot.png?raw=true)
 
