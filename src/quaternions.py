@@ -1,4 +1,4 @@
-"""Integer-Valued Quaternions"""
+"""pschitz Integers: Integer-Valued Quaternions"""
 
 __author__ = "Alfred J. Reich, Ph.D."
 __contact__ = "al.reich@gmail.com"
@@ -16,7 +16,7 @@ from gaussians import Zi
 class Hi:
     """Integer-valued quaternions ('Gaussian quaternions')
 
-    Internally, a quaternion integer is implemented as a numpy array of 4
+    Internally, a Lipschitz integer is implemented as a numpy array of 4
     integers, but they can be thought of as simply 4 integers, or 2 Gaussian
     integers. For this reason, a Hi can be constructed from 4 integers, or
     2 Gaussian integers, or 1 numpy array of 4 integers.
