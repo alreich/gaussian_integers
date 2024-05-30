@@ -1,4 +1,4 @@
-"""pschitz Integers: Integer-Valued Quaternions"""
+"""Lipschitz Integers: Integer-Valued Quaternions"""
 
 __author__ = "Alfred J. Reich, Ph.D."
 __contact__ = "al.reich@gmail.com"
@@ -14,7 +14,7 @@ from gaussians import Zi
 
 
 class Hi:
-    """Integer-valued quaternions ('Gaussian quaternions')
+    """Lipschitz Integers - valued quaternions
 
     Internally, a Lipschitz integer is implemented as a numpy array of 4
     integers, but they can be thought of as simply 4 integers, or 2 Gaussian
