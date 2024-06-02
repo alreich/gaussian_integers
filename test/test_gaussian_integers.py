@@ -1,7 +1,6 @@
 from unittest import TestCase
 from gaussians import Zi, Qi
 
-
 class TestZi(TestCase):
 
     def setUp(self) -> None:
