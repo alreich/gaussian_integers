@@ -34,8 +34,26 @@ from math import sqrt, floor, ceil
 from fractions import Fraction
 from numbers import Complex
 from random import randint
+from functools import wraps
 
 import numpy as np
+
+
+def to_gaussian_integer(number):
+    if isinstance(number, (int, float, complex)):
+        return Zi(number)
+    elif isinstance(number, Zi):
+        return number
+    else:
+        raise TypeError(f"'{number}' cannot be cast into a Gaussian integer")
+
+
+def gaussian_integer(fnc):
+    @wraps(fnc)
+    def gaussian_integer_wrapper(arg, num):
+        zi = to_gaussian_integer(num)
+        return fnc(arg, zi)
+    return gaussian_integer_wrapper
 
 
 class Zi(Complex):
@@ -83,126 +101,53 @@ class Zi(Complex):
     def __str__(self) -> str:
         return str(complex(self))
 
-    def __add__(self, other):
-        """Implements the + operator: self + other
+    # NOTE: Python ints and floats have both 'real' and 'imag' properties, so
+    # no conversion to Gaussian integers is necessary to use them in the arithmetic
+    # operations, below.
 
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return self + Zi(other)
-        elif isinstance(other, Zi):
-            return Zi(self.real + other.real, self.imag + other.imag)
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+    def __add__(self, other):
+        """Implements the + operator: self + other"""
+        return Zi(self.real + other.real, self.imag + other.imag)
 
     def __radd__(self, other):
-        """The reflected (swapped) operand for addition: other + self
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return Zi(other) + self
-        # elif isinstance(other, Qi):
-        #     return other + Qi(self)
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+        """The reflected (swapped) operand for addition: other + self"""
+        return Zi(other) + self
 
     def __iadd__(self, other):
-        """Implements the += operation: self += other
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return self + Zi(other)
-        elif isinstance(other, Zi):
-            return Zi(self.real + other.real, self.imag + other.imag)
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+        """Implements the += operation: self += other"""
+        return Zi(self.real + other.real, self.imag + other.imag)
 
     def __sub__(self, other):
-        """Implements the subtraction operator: self - other
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return self - Zi(other)
-        elif isinstance(other, Zi):
-            return Zi(self.real - other.real, self.imag - other.imag)
-        else:
-            raise TypeError(f"Subtraction by '{other}' not supported")
+        """Implements the subtraction operator: self - other"""
+        return Zi(self.real - other.real, self.imag - other.imag)
 
     def __rsub__(self, other):
-        """The reflected (swapped) operand for subtraction: other - self
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return Zi(other) - self
-        else:
-            raise TypeError(f"Subtraction by '{other}' not supported")
+        """The reflected (swapped) operand for subtraction: other - self"""
+        return Zi(other) - self
 
     def __isub__(self, other):
-        """Implements the -= operation: self -= other
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return self - Zi(other)
-        elif isinstance(other, Zi):
-            return Zi(self.real - other.real, self.imag - other.imag)
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+        """Implements the -= operation: self -= other"""
+        return Zi(self.real - other.real, self.imag - other.imag)
 
     def __mul__(self, other):  # self * other
-        """Implements the multiplication operator: self * other
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
+        """Implements the multiplication operator: self * other"""
         a = self.real
         b = self.imag
-        if isinstance(other, Zi):
-            c = other.real
-            d = other.imag
-        elif isinstance(other, (int, float, complex)):
-            oth = Zi(other)
-            c = oth.real
-            d = oth.imag
-        else:
-            raise TypeError(f"Multiplication by '{other}' not supported")
-        # (a, b) * (c, d) = (a * c - b * d, a * d + b * c)
+        c = round(other.real)
+        d = round(other.imag)
         return Zi(a * c - b * d, a * d + b * c)
 
     def __rmul__(self, other):  # other * self
-        """The reflected (swapped) operand for multiplication: other * self
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
-        if isinstance(other, (int, float, complex)):
-            return Zi(other) * self
-        else:
-            raise TypeError(f"Multiplication by '{other}' not supported")
+        """The reflected (swapped) operand for multiplication: other * self"""
+        return Zi(other) * self
 
     def __imul__(self, other):
-        """Implements the *= operation: self *= other
-
-        other can be a Zi, int, float, or complex. Floats & complex will be rounded.
-        """
+        """Implements the *= operation: self *= other"""
         a = self.real
         b = self.imag
-        if isinstance(other, Zi):
-            c = other.real
-            d = other.imag
-        elif isinstance(other, (int, float, complex)):
-            oth = Zi(other)
-            c = oth.real
-            d = oth.imag
-        else:
-            raise TypeError(f"Multiplication by '{other}' not supported")
-        # (a, b) * (c, d) = (a*c - b*d) + (a*d + b*c)
-        if d == 0:
-            return Zi(a * c, b * c)
-        else:
-            return Zi(a * c - b * d, a * d + b * c)
+        c = round(other.real)
+        d = round(other.imag)
+        return Zi(a * c - b * d, a * d + b * c)
 
     def __pow__(self, n: int, modulo=None):
         """Implements the ** operator: self ** n.
