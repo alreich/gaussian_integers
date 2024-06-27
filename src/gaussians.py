@@ -665,7 +665,7 @@ class Qi(Complex):
         """Return True if the other Qi is an associate of this Qi, return False otherwise"""
         q = self / other
         if q:
-            if q in Qi.units():
+            if q in Zi.units():
                 return True
             else:
                 return False
