@@ -39,21 +39,23 @@ from functools import wraps
 import numpy as np
 
 
-def to_gaussian_integer(number):
-    if isinstance(number, (int, float, complex)):
-        return Zi(number)
-    elif isinstance(number, Zi):
+def to_gaussian_rational(number):
+    """Given a number, return its equivalent Gaussian rational."""
+    if isinstance(number, (int, float, complex, Zi, Fraction)):
+        return Qi(number)
+    elif isinstance(number, Qi):
         return number
     else:
-        raise TypeError(f"'{number}' cannot be cast into a Gaussian integer")
+        raise TypeError(f"'{number}' cannot be cast into a Gaussian rational")
 
 
-def gaussian_integer(fnc):
+def gaussian_rational(fnc):
+    """For use as a property that casts an argument into Gaussian rational."""
     @wraps(fnc)
-    def gaussian_integer_wrapper(arg, num):
-        zi = to_gaussian_integer(num)
-        return fnc(arg, zi)
-    return gaussian_integer_wrapper
+    def gaussian_rational_wrapper(arg, num):
+        qi = to_gaussian_rational(num)
+        return fnc(arg, qi)
+    return gaussian_rational_wrapper
 
 
 class Zi(Complex):
@@ -178,53 +180,27 @@ class Zi(Complex):
 
     def __eq__(self, other) -> bool:
         """Return True if this Zi equals other."""
-        if isinstance(other, Zi):
-            return (self.real == other.real) and (self.imag == other.imag)
-        else:
-            return False
+        return (self.real == other.real) and (self.imag == other.imag)
 
     def __ne__(self, other) -> bool:
         """Return True if this Zi does NOT equal other."""
-        if isinstance(other, Zi):
-            return (self.real != other.real) or (self.imag != other.imag)
-        else:
-            return True
+        return (self.real != other.real) or (self.imag != other.imag)
 
+    @gaussian_rational
     def __truediv__(self, other):  # self / other
-        """Divide self by other, exactly, and return the resulting Gaussian rational, Qi.
+        """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
 
-        Implements the / operator, and returns the exact, Gaussian rational result
-        of dividing this Gaussian integer by another Gaussian integer, or an int,
-        float, or complex. Floats & complexes will be rounded.
+        The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
         """
-        if isinstance(other, Qi):
-            return Qi(self) / other
-        else:
-            if isinstance(other, (int, float, complex)):
-                oth = Zi(other)
-            elif isinstance(other, Zi):
-                oth = other
-            else:
-                raise TypeError(f"Cannot divide a Gaussian integer by {other}")
-            numer = self * oth.conjugate
-            denom = oth.norm
-            return Qi(Fraction(numer.real, denom), Fraction(numer.imag, denom))
+        return Qi(self) / other
 
+    @gaussian_rational
     def __rtruediv__(self, other):  # other / self
-        """Divide other by self, exactly, and return the resulting Gaussian rational, Qi.
+        """Divide pother by self, exactly, and return the resulting Gaussian rational or integer.
 
-        Implements the 'swapped' version of the / operator, and returns the exact,
-        Gaussian rational result of dividing other by this Gaussian integer. Other
-        must be a Gaussian integer or an int, float, or complex. Floats & complexes
-        will be rounded.
+        The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
         """
-        if isinstance(other, (int, float, complex)):  # the Zi case is handled by __truediv__
-            oth = Zi(other)
-            numer = oth * self.conjugate
-            denom = self.norm
-            return Qi(Fraction(numer.real, denom), Fraction(numer.imag, denom))
-        else:
-            raise TypeError(f"{other} cannot be divided by a Gaussian integer")
+        return other / Qi(self)
 
     def __floordiv__(self, other):  # self // other
         """Implements the // operator using 'round', instead of 'floor'.
@@ -491,59 +467,39 @@ class Qi(Complex):
         else:
             return f"({self.real}+{self.imag}j)"
 
+    @gaussian_rational
     def __add__(self, other):
-        if isinstance(other, (int, float, complex, Zi)):
-            return self + Qi(other)
-        elif isinstance(other, Qi):
-            return Qi(self.real + other.real, self.imag + other.imag)
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+        return Qi(self.real + other.real, self.imag + other.imag)
 
+    @gaussian_rational
     def __radd__(self, other):
-        if isinstance(other, (int, float, complex, Zi)):
-            return Qi(other) + self
-        else:
-            raise TypeError(f"Addition by '{other}' not supported")
+        return other + self
 
+    @gaussian_rational
     def __sub__(self, other):
-        if isinstance(other, (int, float, complex, Zi)):
-            return self - Qi(other)
-        elif isinstance(other, Qi):
-            return Qi(self.real - other.real, self.imag - other.imag)
-        else:
-            raise TypeError(f"Subtraction by '{other}' not supported")
+        return Qi(self.real - other.real, self.imag - other.imag)
 
+    @gaussian_rational
     def __rsub__(self, other):
-        if isinstance(other, (int, float, complex, Zi)):
-            return Qi(other) - self
-        else:
-            raise TypeError(f"Subtraction by '{other}' not supported")
+        return other - self
 
+    @gaussian_rational
     def __mul__(self, other):
         a = self.real
         b = self.imag
-        if isinstance(other, Qi):
-            c = other.real
-            d = other.imag
-        elif isinstance(other, (int, float, complex, Zi)):
-            oth = Qi(other)
-            c = oth.real
-            d = oth.imag
-        else:
-            raise TypeError(f"Multiplication by '{other}' not supported")
-        # (a, b) * (c, d) = (a * c - b * d) + (a * d + b * c)
+        c = other.real
+        d = other.imag
         re = a * c - b * d
         im = a * d + b * c
+        # Return a Gaussian integer if the denominators are 1
         if re.denominator == 1 and im.denominator == 1:
             return Zi(re.numerator, im.numerator)
         else:
             return Qi(re, im)
 
+    @gaussian_rational
     def __rmul__(self, other):
-        if isinstance(other, (int, float, complex, Zi)):
-            return Qi(other) * self
-        else:
-            raise TypeError(f"Multiplication by '{other}' not supported")
+        return other * self
 
     def __pow__(self, n: int, modulo=None):  # self ** n
         result = self
@@ -559,26 +515,15 @@ class Qi(Complex):
             raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
+    @gaussian_rational
     def __truediv__(self, other):
-        """Returns self/other as a Gaussian rational, Qi
+        """Returns self/other as a Gaussian rational"""
+        return self * other.inverse
 
-        If other is an int, float, complex, or Zi, then it is converted to Qi first.
-        """
-        if isinstance(other, (int, float, complex, Zi)):
-            oth = Qi(other)
-            return self * oth.inverse
-        elif isinstance(other, Qi):
-            return self * other.inverse
-        else:
-            raise TypeError(f"{other} is not a supported type")
-
+    @gaussian_rational
     def __rtruediv__(self, other):
         """Returns other/self as a Gaussian rational, Qi"""
-        if isinstance(other, (int, float, complex, Zi)):
-            oth = Qi(other)
-            return oth * self.inverse
-        else:
-            raise TypeError(f"{other} is not a supported type")
+        return other * self.inverse
 
     def __neg__(self):
         return Qi(-self.real, -self.imag)
@@ -586,19 +531,15 @@ class Qi(Complex):
     def __complex__(self) -> complex:
         return complex(float(self.real), float(self.imag))
 
+    @gaussian_rational
     def __eq__(self, other) -> bool:
-        """Return True if this Qi equals other."""
-        if isinstance(other, Qi):
-            return (self.real == other.real) and (self.imag == other.imag)
-        else:
-            return False
+        """Test for equality."""
+        return (self.real == other.real) and (self.imag == other.imag)
 
+    @gaussian_rational
     def __ne__(self, other) -> bool:
         """Return True if this Qi does NOT equal other."""
-        if isinstance(other, Qi):
-            return (self.real != other.real) or (self.imag != other.imag)
-        else:
-            return True
+        return (self.real != other.real) or (self.imag != other.imag)
 
     def __hash__(self):
         return hash((self.real, self.imag))

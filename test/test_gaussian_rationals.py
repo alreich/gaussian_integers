@@ -125,9 +125,17 @@ class TesQi(TestCase):
 
     def test_equality(self):
         self.assertTrue(self.q1 == Qi(2, '17/5'))
+        self.assertTrue(Qi(2, 0) == 2)
+        self.assertTrue(Qi(2, 0) == 2.0)
+        self.assertTrue(Qi(2, 0) == (2+0j))
+        self.assertTrue(Qi('1/2', 0) == Fraction(1, 2))
 
     def test_inequality(self):
         self.assertTrue(self.q1 != self.q2)
+        self.assertTrue(Qi(2, 0) != 3)
+        self.assertTrue(Qi(2, 0) != 3.0)
+        self.assertTrue(Qi(2, 0) != (3-2j))
+        self.assertTrue(Qi('1/2', 0) != Fraction(2, 3))
 
     def test_eye(self):
         self.assertEqual(Qi.eye(), Qi(0, 1))
