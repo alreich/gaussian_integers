@@ -32,20 +32,28 @@ The examples below are from ["The Gaussian Integers"](https://kconrad.math.uconn
 
 ## The Division Theorem
 
+For $\alpha, \beta \in \mathbb{Z}[i]$ with $\beta \ne 0$, there are $\gamma, \rho \in \mathbb{Z}[i]$ such that $\alpha = \beta \gamma + \rho$ and $N(\rho) \le (1/2)N(\beta)$.
+
 
 ```python
 >>> alpha = Zi(27, -23)
 >>> beta = Zi(8, 1)
 
->>> quot, rem = Zi.modified_divmod(alpha, beta)
+>>> gamma, rho = Zi.modified_divmod(alpha, beta)
 
->>> print(f"{beta * quot + rem} = {beta} * {quot} + {rem}")
+>>> print(f"{beta * gamma + rho} = {beta} * {gamma} + {rho}")
+
+>>> print(f"\nN({rho}) = {rho.norm} and (1/2)N({beta}) = {(1/2) * beta.norm}")
 ```
 
     (27-23j) = (8+1j) * (3-3j) + -2j
+    
+    N(-2j) = 4 and (1/2)N((8+1j)) = 32.5
 
 
 ## The Euclidean Algorithm
+
+Let $\alpha, \beta \in \mathbb{Z}[i]$ be non-zero, then we can recursively apply the Division Theorem to obtain the Greatest Common Divisor (GCD) of $\alpha$ and $\beta$.
 
 
 ```python
@@ -66,16 +74,25 @@ The examples below are from ["The Gaussian Integers"](https://kconrad.math.uconn
 
 ## Bezout's Theorem
 
+Let $\delta$ be the GCD of $\alpha, \beta \in \mathbb{Z}[i]$, then $\delta = \alpha x + \beta y$ for some $x, y \in \mathbb{Z}[i]$.
+
 
 ```python
->>> a, x, y = Zi.xgcd(alpha, beta)
+>>> delta, x, y = Zi.xgcd(alpha, beta)  # Use alpha & beta from above
 
->>> print(f"a = {a}")
->>> print(f"{alpha * x  + beta * y} = {alpha} * {x} + {beta} * {y}")
+>>> print(f"alpha = {alpha} and beta = {beta}")
+>>> print(f"delta = {delta}, x = {x}, and y = {y}\n")
+>>> print(f"==> {alpha * x  + beta * y} = {alpha} * {x} + {beta} * {y}")
+
+>>> print(f"\n  Note: gcd({alpha},{beta}) = {Zi.gcd(alpha, beta)}")
 ```
 
-    a = (1-2j)
-    (1-2j) = (11+3j) * (2-1j) + (1+8j) * 3j
+    alpha = (11+3j) and beta = (1+8j)
+    delta = (1-2j), x = (2-1j), and y = 3j
+    
+    ==> (1-2j) = (11+3j) * (2-1j) + (1+8j) * 3j
+    
+      Note: gcd((11+3j),(1+8j)) = (1-2j)
 
 
 ## True Division
@@ -84,9 +101,10 @@ If $\alpha, \beta \in \mathbb{Z}[i]$, then ${\large \frac{\alpha}{\beta}} \in \m
 
 
 ```python
->>> a = Zi(4, 5)
->>> b = Zi(1, -2)
->>> a / b
+>>> alpha = Zi(4, 5)
+>>> beta = Zi(1, -2)
+
+>>> alpha / beta
 ```
 
 
@@ -98,7 +116,7 @@ If $\alpha, \beta \in \mathbb{Z}[i]$, then ${\large \frac{\alpha}{\beta}} \in \m
 
 
 ```python
->>> print(f"{a} / {b} -> {a / b}")
+>>> print(f"{alpha} / {beta} -> {alpha / beta}")
 ```
 
     (4+5j) / (1-2j) -> (-6/5+13/5j)
