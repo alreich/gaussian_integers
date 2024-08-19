@@ -1,0 +1,21 @@
+Q: Why define Zi, rather than using Python's built in complex numbers?
+
+A: We want to exactly represent arbitrarily large Gaussian integers. Python's built-in complex type uses two floating point numbers, and Python floats are limited in size, whereas its integers are not.
+
+Consider the following calculation, where x & x1 are ints, and y & y1 are floats:
+
+In [1]: x = 11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+   ...: 111111111111111111111111111111111111111111111111111111111111111111111
+
+In [2]: y = 11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+   ...: 111111111111111111111111111111111111111111111111111111111111111111111.0
+
+In [3]: x1 = x + 1
+
+In [4]: y1 = y + 1
+
+In [5]: x1 - x
+Out[5]: 1
+
+In [6]: y1 - y
+Out[6]: 0.0
