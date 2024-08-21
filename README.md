@@ -97,8 +97,6 @@ Let $\delta$ be the GCD of $\alpha, \beta \in \mathbb{Z}[i]$, then $\delta = \al
 
 ## True Division
 
-Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then ${\large \frac{\alpha}{\beta}} \in \mathbb{Z}[i]$, otherwise ${\large \frac{\alpha}{\beta}} \in \mathbb{Q}[i]$
-
 Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then $\alpha / \beta \in \mathbb{Z}[i]$, otherwise $\alpha / \beta \in \mathbb{Q}[i]$
 
 
@@ -124,7 +122,7 @@ Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then $\alpha / \be
     (4+5j) / (1-2j) -> (-6/5+13/5j)
 
 
-# Gaussian Primes
+## Gaussian Primes
 
 
 ```python
