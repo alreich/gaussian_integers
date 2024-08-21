@@ -98,10 +98,16 @@ class Zi(Complex):
         return self.__imag
 
     def __repr__(self) -> str:
-        return f"Zi({self.real}, {self.imag})"
+        if self.imag == 0:
+            return f"Zi({self.real})"
+        else:
+            return f"Zi({self.real}, {self.imag})"
 
     def __str__(self) -> str:
-        return str(complex(self))
+        if self.imag == 0:
+            return str(self.real)
+        else:
+            return str(complex(self))
 
     # NOTE: Python ints and floats have both 'real' and 'imag' properties, so
     # no conversion to Gaussian integers is necessary to use them in the arithmetic

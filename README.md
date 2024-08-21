@@ -30,7 +30,7 @@ The examples below are from ["The Gaussian Integers"](https://kconrad.math.uconn
 >>> from gaussians import Zi, Qi
 ```
 
-## The Division Theorem
+## The Modified Division Theorem
 
 For $\alpha, \beta \in \mathbb{Z}[i]$ with $\beta \ne 0$, there are $\gamma, \rho \in \mathbb{Z}[i]$ such that $\alpha = \beta \gamma + \rho$ and $N(\rho) \le (1/2)N(\beta)$.
 
@@ -67,7 +67,7 @@ Let $\alpha, \beta \in \mathbb{Z}[i]$ be non-zero, then we can recursively apply
 
        (11+3j) = (1+8j) * (1-1j) + (2-4j)
        (1+8j) = (2-4j) * (-2+1j) + (1-2j)
-       (2-4j) = (1-2j) * (2+0j) + 0j
+       (2-4j) = (1-2j) * 2 + 0
     
     gcd((11+3j), (1+8j)) -> (1-2j)
 
@@ -99,6 +99,8 @@ Let $\delta$ be the GCD of $\alpha, \beta \in \mathbb{Z}[i]$, then $\delta = \al
 
 Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then ${\large \frac{\alpha}{\beta}} \in \mathbb{Z}[i]$, otherwise ${\large \frac{\alpha}{\beta}} \in \mathbb{Q}[i]$
 
+Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then $\alpha / \beta \in \mathbb{Z}[i]$, otherwise $\alpha / \beta \in \mathbb{Q}[i]$
+
 
 ```python
 >>> alpha = Zi(4, 5)
@@ -121,3 +123,29 @@ Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then ${\large \fra
 
     (4+5j) / (1-2j) -> (-6/5+13/5j)
 
+
+# Gaussian Primes
+
+
+```python
+gints = [alpha, beta, gamma, Zi(2, 0), Zi(3, 0), Zi(5, 0), Zi(7, 0), Zi(0, 2), Zi(0, 3)]
+
+for gi in gints:
+    print(f"Is {gi} a Gaussian prime? {Zi.is_gaussian_prime(gi)}")
+```
+
+    Is (4+5j) a Gaussian prime? True
+    Is (1-2j) a Gaussian prime? True
+    Is (3-3j) a Gaussian prime? False
+    Is 2 a Gaussian prime? False
+    Is 3 a Gaussian prime? True
+    Is 5 a Gaussian prime? False
+    Is 7 a Gaussian prime? True
+    Is 2j a Gaussian prime? False
+    Is 3j a Gaussian prime? True
+
+
+
+```python
+
+```
