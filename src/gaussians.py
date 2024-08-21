@@ -131,13 +131,24 @@ class Zi(Complex):
         """Implements the -= operation: self -= other"""
         return Zi(self.real - other.real, self.imag - other.imag)
 
+    # def __mul__(self, other):  # self * other
+    #     """Implements the multiplication operator: self * other"""
+    #     a = self.real
+    #     b = self.imag
+    #     c = round(other.real)
+    #     d = round(other.imag)
+    #     return Zi(a * c - b * d, a * d + b * c)
+
     def __mul__(self, other):  # self * other
         """Implements the multiplication operator: self * other"""
-        a = self.real
-        b = self.imag
-        c = round(other.real)
-        d = round(other.imag)
-        return Zi(a * c - b * d, a * d + b * c)
+        if isinstance(other, Qi):
+            return Qi(self) * other
+        else:
+            a = self.real
+            b = self.imag
+            c = round(other.real)
+            d = round(other.imag)
+            return Zi(a * c - b * d, a * d + b * c)
 
     def __rmul__(self, other):  # other * self
         """The reflected (swapped) operand for multiplication: other * self"""
@@ -252,6 +263,12 @@ class Zi(Complex):
         """Returns the list of four units, [1, -1, i, -i], as Zis."""
         return [Zi(1), -Zi(1), Zi.eye(), -Zi.eye()]
 
+    @staticmethod
+    def two():
+        """Returns 1+i, because a Gaussian integer has an even norm if and only if
+        it is a multiple of 1+i."""
+        return Zi(1, 1)
+
     @property
     def conjugate(self):
         """Return the conjugate of this Gaussian integer"""
@@ -293,6 +310,18 @@ class Zi(Complex):
     def to_gaussian_rational(self):
         """Convert this Gaussian integer to an equivalent Gaussian rational."""
         return Qi(self.real, self.imag)
+
+    def norms_divide(self, other):
+        """Divide norms: self.norm / other.norm. If they divide evenly, return the value;
+        otherwise, if they don't divide evenly, return False."""
+        a = self.norm
+        b = other.norm
+        sm = min(a, b)
+        lg = max(a, b)
+        if lg % sm == 0:
+            return int(lg / sm)
+        else:
+            return False
 
     @staticmethod
     def from_array(arr):

@@ -97,7 +97,7 @@ Let $\delta$ be the GCD of $\alpha, \beta \in \mathbb{Z}[i]$, then $\delta = \al
 
 ## True Division
 
-If $\alpha, \beta \in \mathbb{Z}[i]$, then ${\large \frac{\alpha}{\beta}} \in \mathbb{Q}[i]$
+Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then ${\large \frac{\alpha}{\beta}} \in \mathbb{Z}[i]$, otherwise ${\large \frac{\alpha}{\beta}} \in \mathbb{Q}[i]$
 
 
 ```python
