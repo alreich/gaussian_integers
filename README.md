@@ -124,6 +124,8 @@ Let $\alpha, \beta \in \mathbb{Z}[i]$. If $\beta \mid \alpha$ then $\alpha / \be
 
 ## Gaussian Primes
 
+See [this link for a definition](https://en.wikipedia.org/wiki/Gaussian_integer#Gaussian_primes) of a Gaussian prime, and see [this link for the algorithm](https://mathworld.wolfram.com/GaussianPrime.html) used here to determine whether a Gaussian integer is prime or not.
+
 
 ```python
 gints = [alpha, beta, gamma, Zi(2, 0), Zi(3, 0), Zi(5, 0), Zi(7, 0), Zi(0, 2), Zi(0, 3)]
@@ -142,8 +144,3 @@ for gi in gints:
     Is 2j a Gaussian prime? False
     Is 3j a Gaussian prime? True
 
-
-
-```python
-
-```
