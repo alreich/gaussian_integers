@@ -121,14 +121,14 @@ class TestZi(TestCase):
         b = Zi(1, -2)
         q, r = Zi.modified_divmod(a, b)
         test = f"{b * q + r} = {b} * {q} + {r}"
-        answer = "(4+5j) = (1-2j) * (-1+3j) + (-1+0j)"
+        answer = "(4+5j) = (1-2j) * (-1+3j) + -1"
         self.assertEqual(test, answer)
 
     def test_mod(self):
         a = Zi(4, 5)
         b = Zi(1, -2)
         test = f"{a} % {b} = {a % b}"
-        answer = "(4+5j) % (1-2j) = (-1+0j)"
+        answer = "(4+5j) % (1-2j) = -1"
         self.assertEqual(test, answer)
 
     def test_gcd_1(self):

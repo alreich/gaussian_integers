@@ -195,7 +195,7 @@ class Zi(Complex):
         """Negate this Zi."""
         return Zi(-self.real, -self.imag)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Complex) -> bool:
         """Return True if this Zi equals other."""
         return (self.real == other.real) and (self.imag == other.imag)
 
@@ -318,7 +318,7 @@ class Zi(Complex):
         return Qi(self.real, self.imag)
 
     def norms_divide(self, other):
-        """Divide norms: self.norm / other.norm. If they divide evenly, return the value;
+        """Divide sel norm by other norm. If they divide evenly, return the value;
         otherwise, if they don't divide evenly, return False."""
         a = self.norm
         b = other.norm
@@ -567,7 +567,7 @@ class Qi(Complex):
         return complex(float(self.real), float(self.imag))
 
     @gaussian_rational
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Complex) -> bool:
         """Test for equality."""
         return (self.real == other.real) and (self.imag == other.imag)
 
