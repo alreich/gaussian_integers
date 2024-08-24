@@ -269,6 +269,10 @@ class Zi(Complex):
         """Returns the list of four units, [1, -1, i, -i], as Zis."""
         return [Zi(1), -Zi(1), Zi.eye(), -Zi.eye()]
 
+    def is_unit(self):
+        """Returns True if this Zi is a unit."""
+        return self in Zi.units()
+
     @staticmethod
     def two():
         """Returns 1+i, because a Gaussian integer has an even norm if and only if
