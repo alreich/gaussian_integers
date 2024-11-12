@@ -68,7 +68,7 @@ class Zi(Complex):
     rounded to nearest integers and used as inputs for re & im, respectively.
     """
 
-    def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0):
+    def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0) -> None:
         """Instantiate a Gaussian integer, Zi(re=0, im=0)."""
 
         if isinstance(re, (int, np.int64)):
