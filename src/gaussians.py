@@ -17,9 +17,8 @@ Example:
   >
   > alpha = Zi(11, 3)
   > beta = Zi(1, 8)
-  > a, x, y = xgcd(alpha, beta)
+  > a, x, y = Zi.xgcd(alpha, beta)
   > print(f"{alpha * x + beta * y} = {alpha} * {x} + {beta} * {y}")
-  >
   > (1-2j) = (11+3j) * (2-1j) + (1+8j) * 3j
 
 """
@@ -90,11 +89,11 @@ class Zi(Complex):
             raise TypeError(f"{im} cannot be used for the imaginary part of a Zi instance")
 
     @property
-    def real(self):
+    def real(self) -> int:
         return self.__real
 
     @property
-    def imag(self):
+    def imag(self) -> int:
         return self.__imag
 
     def __repr__(self) -> str:
@@ -490,11 +489,11 @@ class Qi(Complex):
             raise ValueError("max_denominator must be > 1")
 
     @property
-    def real(self):
+    def real(self) -> Fraction:
         return self.__real
 
     @property
-    def imag(self):
+    def imag(self) -> Fraction:
         return self.__imag
 
     def __repr__(self):
