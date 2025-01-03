@@ -14,6 +14,7 @@ class TestZi(TestCase):
         self.assertEqual(Zi(), Zi(0, 0))
         self.assertEqual(Zi(1), Zi(1, 0))
         self.assertEqual(Zi.eye(), Zi(0, 1))
+        self.assertEqual(Zi.two(), Zi(1, 1))
         self.assertEqual(Zi(2.3, 3.8), Zi(2, 4))
         self.assertEqual(Zi(-2.3, 3.8), Zi(-2, 4))
         self.assertEqual(Zi(2.3, -3.8), Zi(2, -4))
@@ -51,6 +52,8 @@ class TestZi(TestCase):
         self.assertEqual(2 * Zi(4, 5), Zi(8, 10))
         self.assertEqual(Zi(4, 5) * 1.9, Zi(8, 10))
         self.assertEqual(1.9 * Zi(4, 5), Zi(8, 10))
+        self.assertEqual(Zi(4, 5) * 1.49999, Zi(4, 5))
+        self.assertEqual(1.49999 * Zi(4, 5), Zi(4, 5))
         self.assertEqual(Zi(4, 5) * (2-1j), Zi(13, 6))
         self.assertEqual((2-1j) * Zi(4, 5), Zi(13, 6))
         self.assertEqual(Zi(4, 5) * (1.9-1.1j), Zi(13, 6))
@@ -80,6 +83,11 @@ class TestZi(TestCase):
 
     def test_pow(self):  # __pow__
         self.assertEqual(self.c1 ** 3, Zi(-236, 115))
+        self.assertEqual(self.c1 ** 1, self.c1)
+        self.assertEqual(self.c1 ** 0, Zi(1))
+        self.assertEqual(self.c1 ** -1, Qi('4/41', '-5/41'))
+        self.assertEqual(self.c1 ** -2, Qi('-9/1681', '-40/1681'))
+        self.assertEqual(1 / self.c1 ** 2, self.c1 ** -2)
 
     def test_complex(self):  # __complex__
         self.assertEqual(complex(self.c1), (4+5j))
@@ -116,20 +124,46 @@ class TestZi(TestCase):
         self.assertTrue(self.c1.is_associate(Zi(-4, -5)))
         self.assertFalse(self.c1.is_associate(self.c2))
 
-    def test_divmod(self):
+    def test_divmod_1(self):
         a = Zi(4, 5)
         b = Zi(1, -2)
         q, r = Zi.modified_divmod(a, b)
-        test = f"{b * q + r} = {b} * {q} + {r}"
-        answer = "(4+5j) = (1-2j) * (-1+3j) + -1"
-        self.assertEqual(test, answer)
+        self.assertEqual(a, b * q + r)
 
-    def test_mod(self):
+    def test_divmod_2(self):
+        a = Zi(27, -23)
+        b = Zi(8, 1)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_3(self):
+        a = Zi(11, 10)
+        b = Zi(4, 1)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_4(self):
+        a = Zi(41, 24)
+        b = Zi(11, -2)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_5(self):
+        a = Zi(37, 2)
+        b = Zi(11, 2)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_6(self):
+        a = Zi(1, 8)
+        b = Zi(2, -4)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_mod_1(self):
         a = Zi(4, 5)
         b = Zi(1, -2)
-        test = f"{a} % {b} = {a % b}"
-        answer = "(4+5j) % (1-2j) = -1"
-        self.assertEqual(test, answer)
+        self.assertEqual(a % b, -1)
 
     def test_gcd_1(self):
         alpha = Zi(32, 9)
@@ -137,6 +171,11 @@ class TestZi(TestCase):
         self.assertEqual(Zi.gcd(alpha, beta), Zi(0, -1))
 
     def test_gcd_2(self):
+        alpha = Zi(32, 9)
+        beta = Zi(4, 11)
+        self.assertEqual(Zi.gcd(beta, alpha), Zi(0, -1))
+
+    def test_gcd_3(self):
         alpha = Zi(11, 3)
         beta = Zi(1, 8)
         self.assertEqual(Zi.gcd(alpha, beta), Zi(1, -2))
