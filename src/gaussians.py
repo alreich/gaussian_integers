@@ -34,7 +34,6 @@ from fractions import Fraction
 from numbers import Complex
 from random import randint
 from functools import wraps
-
 import numpy as np
 
 
@@ -320,13 +319,14 @@ class Zi(Complex):
         """Convert this Gaussian integer to an equivalent Gaussian rational."""
         return Qi(self.real, self.imag)
 
-    def norms_divide(self, other):
-        """Divide sel norm by other norm. If they divide evenly, return the value;
-        otherwise, if they don't divide evenly, return False."""
-        a = self.norm
-        b = other.norm
-        sm = min(a, b)
-        lg = max(a, b)
+    @staticmethod
+    def norms_divide(a, b):
+        """Divide the larger norm by the smaller norm. If they divide evenly,
+        return the value; otherwise, if they don't divide evenly, return False."""
+        x = a.norm
+        y = b.norm
+        sm = min(x, y)
+        lg = max(x, y)
         if lg % sm == 0:
             return int(lg / sm)
         else:
@@ -395,6 +395,25 @@ class Zi(Complex):
         return a, x, y
 
     @staticmethod
+    def congruent_modulo(x, y, z):
+        """This method returns two values: The first value is True or False,
+        depending on whether x is congruent to y modulo z;
+        the second value is result of computing (x - y) / z."""
+        w = (x - y) / z
+        if isinstance(w, Zi):
+            return True, w
+        else:
+            return False, w
+
+    @staticmethod
+    def is_relatively_prime(a, b) -> bool:
+        """Returns True if a and b are relatively prime, otherwise it returns false."""
+        return Zi.gcd(a, b) in Zi.units()
+
+    # Defining "is_gaussian_prime" as a staticmethod allows it to be easily used on both
+    # Gaussian integers and real integers. If it had been defined as a normal method,
+    # then it wouldn't work on real integers, unless they are first converted into Zi's.
+    @staticmethod
     def is_gaussian_prime(x) -> bool:
         """Return True if x is a Gaussian prime.  Otherwise, return False.
         x can be an integer or a Gaussian integer.
@@ -430,7 +449,6 @@ class Zi(Complex):
         else:
             return False
 
-
 def isprime(n: int) -> bool:
     """Returns True if n is a positive, prime integer; otherwise, False is returned.
 
@@ -448,7 +466,6 @@ def isprime(n: int) -> bool:
         return True
     else:
         raise False
-
 
 class Qi(Complex):
     """Gaussian Rational Number Class"""
