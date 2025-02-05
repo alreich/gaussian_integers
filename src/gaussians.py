@@ -29,7 +29,8 @@ __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
 __version__ = "1.0.0"
 
-from math import sqrt, floor, ceil
+# from math import sqrt, floor, ceil
+import math
 from fractions import Fraction
 from numbers import Complex
 from random import randint
@@ -249,7 +250,7 @@ class Zi(Complex):
 
     def __abs__(self) -> float:
         """Returns the square root of the norm."""
-        return sqrt(self.norm)
+        return math.sqrt(self.norm)
 
     def __pos__(self):
         return +self
@@ -267,6 +268,7 @@ class Zi(Complex):
         """Returns the list of four units, [1, -1, i, -i], as Zis."""
         return [Zi(1), -Zi(1), Zi.eye(), -Zi.eye()]
 
+    @property
     def is_unit(self):
         """Returns True if this Zi is a unit."""
         return self in Zi.units()
@@ -395,11 +397,11 @@ class Zi(Complex):
         return a, x, y
 
     @staticmethod
-    def congruent_modulo(x, y, z):
+    def congruent_modulo(a, b, c):
         """This method returns two values: The first value is True or False,
         depending on whether x is congruent to y modulo z;
-        the second value is result of computing (x - y) / z."""
-        w = (x - y) / z
+        the second value is result of computing (a - b) / c."""
+        w = (a - b) / c
         if isinstance(w, Zi):
             return True, w
         else:
@@ -459,7 +461,7 @@ def isprime(n: int) -> bool:
             return True
         if n % 2 == 0 or n <= 1:
             return False
-        root_n = int(sqrt(n)) + 1
+        root_n = int(math.sqrt(n)) + 1
         for val in range(3, root_n, 2):
             if n % val == 0:
                 return False
@@ -600,7 +602,7 @@ class Qi(Complex):
         return hash((self.real, self.imag))
 
     def __abs__(self) -> float:
-        return sqrt(self.norm)
+        return math.sqrt(self.norm)
 
     def __pos__(self):
         return +self
@@ -612,10 +614,10 @@ class Qi(Complex):
         return Zi(round(self.real), round(self.imag))
 
     def __floor__(self) -> Zi:
-        return Zi(floor(self.real), floor(self.imag))
+        return Zi(math.floor(self.real), math.floor(self.imag))
 
     def __ceil__(self) -> Zi:
-        return Zi(ceil(self.real), ceil(self.imag))
+        return Zi(math.ceil(self.real), math.ceil(self.imag))
 
     @property
     def conjugate(self):
