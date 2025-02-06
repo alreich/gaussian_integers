@@ -208,7 +208,7 @@ class Zi(Complex):
 
         The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
         """
-        return Qi(self) / other
+        return Qi(self) / other  # Despite the Qi, this could still output a Zi
 
     @gaussian_rational
     def __rtruediv__(self, other):  # other / self
@@ -241,7 +241,11 @@ class Zi(Complex):
 
         Returns the remainder of the result from modified_divmod
         """
-        _, r = Zi.modified_divmod(self, other)
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        else:
+            oth = other
+        _, r = Zi.modified_divmod(self, oth)
         return r
 
     def __hash__(self):
