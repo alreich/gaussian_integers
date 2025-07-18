@@ -1,5 +1,5 @@
 from unittest import TestCase
-from gaussians import Zi, Qi
+from src.gaussians import Zi, Qi
 
 class TestZi(TestCase):
 
