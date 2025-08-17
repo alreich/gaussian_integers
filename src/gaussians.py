@@ -5,7 +5,7 @@ Similarly, a Gaussian rational is a complex number whose real and imaginary part
 rational numbers.
 
 In mathematics, Gaussian integers and rationals are denoted by Z[i] & Q[i], resp.
-So, here, Zi & Qi denote the Gaussian integer and rational classes.
+So, here, Zi & Qi denote the Gaussian integer and rational classes, respectively.
 
 The classes support the arithmetic of Gaussian integers and rationals using the
 operators: +, -, *, /, //, %, **, +=, -=, *=, and /=, along with a modified version
@@ -63,8 +63,8 @@ class Zi(Complex):
     A Gaussian integer, Zi, has two integer input values, re & im.
     Floats and complex numbers can be entered, but they will be rounded to the
     nearest integers. If a complex number is provided for re, then the value of
-    im will be ignored, and the complex number's components, real & imag, will be
-    rounded to nearest integers and used as inputs for re & im, respectively.
+    im will be ignored. Additionally, the complex number's components, real & imag,
+    will be rounded to the nearest integers and used as inputs for re & im, resp.
     """
 
     def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0) -> None:
@@ -404,7 +404,7 @@ class Zi(Complex):
     def congruent_modulo(a, b, c):
         """This method returns two values: The first value is True or False,
         depending on whether x is congruent to y modulo z;
-        the second value is result of computing (a - b) / c."""
+        the second value is the result of computing (a - b) / c."""
         w = (a - b) / c
         if isinstance(w, Zi):
             return True, w
@@ -418,7 +418,7 @@ class Zi(Complex):
 
     # Defining "is_gaussian_prime" as a staticmethod allows it to be easily used on both
     # Gaussian integers and real integers. If it had been defined as a normal method,
-    # then it wouldn't work on real integers, unless they are first converted into Zi's.
+    # then it wouldn't work on real integers unless they are first converted into Zi's.
     @staticmethod
     def is_gaussian_prime(x) -> bool:
         """Return True if x is a Gaussian prime.  Otherwise, return False.
@@ -678,9 +678,9 @@ class Qi(Complex):
     def string_to_rational(qi_str):
         """Turn the string form of a Gaussian rational into a Gaussian rational."""
 
-        insides = qi_str[1:-2]  # Remove leading ( and trailing j)
+        insides = qi_str[1:-2]  # Remove leading (and trailing j)
 
-        # Separate leading sign, if exists, from main body of string
+        # Separate leading sign, if it exists, from the main body of the string
         if insides[0] == '-' or insides[0] == '+':
             sign = insides[0]  # Leading sign
             body = insides[1:]
