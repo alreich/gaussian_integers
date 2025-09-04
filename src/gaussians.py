@@ -35,7 +35,7 @@ from fractions import Fraction
 from numbers import Complex
 from random import randint
 from functools import wraps
-import numpy as np
+# import numpy as np
 
 
 def to_gaussian_rational(number):
@@ -57,7 +57,7 @@ def gaussian_rational(fnc):
     return gaussian_rational_wrapper
 
 
-class Zi(Complex):
+class Zi():
     """Gaussian Integer Class with arithmetic and related functionality.
 
     A Gaussian integer, Zi, has two integer input values, re & im.
@@ -67,34 +67,70 @@ class Zi(Complex):
     will be rounded to the nearest integers and used as inputs for re & im, resp.
     """
 
-    def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0) -> None:
-        """Instantiate a Gaussian integer, Zi(re=0, im=0)."""
+    # def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0) -> None:
+    #     """Instantiate a Gaussian integer, Zi(re=0, im=0)."""
+    #
+    #     if isinstance(re, (int, np.int64)):
+    #         self.__real = int(re)
+    #     elif isinstance(re, float):
+    #         self.__real = round(re)
+    #     elif isinstance(re, complex):
+    #         self.__real = round(re.real)
+    #     else:
+    #         raise TypeError(f"{re} cannot be used for the real part of a Zi instance")
+    #
+    #     if isinstance(re, complex):  # This way, im is ignored if re is complex
+    #         self.__imag = round(re.imag)
+    #     elif isinstance(im, (int, np.int64)):
+    #         self.__imag = int(im)
+    #     elif isinstance(im, float):
+    #         self.__imag = round(im)
+    #     else:
+    #         raise TypeError(f"{im} cannot be used for the imaginary part of a Zi instance")
 
-        if isinstance(re, (int, np.int64)):
-            self.__real = int(re)
-        elif isinstance(re, float):
-            self.__real = round(re)
+    def __init__(self, re=None, im=None):
+        if isinstance(re, (float, int)):
+            self.__re = round(re)
+            if im is None:
+                self.__im = 0
+            elif isinstance(im, (float, int)):
+                self.__im = round(im)
+            else:
+                raise Exception(f"Inputs incompatible: {re} and {im}")
         elif isinstance(re, complex):
-            self.__real = round(re.real)
+            if im is None:
+                self.__re = round(re.real)
+                self.__im = round(re.imag)
+            elif isinstance(im, (complex, Zi)):
+                self.__re = Zi(re)
+                self.__im = Zi(im)
+            else:
+                raise Exception(f"Inputs incompatible: {re} and {im}")
+        elif isinstance(re, Zi):
+            if im is None:
+                self.__re = re.real
+                self.__im = re.imag
+            elif isinstance(im, (complex, Zi)):
+                self.__re = Zi(re)
+                self.__im = Zi(im)
+            else:
+                raise Exception(f"Inputs incompatible: {re} and {im}")
+        elif re is None:
+            if im is None:
+                self.__re = 0
+                self.__im = 0
+            else:
+                raise Exception("If re is None, then im must be None. But im = {im}")
         else:
-            raise TypeError(f"{re} cannot be used for the real part of a Zi instance")
-
-        if isinstance(re, complex):  # This way, im is ignored if re is complex
-            self.__imag = round(re.imag)
-        elif isinstance(im, (int, np.int64)):
-            self.__imag = int(im)
-        elif isinstance(im, float):
-            self.__imag = round(im)
-        else:
-            raise TypeError(f"{im} cannot be used for the imaginary part of a Zi instance")
+            raise Exception("We should never get to this point in the code")
 
     @property
-    def real(self) -> int:
-        return self.__real
+    def real(self):
+        return self.__re
 
     @property
-    def imag(self) -> int:
-        return self.__imag
+    def imag(self):
+        return self.__im
 
     def __repr__(self) -> str:
         if self.imag == 0:
@@ -182,8 +218,8 @@ class Zi(Complex):
                     result = result * self
             else:  # n < 0
                 result = 1 / (self ** abs(n))
-        else:
-            raise TypeError(f"The power, {n}, must be an integer.")
+        # else:
+        #     raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
     def __complex__(self) -> complex:
@@ -470,16 +506,17 @@ def isprime(n: int) -> bool:
             if n % val == 0:
                 return False
         return True
-    else:
-        raise False
+    # else:
+    #     raise False
 
-class Qi(Complex):
+class Qi():
     """Gaussian Rational Number Class"""
 
     __max_denominator = 1_000_000
 
-    def __init__(self, re: (str, int, float, complex, Zi, Fraction) = Fraction(0, 1),
-                 im: (str, int, float, Fraction) = Fraction(0, 1)):
+    # def __init__(self, re: (str, int, float, complex, Zi, Fraction) = Fraction(0, 1),
+    #              im: (str, int, float, Fraction) = Fraction(0, 1)):
+    def __init__(self, re=Fraction(0, 1), im=Fraction(0, 1)):
 
         if isinstance(re, Fraction):
             self.__real = re
@@ -572,8 +609,8 @@ class Qi(Complex):
                     result = result * self
             else:  # n < 0
                 result = 1 / self ** abs(n)
-        else:
-            raise TypeError(f"The power, {n}, must be an integer.")
+        # else:
+        #     raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
     @gaussian_rational
