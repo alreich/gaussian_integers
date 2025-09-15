@@ -69,8 +69,24 @@ class Zi:
     def __add__(self, other):
         return Zi(self.__re + other.real, self.__im + other.imag)
 
+    def __radd__(self, other):
+        """The reflected (swapped) operand for addition: other + self"""
+        return Zi(other) + self
+
+    def __iadd__(self, other):
+        """Implements the += operation: self += other"""
+        return Zi(self.real + other.real, self.imag + other.imag)
+
     def __sub__(self, other):
         return Zi(self.__re - other.real, self.__im - other.imag)
+
+    def __rsub__(self, other):
+        """The reflected (swapped) operand for subtraction: other - self"""
+        return Zi(other) - self
+
+    def __isub__(self, other):
+        """Implements the -= operation: self -= other"""
+        return Zi(self.real - other.real, self.imag - other.imag)
 
     def __mul__(self, other):
         """
@@ -90,6 +106,14 @@ class Zi:
 
     def __rmul__(self, other):
         return self * other
+
+    def __imul__(self, other):
+        """Implements the *= operation: self *= other"""
+        a = self.real
+        b = self.imag
+        c = round(other.real)
+        d = round(other.imag)
+        return Zi(a * c - b * d, a * d + b * c)
 
     def __complex__(self):
         depth = self.depth()
@@ -179,30 +203,6 @@ class Zi:
         return Zi(randint(re1, re2), randint(im1, im2))
 
     # --------------------------
-
-    def __radd__(self, other):
-        """The reflected (swapped) operand for addition: other + self"""
-        return Zi(other) + self
-
-    def __iadd__(self, other):
-        """Implements the += operation: self += other"""
-        return Zi(self.real + other.real, self.imag + other.imag)
-
-    def __rsub__(self, other):
-        """The reflected (swapped) operand for subtraction: other - self"""
-        return Zi(other) - self
-
-    def __isub__(self, other):
-        """Implements the -= operation: self -= other"""
-        return Zi(self.real - other.real, self.imag - other.imag)
-
-    def __imul__(self, other):
-        """Implements the *= operation: self *= other"""
-        a = self.real
-        b = self.imag
-        c = round(other.real)
-        d = round(other.imag)
-        return Zi(a * c - b * d, a * d + b * c)
 
     def __pow__(self, n: int, modulo=None):
         """Implements the ** operator: self ** n.
