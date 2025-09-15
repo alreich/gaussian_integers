@@ -155,13 +155,11 @@ class Zi:
         """Depth is the number levels contained in the Zi.
         That is, a Zi made up of two integers has depth 0, and a Zi
         made up of two other Zi's, each of depth n, has depth n+1."""
-
         def aux(x, d):
             if isinstance(x, int):
                 return d
             else:
                 return aux(x.real, d + 1)
-
         return aux(self.__re, 0)
 
     def is_complex(self):
@@ -197,10 +195,37 @@ class Zi:
             return Zi(Zi.from_array(re), Zi.from_array(im))
 
     @staticmethod
-    def random(re1=-100, re2=100, im1=-100, im2=100):
-        """Return a random Zi(re, im) with integer components where,
-        re1 <= re <= re2 and im1 <= im <= im2."""
-        return Zi(randint(re1, re2), randint(im1, im2))
+    def random(re1=-100, re2=100, im1=-100, im2=100, depth=0):
+        if depth == 0:
+            return Zi(randint(re1, re2), randint(im1, im2))
+        else:
+            d = depth - 1
+            return Zi(Zi.random(re1, re2, im1, im2, d),
+                      Zi.random(re1, re2, im1, im2, d))
+
+    @staticmethod
+    def zero(depth=0):
+        """Return Zi(0, 0), or Zi(Zi(0, 0), Zi(0, 0)), or so on"""
+        if isinstance(depth, int) and depth >= 0:
+            if depth == 0:
+                return Zi(0, 0)
+            else:
+                d = depth - 1
+                return Zi(Zi.zero(d), Zi.zero(d))
+        else:
+            raise Exception(f"Cannot create a zero with {depth}")
+
+    @staticmethod
+    def one(depth=0):
+        """Return Zi(1, 0), or Zi(Zi(1, 0), Zi(0, 0)), or so on"""
+        if isinstance(depth, int) and depth >= 0:
+            if depth == 0:
+                return Zi(1, 0)
+            else:
+                d = depth - 1
+                return Zi(Zi.one(d), Zi.zero(d))
+        else:
+            raise Exception(f"Cannot create a one with {depth}")
 
     # --------------------------
 
