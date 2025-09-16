@@ -4,6 +4,9 @@ from random import randint
 from math import sqrt
 from numbers import Number
 
+def flatten(list_of_lists):
+    return [item for lst in list_of_lists for item in lst]
+
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
@@ -61,7 +64,17 @@ class Zi:
             raise Exception(f"Unexpected combination of input types: {re} and {im}")
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.__re}, {self.__im})"
+        return f"{self.__class__.__name__}({repr(self.__re)}, {repr(self.__im)})"
+
+    def __str__(self):
+        if self.is_complex():
+            return str(complex(self))
+        elif self.is_quaternion():
+            return self.quaternion_to_string()
+        elif self.is_octonion():
+            return f"Oct({str(self.__re)}, {str(self.__im)})"
+        else:
+            return str(self.to_array())
 
     def __neg__(self):
         return Zi(- self.__re, - self.__im)
@@ -193,6 +206,21 @@ class Zi:
             return Zi(re, im)
         else:
             return Zi(Zi.from_array(re), Zi.from_array(im))
+
+    def quaternion_to_string(self):
+        unit_strs = ["", "i", "j", "k"]
+        if self.is_quaternion():
+            qstr = "Quat("
+            for idx, coef in enumerate(flatten(self.to_array())):
+                if coef > 0:
+                    qstr = qstr + f"+{coef}{unit_strs[idx]}"
+                elif coef < 0:
+                    qstr = qstr + f"{coef}{unit_strs[idx]}"
+                else:
+                    pass
+            return qstr + ")"
+        else:
+            raise Exception(f"{self} is not a quaternion")
 
     @staticmethod
     def random(re1=-100, re2=100, im1=-100, im2=100, depth=0):
