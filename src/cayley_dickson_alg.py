@@ -351,17 +351,16 @@ class Zi:
     #     else:
     #         return False
 
-def parse_quaternion_string(quat):
+def parse_quaternion_string(qstr):
     """Parse a quaternion string into a Zi.
     The quaternion string can be formatted in many different ways...
     * It may be normal: 1+2i-3j-4k
-    * It may have missing terms: 1-3k, 2i-4k (If you have missing terms, output 0 for those terms)
-    * It may have missing coefficients: i+j-k (In this case, this is equivalent to 1i+1j-1k. In other words, a i, j, or k without a number in front is assumed to have a 1 in front by default)
+    * It may have missing terms: 1-3k, 2i-4k
+    * It may have missing coefficients: i+j-k (they are assumed to be 1)
     * It may not be in the right order: 2i-1+3k-4j
-    * The coefficients may be simply integers or decimals or scientific notation: 7-2.4i+3.75j-4.0k
-    * There will always be a + or - between terms
-    * All inputs must be valid with at least 1 term, and without repeated letters (no j-js)
-    * All numbers can be assumed to be valid
+    * The coefficients must be ints or floats: 7-2.4i+3.75j-4.0k
+    * There will always be a single + or - between terms
+    * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
     """
 
     def make_int_or_float(st: str):
@@ -383,6 +382,7 @@ def parse_quaternion_string(quat):
         # Pattern for a valid quaternion term that ends in i, j, or k.
         unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
+        # The term is either associated with a unit (i,j,k) or it's 'real'
         if regex.match(unit_term_pat, tm):
             return tm[-1], make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
         else:
@@ -402,21 +402,27 @@ def parse_quaternion_string(quat):
             return tm
 
     # Make lowercase and remove all spaces
-    q0 = quat.lower().strip().replace(' ', '')
+    q0 = qstr.lower().strip().replace(' ', '')
 
+    # Put a coefficient of 1 in front of units where it is implied to be 1.
     q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
     q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
 
     # Put single space in front of + & -
     q1 = q0b.replace('+', ' +').replace('-', ' -')
 
-    # Remove any space after leading parenthesis
-    q2 = q1.replace('( ', '(')
+    # If scientific notation, remove the space that was added in the previous step
+    q1a = q1.replace('e -', 'e-').replace('e +', 'e+')
+
+    # Remove any space after leading parenthesis (created by the step above)
+    q2 = q1a.replace('( ', '(')
 
     # Remove parentheses, if they exist
     q3 = q2.replace('(', '').replace(')', '').strip()
 
-    # Split string at spaces
+    # Split string at spaces.
+    # The input string has now been transformed into a list of strings that
+    # correspond to terms in the quaternion.
     q4 = q3.split()
 
     # Some terms are just units (i, j, k), possibly with a sign (-+)
@@ -428,12 +434,14 @@ def parse_quaternion_string(quat):
     for term in q5:
         mat = regex.match(qterm_pat, term)
         if mat is None:
-            raise ValueError(f"{term} in {quat} is not a valid quaternion term.")
+            raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
 
+    # Each call to make_term returns a key-value pair that can be used to
+    # update the dictionary, qdict, where the key is one of 'real', 'i',
+    # 'j', or 'k', and the value is the quaternion coefficient (float or int)
+    # that corresponds to the key.
     q6 = [make_term(t) for t in q5]
-
     qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0}
-
     for term in q6:
         qdict[term[0]] = term[1]
 
