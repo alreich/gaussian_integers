@@ -6,7 +6,16 @@ from numbers import Number
 import regex
 
 def flatten(list_of_lists):
+    """Return a flat list, given a list of lists..."""
     return [item for lst in list_of_lists for item in lst]
+
+def is_power_of_two(n: int):
+    """In binary representation, a power of two has exactly one '1' bit,
+    and all other bits are '0'. So, when a power of two is decremented
+    by one, all the '0' bits to the right of the '1' become '1', and the
+    '1' bit becomes '0'. This means that, if n is a power of 2, a bitwise
+    AND operation between n and n-1 will result in 0."""
+    return n > 0 and (n & (n - 1)) == 0  # bitwise AND
 
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
@@ -130,8 +139,8 @@ class Zi:
         return Zi(a * c - b * d, a * d + b * c)
 
     def __complex__(self):
-        depth = self.depth()
-        if depth == 0:
+        order = self.order()
+        if order == 0:
             return complex(self.__re, self.__im)
         else:
             raise Exception(f"Cannot create a complex from {self}")
@@ -165,10 +174,10 @@ class Zi:
         """This definition works recursively."""
         return Zi(self.__re.conjugate(), - self.__im)
 
-    def depth(self):
-        """Depth is the number levels contained in the Zi.
-        That is, a Zi made up of two integers has depth 0, and a Zi
-        made up of two other Zi's, each of depth n, has depth n+1."""
+    def order(self):
+        """Order is the number levels contained in the Zi.
+        That is, a Zi made up of two integers has order 0, and a Zi
+        made up of two other Zi's, each of order n, has order n+1."""
         def aux(x, d):
             if isinstance(x, int):
                 return d
@@ -179,17 +188,17 @@ class Zi:
     def is_complex(self):
         """Return True if this Zi is essentially a complex number
         That is, the re & im parts are numbers, not other Zis."""
-        return self.depth() == 0
+        return self.order() == 0
 
     def is_quaternion(self):
         """Return True if this Zi is essentially a quaternion
         That is, the re & im parts are essentially complex numbers."""
-        return self.depth() == 1
+        return self.order() == 1
 
     def is_octonion(self):
         """Return True if this Zi is essentially an octonion
         That is, the re & im parts are essentially quaternions."""
-        return self.depth() == 2
+        return self.order() == 2
 
     def to_array(self):
         if isinstance(self.__re, (float, int)) and isinstance(self.__im, (float, int)):
@@ -201,12 +210,24 @@ class Zi:
 
     @staticmethod
     def from_array(arr):
-        re = arr[0]
-        im = arr[1]
-        if isinstance(re, int) and isinstance(im, int):
-            return Zi(re, im)
+        n = len(arr)
+        if n == 2:
+            if isinstance(arr[0], (int, float)) and isinstance(arr[1], (int, float)):
+                return Zi(arr[0], arr[1])
+            else:
+                raise ValueError(f"{arr} cannot be transformed into a Zi")
+        elif n % 2 == 0:
+            return Zi(Zi.from_array(arr[:2]), Zi.from_array(arr[2:]))
         else:
-            return Zi(Zi.from_array(re), Zi.from_array(im))
+            raise ValueError(f"Number of elements in array, {n}, must be even.")
+
+    # def from_array(arr):
+    #     re = arr[0]
+    #     im = arr[1]
+    #     if isinstance(re, int) and isinstance(im, int):
+    #         return Zi(re, im)
+    #     else:
+    #         return Zi(Zi.from_array(re), Zi.from_array(im))
 
     @staticmethod
     def quaternion(arr):
@@ -230,37 +251,37 @@ class Zi:
             raise Exception(f"{self} is not a quaternion")
 
     @staticmethod
-    def random(re1=-100, re2=100, im1=-100, im2=100, depth=0):
-        if depth == 0:
+    def random(re1=-100, re2=100, im1=-100, im2=100, order=0):
+        if order == 0:
             return Zi(randint(re1, re2), randint(im1, im2))
         else:
-            d = depth - 1
+            d = order - 1
             return Zi(Zi.random(re1, re2, im1, im2, d),
                       Zi.random(re1, re2, im1, im2, d))
 
     @staticmethod
-    def zero(depth=0):
+    def zero(order=0):
         """Return Zi(0, 0), or Zi(Zi(0, 0), Zi(0, 0)), or so on"""
-        if isinstance(depth, int) and depth >= 0:
-            if depth == 0:
+        if isinstance(order, int) and order >= 0:
+            if order == 0:
                 return Zi(0, 0)
             else:
-                d = depth - 1
+                d = order - 1
                 return Zi(Zi.zero(d), Zi.zero(d))
         else:
-            raise Exception(f"Cannot create a zero with {depth}")
+            raise Exception(f"Cannot create a zero with {order}")
 
     @staticmethod
-    def one(depth=0):
+    def one(order=0):
         """Return Zi(1, 0), or Zi(Zi(1, 0), Zi(0, 0)), or so on"""
-        if isinstance(depth, int) and depth >= 0:
-            if depth == 0:
+        if isinstance(order, int) and order >= 0:
+            if order == 0:
                 return Zi(1, 0)
             else:
-                d = depth - 1
+                d = order - 1
                 return Zi(Zi.one(d), Zi.zero(d))
         else:
-            raise Exception(f"Cannot create a one with {depth}")
+            raise Exception(f"Cannot create a one with {order}")
 
     # --------------------------
 
@@ -351,98 +372,99 @@ class Zi:
     #     else:
     #         return False
 
-def parse_quaternion_string(qstr):
-    """Parse a quaternion string into a Zi.
-    The quaternion string can be formatted in many different ways...
-    * It may be normal: 1+2i-3j-4k
-    * It may have missing terms: 1-3k, 2i-4k
-    * It may have missing coefficients: i+j-k (they are assumed to be 1)
-    * It may not be in the right order: 2i-1+3k-4j
-    * The coefficients must be ints or floats: 7-2.4i+3.75j-4.0k
-    * There will always be a single + or - between terms
-    * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
-    """
+    @staticmethod
+    def parse_quaternion_string(qstr):
+        """Parse a quaternion string into a Zi.
+        The quaternion string can be formatted in many different ways...
+        * It may be normal: 1+2i-3j-4k
+        * It may have missing terms: 1-3k, 2i-4k
+        * It may have missing coefficients: i+j-k (they are assumed to be 1)
+        * It may not be in the right order: 2i-1+3k-4j
+        * The coefficients must be ints or floats: 7-2.4i+3.75j-4.0k
+        * There will always be a single + or - between terms
+        * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
+        """
 
-    def make_int_or_float(st: str):
-        """Cast a string representation of a number into an integer or a float."""
-        try:
-            f_st = float(st)
-        except:
-            raise ValueError(f"{st} is not a float nor an int")
+        def make_int_or_float(st: str):
+            """Cast a string representation of a number into an integer or a float."""
+            try:
+                f_st = float(st)
+            except:
+                raise ValueError(f"{st} is not a float nor an int")
 
-        i_st = int(f_st)
+            i_st = int(f_st)
 
-        return i_st if i_st == f_st else f_st
+            return i_st if i_st == f_st else f_st
 
-    def make_term(tm):
-        """Return a pair where the first element is one of 'real', 'i', 'j', or 'k'
-        and the second element is the coefficient as a float or int. These will be
-        used to update a dictionary."""
+        def make_term(tm):
+            """Return a pair where the first element is one of 'real', 'i', 'j', or 'k'
+            and the second element is the coefficient as a float or int. These will be
+            used to update a dictionary."""
 
-        # Pattern for a valid quaternion term that ends in i, j, or k.
-        unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
+            # Pattern for a valid quaternion term that ends in i, j, or k.
+            unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
-        # The term is either associated with a unit (i,j,k) or it's 'real'
-        if regex.match(unit_term_pat, tm):
-            return tm[-1], make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
-        else:
-            return 'real', make_int_or_float(tm)  # e.g., ('real', -3.1)
+            # The term is either associated with a unit (i,j,k) or it's 'real'
+            if regex.match(unit_term_pat, tm):
+                return tm[-1], make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
+            else:
+                return 'real', make_int_or_float(tm)  # e.g., ('real', -3.1)
 
-    def maybe_add_coefficient(tm):
-        """If a term consists of a single unit (i, j, k), then put
-        a coefficient of 1 on it, otherwise just return the term."""
+        def maybe_add_coefficient(tm):
+            """If a term consists of a single unit (i, j, k), then put
+            a coefficient of 1 on it, otherwise just return the term."""
 
-        if tm == 'i':
-            return '1i'
-        elif tm == 'j':
-            return '1j'
-        elif tm == 'k':
-            return '1k'
-        else:
-            return tm
+            if tm == 'i':
+                return '1i'
+            elif tm == 'j':
+                return '1j'
+            elif tm == 'k':
+                return '1k'
+            else:
+                return tm
 
-    # Make lowercase and remove all spaces
-    q0 = qstr.lower().strip().replace(' ', '')
+        # Make lowercase and remove all spaces
+        q0 = qstr.lower().strip().replace(' ', '')
 
-    # Put a coefficient of 1 in front of units where it is implied to be 1.
-    q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
-    q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
+        # Put a coefficient of 1 in front of units where it is implied to be 1.
+        q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
+        q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
 
-    # Put single space in front of + & -
-    q1 = q0b.replace('+', ' +').replace('-', ' -')
+        # Put single space in front of + & -
+        q1 = q0b.replace('+', ' +').replace('-', ' -')
 
-    # If scientific notation, remove the space that was added in the previous step
-    q1a = q1.replace('e -', 'e-').replace('e +', 'e+')
+        # If scientific notation, remove the space that was added in the previous step
+        q1a = q1.replace('e -', 'e-').replace('e +', 'e+')
 
-    # Remove any space after leading parenthesis (created by the step above)
-    q2 = q1a.replace('( ', '(')
+        # Remove any space after leading parenthesis (created by the step above)
+        q2 = q1a.replace('( ', '(')
 
-    # Remove parentheses, if they exist
-    q3 = q2.replace('(', '').replace(')', '').strip()
+        # Remove parentheses, if they exist
+        q3 = q2.replace('(', '').replace(')', '').strip()
 
-    # Split string at spaces.
-    # The input string has now been transformed into a list of strings that
-    # correspond to terms in the quaternion.
-    q4 = q3.split()
+        # Split string at spaces.
+        # The input string has now been transformed into a list of strings that
+        # correspond to terms in the quaternion.
+        q4 = q3.split()
 
-    # Some terms are just units (i, j, k), possibly with a sign (-+)
-    # Add a coefficient of 1 or -1 to those terms.
-    q5 = [maybe_add_coefficient(t) for t in q4]
+        # Some terms are just units (i, j, k), possibly with a sign (-+)
+        # Add a coefficient of 1 or -1 to those terms.
+        q5 = [maybe_add_coefficient(t) for t in q4]
 
-    # Make sure each term in the quaternion is valid
-    qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
-    for term in q5:
-        mat = regex.match(qterm_pat, term)
-        if mat is None:
-            raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
+        # Make sure each term in the quaternion is valid
+        qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
+        for term in q5:
+            mat = regex.match(qterm_pat, term)
+            if mat is None:
+                raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
 
-    # Each call to make_term returns a key-value pair that can be used to
-    # update the dictionary, qdict, where the key is one of 'real', 'i',
-    # 'j', or 'k', and the value is the quaternion coefficient (float or int)
-    # that corresponds to the key.
-    q6 = [make_term(t) for t in q5]
-    qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0}
-    for term in q6:
-        qdict[term[0]] = term[1]
+        # Each call to make_term returns a key-value pair that can be used to
+        # update the dictionary, qdict, where the key is one of 'real', 'i',
+        # 'j', or 'k', and the value is the quaternion coefficient (float or int)
+        # that corresponds to the key.
+        q6 = [make_term(t) for t in q5]
+        qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0}
+        for term in q6:
+            qdict[term[0]] = term[1]
 
-    return list(qdict.values())
+        return list(qdict.values())
