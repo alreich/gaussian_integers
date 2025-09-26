@@ -7,7 +7,10 @@ import regex
 
 def flatten(list_of_lists):
     """Return a flat list, given a list of lists..."""
-    return [item for lst in list_of_lists for item in lst]
+    if isinstance(list_of_lists[0], list):
+        return [item for lst in list_of_lists for item in lst]
+    else:
+        return list_of_lists
 
 def is_power_of_two(n: int):
     """In binary representation, a power of two has exactly one '1' bit,
@@ -16,6 +19,15 @@ def is_power_of_two(n: int):
     '1' bit becomes '0'. This means that, if n is a power of 2, a bitwise
     AND operation between n and n-1 will result in 0."""
     return n > 0 and (n & (n - 1)) == 0  # bitwise AND
+
+def make_int_or_float(st: str):
+    """Cast a string representation of a number into an integer or a float."""
+    try:
+        f_st = float(st)
+    except:
+        raise ValueError(f"{st} is not a float nor an int")
+    i_st = int(f_st)
+    return i_st if i_st == f_st else f_st
 
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
@@ -74,15 +86,18 @@ class Zi:
             raise Exception(f"Unexpected combination of input types: {re} and {im}")
 
     def __repr__(self):
+        """This representation method operates recursively"""
         return f"{self.__class__.__name__}({repr(self.__re)}, {repr(self.__im)})"
 
     def __str__(self):
+        if isinstance(self, (float, int)):
+            return self
         if self.is_complex():
             return str(complex(self))
         elif self.is_quaternion():
-            return self.quaternion_to_string()
+            return f"quaternion('{self.quaternion_to_string()}')"
         elif self.is_octonion():
-            return f"Oct({str(self.__re)}, {str(self.__im)})"
+            return f"octonion({str(self.__re)}, {str(self.__im)})"
         else:
             return str(self.to_array())
 
@@ -139,8 +154,7 @@ class Zi:
         return Zi(a * c - b * d, a * d + b * c)
 
     def __complex__(self):
-        order = self.order()
-        if order == 0:
+        if self.order() == 1:
             return complex(self.__re, self.__im)
         else:
             raise Exception(f"Cannot create a complex from {self}")
@@ -176,29 +190,32 @@ class Zi:
 
     def order(self):
         """Order is the number levels contained in the Zi.
-        That is, a Zi made up of two integers has order 0, and a Zi
+        That is, a Zi made up of two integers has order 1, and a Zi
         made up of two other Zi's, each of order n, has order n+1."""
         def aux(x, d):
             if isinstance(x, int):
                 return d
             else:
                 return aux(x.real, d + 1)
-        return aux(self.__re, 0)
+        return aux(self.__re, 1)
+
+    def is_real(self):
+        return False
 
     def is_complex(self):
         """Return True if this Zi is essentially a complex number
         That is, the re & im parts are numbers, not other Zis."""
-        return self.order() == 0
+        return self.order() == 1
 
     def is_quaternion(self):
         """Return True if this Zi is essentially a quaternion
         That is, the re & im parts are essentially complex numbers."""
-        return self.order() == 1
+        return self.order() == 2
 
     def is_octonion(self):
         """Return True if this Zi is essentially an octonion
         That is, the re & im parts are essentially quaternions."""
-        return self.order() == 2
+        return self.order() == 3
 
     def to_array(self):
         if isinstance(self.__re, (float, int)) and isinstance(self.__im, (float, int)):
@@ -210,16 +227,32 @@ class Zi:
 
     @staticmethod
     def from_array(arr):
-        n = len(arr)
-        if n == 2:
-            if isinstance(arr[0], (int, float)) and isinstance(arr[1], (int, float)):
-                return Zi(arr[0], arr[1])
+        flat_arr = flatten(arr)
+        n = len(flat_arr)
+        if n == 1:
+            return Zi(flat_arr[0])
+        elif n == 2:
+            a, b = flat_arr
+            if isinstance(a, (float, int)) and isinstance(b, (float, int)):
+                return Zi(a, b)
             else:
-                raise ValueError(f"{arr} cannot be transformed into a Zi")
-        elif n % 2 == 0:
-            return Zi(Zi.from_array(arr[:2]), Zi.from_array(arr[2:]))
+                raise ValueError(f"Can make Zi out of {arr}")
+        elif is_power_of_two(n):
+            return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
         else:
-            raise ValueError(f"Number of elements in array, {n}, must be even.")
+            raise ValueError(f"Can make Zi out of {arr}")
+
+    # def from_array(arr):
+    #     n = len(arr)
+    #     if n == 2:
+    #         if isinstance(arr[0], (int, float)) and isinstance(arr[1], (int, float)):
+    #             return Zi(arr[0], arr[1])
+    #         else:
+    #             raise ValueError(f"{arr} cannot be transformed into a Zi")
+    #     elif n % 2 == 0:
+    #         return Zi(Zi.from_array(arr[:2]), Zi.from_array(arr[2:]))
+    #     else:
+    #         raise ValueError(f"Number of elements in array, {n}, must be even.")
 
     # def from_array(arr):
     #     re = arr[0]
@@ -230,29 +263,40 @@ class Zi:
     #         return Zi(Zi.from_array(re), Zi.from_array(im))
 
     @staticmethod
-    def quaternion(arr):
-        re = Zi(arr[0], arr[1])
-        im = Zi(arr[2], arr[3])
-        return Zi(re, im)
+    def quaternion(quat):
+        """Create a Zi of order 2 (i.e., a quaternion) from an list of 4 elements
+        or a string representation of a quaternion."""
+        if isinstance(quat, list) and len(quat) == 4:
+            re = Zi(quat[0], quat[1])
+            im = Zi(quat[2], quat[3])
+            return Zi(re, im)
+        elif isinstance(quat, str):
+            return Zi.parse_quaternion_string(quat)
+        else:
+            raise ValueError(f"Cannot create a quaternion from {quat}")
 
     def quaternion_to_string(self):
         unit_strs = ["", "i", "j", "k"]
         if self.is_quaternion():
-            qstr = "("
+            qstr = ""
             for idx, coef in enumerate(flatten(self.to_array())):
+                # Don't include terms with 0 coefficient
                 if coef > 0:
-                    qstr = qstr + f"+{coef}{unit_strs[idx]}"
+                    if idx == 0:
+                        qstr = qstr + f"{coef}{unit_strs[idx]}"
+                    else:
+                        qstr = qstr + f"+{coef}{unit_strs[idx]}"
                 elif coef < 0:
                     qstr = qstr + f"{coef}{unit_strs[idx]}"
                 else:
                     pass
-            return qstr + ")"
+            return qstr
         else:
             raise Exception(f"{self} is not a quaternion")
 
     @staticmethod
-    def random(re1=-100, re2=100, im1=-100, im2=100, order=0):
-        if order == 0:
+    def random(re1=-100, re2=100, im1=-100, im2=100, order=1):
+        if order == 1:
             return Zi(randint(re1, re2), randint(im1, im2))
         else:
             d = order - 1
@@ -260,10 +304,10 @@ class Zi:
                       Zi.random(re1, re2, im1, im2, d))
 
     @staticmethod
-    def zero(order=0):
+    def zero(order=1):
         """Return Zi(0, 0), or Zi(Zi(0, 0), Zi(0, 0)), or so on"""
-        if isinstance(order, int) and order >= 0:
-            if order == 0:
+        if isinstance(order, int) and order >= 1:
+            if order == 1:
                 return Zi(0, 0)
             else:
                 d = order - 1
@@ -272,10 +316,10 @@ class Zi:
             raise Exception(f"Cannot create a zero with {order}")
 
     @staticmethod
-    def one(order=0):
+    def one(order=1):
         """Return Zi(1, 0), or Zi(Zi(1, 0), Zi(0, 0)), or so on"""
-        if isinstance(order, int) and order >= 0:
-            if order == 0:
+        if isinstance(order, int) and order >= 1:
+            if order == 1:
                 return Zi(1, 0)
             else:
                 d = order - 1
@@ -385,17 +429,6 @@ class Zi:
         * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
         """
 
-        def make_int_or_float(st: str):
-            """Cast a string representation of a number into an integer or a float."""
-            try:
-                f_st = float(st)
-            except:
-                raise ValueError(f"{st} is not a float nor an int")
-
-            i_st = int(f_st)
-
-            return i_st if i_st == f_st else f_st
-
         def make_term(tm):
             """Return a pair where the first element is one of 'real', 'i', 'j', or 'k'
             and the second element is the coefficient as a float or int. These will be
@@ -422,6 +455,11 @@ class Zi:
                 return '1k'
             else:
                 return tm
+
+        # The strategy below is to perform a succession of simple edits on
+        # the string to turn it into a 4-element array, rather than to try
+        # to write some enormous, unreadable regular expression. The regex's
+        # used here are already a bit difficult to read.
 
         # Make lowercase and remove all spaces
         q0 = qstr.lower().strip().replace(' ', '')
