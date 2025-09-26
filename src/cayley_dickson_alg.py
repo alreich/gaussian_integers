@@ -74,6 +74,22 @@ class Zi:
                 raise Exception(f"Inputs incompatible: {re} and {im}")
 
         # --------------------------------------------------------
+        # re is a list or tuple of numbers with length equal to a
+        # power of 2, and im is None or it is a tuple or list
+        # similar to the one input for re.
+        elif isinstance(re, (tuple, list)):
+            z = Zi.from_array(re)
+            if im is None:
+                self.__re = z.real
+                self.__im = z.imag
+            elif isinstance(im, (tuple, list)) and len(im) == len(re):
+                w = Zi.from_array(im)
+                self.__re = z
+                self.__im = w
+            else:
+                raise Exception(f"Inputs incompatible: {re} and {im}")
+
+        # --------------------------------------------------------
         # Both re and im are None
 
         elif re is None:
@@ -136,8 +152,15 @@ class Zi:
         Multiplication is also defined recursively as:
         (a, b) x (c, d) = (a x c  +  mu x d x b*, a* x d  +  c x b)
         where for now, mu = -1 is implicitly hardcoded, below.
+
+        If other is not a Zi, it is converted to a Zi before the
+        multiplication is performed.
         """
-        a, b, c, d = self.__re, self.__im, other.real, other.imag
+        if not isinstance(other, Zi):
+            oth = Zi(other)
+        else:
+            oth = other
+        a, b, c, d = self.__re, self.__im, oth.real, oth.imag
         real_part = a * c - d * b.conjugate()
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
@@ -200,7 +223,7 @@ class Zi:
         return aux(self.__re, 1)
 
     def is_real(self):
-        return False
+        return isinstance(self.__re, int) and self.__im == 0
 
     def is_complex(self):
         """Return True if this Zi is essentially a complex number
@@ -264,7 +287,7 @@ class Zi:
 
     @staticmethod
     def quaternion(quat):
-        """Create a Zi of order 2 (i.e., a quaternion) from an list of 4 elements
+        """Create a Zi of order 2 (i.e., a quaternion) from a list of 4 elements
         or a string representation of a quaternion."""
         if isinstance(quat, list) and len(quat) == 4:
             re = Zi(quat[0], quat[1])
