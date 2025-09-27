@@ -75,7 +75,7 @@ class Zi:
 
         # --------------------------------------------------------
         # re is a list or tuple of numbers with length equal to a
-        # power of 2, and im is None or it is a tuple or list
+        # power of 2, and im is None, or it is a tuple or list
         # similar to the one input for re.
         elif isinstance(re, (tuple, list)):
             z = Zi.from_array(re)
@@ -111,9 +111,9 @@ class Zi:
         if self.is_complex():
             return str(complex(self))
         elif self.is_quaternion():
-            return f"quaternion('{self.quaternion_to_string()}')"
+            return f"({self.quaternion_to_string()})"
         elif self.is_octonion():
-            return f"octonion({str(self.__re)}, {str(self.__im)})"
+            return f"({str(self.__re)}, {str(self.__im)})"
         else:
             return str(self.to_array())
 
@@ -294,7 +294,7 @@ class Zi:
             im = Zi(quat[2], quat[3])
             return Zi(re, im)
         elif isinstance(quat, str):
-            return Zi.parse_quaternion_string(quat)
+            return Zi(Zi.parse_quaternion_string(quat))
         else:
             raise ValueError(f"Cannot create a quaternion from {quat}")
 
@@ -318,13 +318,24 @@ class Zi:
             raise Exception(f"{self} is not a quaternion")
 
     @staticmethod
-    def random(re1=-100, re2=100, im1=-100, im2=100, order=1):
+    def random(size=10, order=1):
+        """Return a random Zi of the given order where the lower and
+        upper limits of the random numbers returned are -size & size, resp."""
         if order == 1:
-            return Zi(randint(re1, re2), randint(im1, im2))
+            return Zi(randint(-size, size), randint(-size, size))
         else:
             d = order - 1
-            return Zi(Zi.random(re1, re2, im1, im2, d),
-                      Zi.random(re1, re2, im1, im2, d))
+            return Zi(Zi.random(size, d), Zi.random(size, d))
+
+    @staticmethod
+    def random_quaternion(size=10):
+        """A convenience method for testing."""
+        return Zi.random(size, order=2)
+
+    @staticmethod
+    def random_octonion(size=10):
+        """A convenience method for testing."""
+        return Zi.random(size, order=3)
 
     @staticmethod
     def zero(order=1):
