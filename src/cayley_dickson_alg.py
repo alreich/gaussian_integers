@@ -120,6 +120,14 @@ class Zi:
     def __neg__(self):
         return Zi(- self.__re, - self.__im)
 
+    def __eq__(self, other) -> bool:
+        """Return True if this Zi equals other."""
+        return (self.real == other.real) and (self.imag == other.imag)
+
+    def __ne__(self, other) -> bool:
+        """Return True if this Zi does NOT equal other."""
+        return (self.real != other.real) or (self.imag != other.imag)
+
     def __add__(self, other):
         return Zi(self.__re + other.real, self.__im + other.imag)
 
@@ -284,6 +292,10 @@ class Zi:
     #         return Zi(re, im)
     #     else:
     #         return Zi(Zi.from_array(re), Zi.from_array(im))
+
+    @staticmethod
+    def komplex(z):
+        pass
 
     @staticmethod
     def quaternion(quat):
