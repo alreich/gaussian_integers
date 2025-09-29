@@ -169,12 +169,15 @@ class Zi:
         else:
             oth = other
         a, b, c, d = self.__re, self.__im, oth.real, oth.imag
+        # print(f"\nMult: {self} x {other}")
+        # print(f"({a}, {b})")
+        # print(f"({c}, {d})")
         real_part = a * c - d * b.conjugate()
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
 
     def __rmul__(self, other):
-        return self * other
+        return Zi(other) * self
 
     def __imul__(self, other):
         """Implements the *= operation: self *= other"""
@@ -182,7 +185,10 @@ class Zi:
         b = self.imag
         c = round(other.real)
         d = round(other.imag)
-        return Zi(a * c - b * d, a * d + b * c)
+        #return Zi(a * c - b * d, a * d + b * c)
+        real_part = a * c - d * b.conjugate()
+        imag_part = a.conjugate() * d + c * b
+        return Zi(real_part, imag_part)
 
     def __complex__(self):
         if self.order() == 1:
@@ -328,6 +334,20 @@ class Zi:
             return qstr
         else:
             raise Exception(f"{self} is not a quaternion")
+
+    def hamilton_product(self, other):
+        """Multiplication of two quaternions according to the classic Hamilton product."""
+        if Zi.is_quaternion(self) and Zi.is_quaternion(other):
+            a1, b1, c1, d1 = flatten(self.to_array())
+            a2, b2, c2, d2 = flatten(other.to_array())
+            # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
+            a = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2
+            b = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2
+            c = a1 * c2 - b1 * d2 + c1 * a2 + d1 * b2
+            d = a1 * d2 + b1 * c2 - c1 * b2 + d1 * a2
+            return Zi(Zi(a, b), Zi(c, d))
+        else:
+            raise Exception(f"Both {self} and {other} must be quaternions")
 
     @staticmethod
     def random(size=10, order=1):
