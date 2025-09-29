@@ -169,11 +169,8 @@ class Zi:
         else:
             oth = other
         a, b, c, d = self.__re, self.__im, oth.real, oth.imag
-        # print(f"\nMult: {self} x {other}")
-        # print(f"({a}, {b})")
-        # print(f"({c}, {d})")
-        real_part = a * c - d * b.conjugate()
-        imag_part = a.conjugate() * d + c * b
+        real_part = a * c - d.conjugate() * b
+        imag_part = d * a + b * c.conjugate()
         return Zi(real_part, imag_part)
 
     def __rmul__(self, other):
