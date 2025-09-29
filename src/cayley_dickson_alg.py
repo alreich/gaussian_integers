@@ -214,8 +214,10 @@ class Zi:
         """Return the innermost first re value."""
         if isinstance(self.__re, int):
             return self.__re
-        else:
+        elif isinstance(self.__re, Zi):
             return self.__re.first
+        else:
+            raise Exception(f"Cannot create a real from {self}")
 
     @property
     def norm(self):
@@ -298,10 +300,6 @@ class Zi:
     #         return Zi(re, im)
     #     else:
     #         return Zi(Zi.from_array(re), Zi.from_array(im))
-
-    @staticmethod
-    def komplex(z):
-        pass
 
     @staticmethod
     def quaternion(quat):
@@ -414,13 +412,13 @@ class Zi:
             raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
-    def __eq__(self, other) -> bool:
-        """Return True if this Zi equals other."""
-        return (self.real == other.real) and (self.imag == other.imag)
-
-    def __ne__(self, other) -> bool:
-        """Return True if this Zi does NOT equal other."""
-        return (self.real != other.real) or (self.imag != other.imag)
+    # def __eq__(self, other) -> bool:
+    #     """Return True if this Zi equals other."""
+    #     return (self.real == other.real) and (self.imag == other.imag)
+    #
+    # def __ne__(self, other) -> bool:
+    #     """Return True if this Zi does NOT equal other."""
+    #     return (self.real != other.real) or (self.imag != other.imag)
 
     def __hash__(self):
         """Allow this Zi to be hashed."""
