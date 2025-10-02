@@ -33,6 +33,8 @@ class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
 
+    __scalar_mult = True  # See the classmethod, scalar_mult
+
     def __init__(self, re=None, im=None):
 
         # --------------------------------------------------------
@@ -100,6 +102,22 @@ class Zi:
                 raise Exception(f"If re is None, then im must be None. But im = {im}")
         else:
             raise Exception(f"Unexpected combination of input types: {re} and {im}")
+
+    @classmethod
+    def scalar_mult(cls, value=None):
+        """Determines how multiplication of two Zi's of different orders works.
+        If scalar_mult is True, then the lower order Zi is treated like a scalar
+        w.r.t. the higher order Zi, otherwise, prior to multiplication, the lower
+        order Zi is coerced to the same order as the higher order Zi.
+        Calling scalar_mult() without an argument will simply return it's current
+        value, which by default is True."""
+        if value is None:
+            return cls.__scalar_mult
+        elif isinstance(value, bool):
+            cls.__scalar_mult = value
+            return cls.__scalar_mult
+        else:
+            raise ValueError("scalar_mult must be a boolean value")
 
     def __repr__(self):
         """This representation method operates recursively"""
@@ -174,6 +192,19 @@ class Zi:
     #     return Zi(real_part, imag_part)
 
     def __mul__(self, other):
+        """Cayley-Dickson Construction
+
+        Conjugation, denoted here by *, is defined recursively as:
+        a* = a and (u, v)* = (u*, -v)
+
+        Multiplication is also defined recursively as:
+        (a, b) x (c, d) = (a x c  +  mu x d x b*, a* x d  +  c x b)
+        where for now, mu = -1 is implicitly hardcoded, below.
+
+        If self & other have different orders, then see the
+        description of the class method, scalar_mult, for how
+        multiplication works.
+        """
         if not isinstance(other, Zi):
             oth = Zi(other)
         else:
