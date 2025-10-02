@@ -150,28 +150,49 @@ class Zi:
         """Implements the -= operation: self -= other"""
         return Zi(self.real - other.real, self.imag - other.imag)
 
+    # def __mul__(self, other):
+    #     """
+    #     Cayley-Dickson Construction -- see [Schafer, 1966]
+    #
+    #     Conjugation, denoted here by *, is defined recursively as:
+    #     a* = a and (u, v)* = (u*, -v)
+    #
+    #     Multiplication is also defined recursively as:
+    #     (a, b) x (c, d) = (a x c  +  mu x d x b*, a* x d  +  c x b)
+    #     where for now, mu = -1 is implicitly hardcoded, below.
+    #
+    #     If other is not a Zi, it is converted to a Zi before the
+    #     multiplication is performed.
+    #     """
+    #     if not isinstance(other, Zi):
+    #         oth = Zi(other)
+    #     else:
+    #         oth = other
+    #     a, b, c, d = self.__re, self.__im, oth.real, oth.imag
+    #     real_part = a * c - d.conjugate() * b
+    #     imag_part = d * a + b * c.conjugate()
+    #     return Zi(real_part, imag_part)
+
     def __mul__(self, other):
-        """
-        Cayley-Dickson Construction -- see [Schafer, 1966]
-
-        Conjugation, denoted here by *, is defined recursively as:
-        a* = a and (u, v)* = (u*, -v)
-
-        Multiplication is also defined recursively as:
-        (a, b) x (c, d) = (a x c  +  mu x d x b*, a* x d  +  c x b)
-        where for now, mu = -1 is implicitly hardcoded, below.
-
-        If other is not a Zi, it is converted to a Zi before the
-        multiplication is performed.
-        """
         if not isinstance(other, Zi):
             oth = Zi(other)
         else:
             oth = other
-        a, b, c, d = self.__re, self.__im, oth.real, oth.imag
-        real_part = a * c - d.conjugate() * b
-        imag_part = d * a + b * c.conjugate()
-        return Zi(real_part, imag_part)
+        n = self.order()
+        m = oth.order()
+        # If n == m, then Cayley-Dickson multiplication
+        if n == m:
+            a, b, c, d = self.real, self.imag, oth.real, oth.imag
+            real_part = a * c - d.conjugate() * b
+            imag_part = d * a + b * c.conjugate()
+            return Zi(real_part, imag_part)
+        # Otherwise, scalar-like multiplication
+        elif m < n:
+            return Zi(self.real * oth, self.imag * oth)
+        elif m > n:
+            return Zi(self * oth.real, self * oth.imag)
+        else:
+            raise Exception(f"Should never reach this line!")
 
     def __rmul__(self, other):
         return Zi(other) * self
@@ -197,6 +218,45 @@ class Zi:
         if hasattr(self, name):
             raise AttributeError(f"Zi's are immutable. Cannot modify {name}")
         super().__setattr__(name, value)
+
+    def __pow__(self, n: int, modulo=None):
+        """Implements the ** operator: self ** n.
+
+        If n == 0, then Zi(1, 0) is returned. If n < 0, then the Gaussian
+        rational, Qi, for 1 / self**n is returned. Otherwise, self ** n is returned.
+        """
+        result = self
+        if isinstance(n, int):
+            if n == 0:
+                result = Zi(1)  # "1"
+            elif n > 0:
+                for _ in range(n - 1):
+                    result = result * self
+            else:  # n < 0
+                result = 1 / (self ** abs(n))
+        else:
+            raise TypeError(f"The power, {n}, must be an integer.")
+        return result
+
+    def __hash__(self):
+        """Allow this Zi to be hashed."""
+        return hash((self.real, self.imag))
+
+    def __abs__(self) -> float:
+        """Returns the square root of the norm."""
+        return sqrt(self.norm)
+
+    def __pos__(self):
+        return +self
+
+    def __rpow__(self, base):
+        return NotImplemented
+
+    def __round__(self):
+        if isinstance(self.real, Number) and isinstance(self.imag, Number):
+            return Zi(round(self.real), round(self.imag))
+        else:
+            return self
 
     @property
     def real(self):
@@ -389,45 +449,6 @@ class Zi:
             raise Exception(f"Cannot create a one with {order}")
 
     # --------------------------
-
-    def __pow__(self, n: int, modulo=None):
-        """Implements the ** operator: self ** n.
-
-        If n == 0, then Zi(1, 0) is returned. If n < 0, then the Gaussian
-        rational, Qi, for 1 / self**n is returned. Otherwise, self ** n is returned.
-        """
-        result = self
-        if isinstance(n, int):
-            if n == 0:
-                result = Zi(1)  # "1"
-            elif n > 0:
-                for _ in range(n - 1):
-                    result = result * self
-            else:  # n < 0
-                result = 1 / (self ** abs(n))
-        else:
-            raise TypeError(f"The power, {n}, must be an integer.")
-        return result
-
-    def __hash__(self):
-        """Allow this Zi to be hashed."""
-        return hash((self.real, self.imag))
-
-    def __abs__(self) -> float:
-        """Returns the square root of the norm."""
-        return sqrt(self.norm)
-
-    def __pos__(self):
-        return +self
-
-    def __rpow__(self, base):
-        return NotImplemented
-
-    def __round__(self):
-        if isinstance(self.real, Number) and isinstance(self.imag, Number):
-            return Zi(round(self.real), round(self.imag))
-        else:
-            return self
 
     @staticmethod
     def eye():
