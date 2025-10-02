@@ -187,7 +187,7 @@ class Zi:
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
 
-    def __complex__(self):
+    def __complex__(self) -> complex:
         if self.order() == 1:
             return complex(self.__re, self.__im)
         else:
@@ -408,14 +408,6 @@ class Zi:
         else:
             raise TypeError(f"The power, {n}, must be an integer.")
         return result
-
-    # def __eq__(self, other) -> bool:
-    #     """Return True if this Zi equals other."""
-    #     return (self.real == other.real) and (self.imag == other.imag)
-    #
-    # def __ne__(self, other) -> bool:
-    #     """Return True if this Zi does NOT equal other."""
-    #     return (self.real != other.real) or (self.imag != other.imag)
 
     def __hash__(self):
         """Allow this Zi to be hashed."""
