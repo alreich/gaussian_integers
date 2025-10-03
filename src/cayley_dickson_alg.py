@@ -33,7 +33,7 @@ class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
 
-    __scalar_mult = True  # See the classmethod, scalar_mult
+    __scalar_multiplication = True  # See the classmethod, scalar_mult
 
     def __init__(self, re=None, im=None):
 
@@ -112,10 +112,10 @@ class Zi:
         Calling scalar_mult() without an argument will simply return it's current
         value, which by default is True."""
         if value is None:
-            return cls.__scalar_mult
+            return cls.__scalar_multiplication
         elif isinstance(value, bool):
-            cls.__scalar_mult = value
-            return cls.__scalar_mult
+            cls.__scalar_multiplication = value
+            return cls.__scalar_multiplication
         else:
             raise ValueError("scalar_mult must be a boolean value")
 
@@ -219,9 +219,15 @@ class Zi:
             return Zi(real_part, imag_part)
         # Otherwise, scalar-like multiplication
         elif m < n:
-            return Zi(self.real * oth, self.imag * oth)
+            if Zi.__scalar_multiplication:
+                return Zi(self.real * oth, self.imag * oth)
+            else:
+                return self * oth.increase_order(self.order())
         elif m > n:
-            return Zi(self * oth.real, self * oth.imag)
+            if Zi.__scalar_multiplication:
+                return Zi(self * oth.real, self * oth.imag)
+            else:
+                return self.increase_order(oth.order()) * oth
         else:
             raise Exception(f"Should never reach this line!")
 
@@ -325,6 +331,23 @@ class Zi:
             else:
                 return aux(x.real, d + 1)
         return aux(self.__re, 1)
+
+    def increase_order(self, d):
+        """Return a Zi that is equivalent to this one, but has a higher order, d.
+        Example: increase_order(Zi(2, -3), 2) -> Zi(Zi(2, -3), Zi(0, 0))"""
+        if isinstance(d, int) and d >= 1:
+            if isinstance(self, (int, float)):
+                return Zi.increase_order(Zi(self), d)
+            else:
+                n = self.order()
+                if n == d:
+                    return self
+                elif n < d:
+                    return Zi.increase_order(Zi(self, Zi.zero(n)), d)
+                else:
+                    raise Exception(f"Should not reach this line, {self = }, {d = }")
+        else:
+            raise ValueError(f"{d = }, is not an integer >= 1")
 
     def is_real(self):
         return isinstance(self.__re, int) and self.__im == 0
