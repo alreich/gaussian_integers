@@ -33,7 +33,7 @@ class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
 
-    __scalar_multiplication = True  # See the classmethod, scalar_mult
+    __SCALAR_MULTIPLICATION = True  # See the classmethod, scalar_mult
 
     def __init__(self, re=None, im=None):
 
@@ -108,14 +108,14 @@ class Zi:
         """Determines how multiplication of two Zi's of different orders works.
         If scalar_mult is True, then the lower order Zi is treated like a scalar
         w.r.t. the higher order Zi, otherwise, prior to multiplication, the lower
-        order Zi is coerced to the same order as the higher order Zi.
+        order Zi is cast to the same order as the higher order Zi.
         Calling scalar_mult() without an argument will simply return it's current
         value, which by default is True."""
         if value is None:
-            return cls.__scalar_multiplication
+            return cls.__SCALAR_MULTIPLICATION
         elif isinstance(value, bool):
-            cls.__scalar_multiplication = value
-            return cls.__scalar_multiplication
+            cls.__SCALAR_MULTIPLICATION = value
+            return cls.__SCALAR_MULTIPLICATION
         else:
             raise ValueError("scalar_mult must be a boolean value")
 
@@ -217,19 +217,19 @@ class Zi:
             real_part = a * c - d.conjugate() * b
             imag_part = d * a + b * c.conjugate()
             return Zi(real_part, imag_part)
-        # Otherwise, scalar-like multiplication
+        # Otherwise, scalar-like (default) or cast-first multiplication
         elif m < n:
-            if Zi.__scalar_multiplication:
+            if Zi.__SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
-                return self * oth.increase_order(self.order())
+                return self * oth.cast(self.order())
         elif m > n:
-            if Zi.__scalar_multiplication:
+            if Zi.__SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
-                return self.increase_order(oth.order()) * oth
+                return self.cast(oth.order()) * oth
         else:
-            raise Exception(f"Should never reach this line!")
+            raise Exception(f"Multiplication should never reach this line!")
 
     def __rmul__(self, other):
         return Zi(other) * self
@@ -332,18 +332,18 @@ class Zi:
                 return aux(x.real, d + 1)
         return aux(self.__re, 1)
 
-    def increase_order(self, d):
+    def cast(self, d):
         """Return a Zi that is equivalent to this one, but has a higher order, d.
         Example: increase_order(Zi(2, -3), 2) -> Zi(Zi(2, -3), Zi(0, 0))"""
         if isinstance(d, int) and d >= 1:
             if isinstance(self, (int, float)):
-                return Zi.increase_order(Zi(self), d)
+                return Zi.cast(Zi(self), d)
             else:
                 n = self.order()
                 if n == d:
                     return self
                 elif n < d:
-                    return Zi.increase_order(Zi(self, Zi.zero(n)), d)
+                    return Zi.cast(Zi(self, Zi.zero(n)), d)
                 else:
                     raise Exception(f"Should not reach this line, {self = }, {d = }")
         else:
