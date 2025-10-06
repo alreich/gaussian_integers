@@ -66,13 +66,12 @@ class TestZi(TestCase):
         self.assertEqual(z1.norm, 149)
         self.assertEqual(z1.order(), 1)
         self.assertEqual(z1.is_complex(), True)
+        self.assertEqual(z1.is_quaternion(), False)
         self.assertEqual(complex(z1), (10 - 7j))
 
     def test_quaternion(self):
-        z1 = Zi(10, -7)
-        z2 = Zi(-10, -2)
-        z3 = Zi(-3, -3)
-        z4 = Zi(-6, -7)
+        z1 = Zi(10, -7); z2 = Zi(-10, -2)
+        z3 = Zi(-3, -3); z4 = Zi(-6, -7)
         q1 = Zi(z1, z2)
         q2 = Zi(z3, z4)
         self.assertEqual(q1, Zi(Zi(10, -7), Zi(-10, -2)))
@@ -82,11 +81,19 @@ class TestZi(TestCase):
         self.assertEqual(q1.is_quaternion(), True)
         self.assertEqual(q1.norm, 253)
         self.assertEqual(q1 + q2, Zi(Zi(7, -10), Zi(-16, -9)))
-        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertEqual(q1 - q2, Zi(Zi(13, -4), Zi(-4, 5)))
         self.assertEqual(q1 * q2, Zi(Zi(-125, 49), Zi(-73, -52)))
         self.assertEqual(q1.hamilton_product(q2), q1 * q2)
         self.assertEqual(q2.hamilton_product(q1), q2 * q1)
+        # Mult by a real number. Scalar_mult setting shouldn't matter.
+        curr_val = Zi.scalar_mult()  # save current setting
+        Zi.scalar_mult(True)  # As scalar
+        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        Zi.scalar_mult(False)  # Cast First
+        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        Zi.scalar_mult(curr_val)  # Change back to current setting
 
     def test_octonion(self):
         q1 = Zi(Zi(10, -7), Zi(-10, -2))
