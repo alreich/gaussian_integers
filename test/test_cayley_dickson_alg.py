@@ -1,5 +1,5 @@
 from unittest import TestCase # TextTestRunner, defaultTestLoader
-from src.cayley_dickson_alg import Zi
+from src.cayley_dickson_alg import Zi, SetScalarMult
 from random import seed
 
 class TestZi(TestCase):
@@ -86,14 +86,15 @@ class TestZi(TestCase):
         self.assertEqual(q1.hamilton_product(q2), q1 * q2)
         self.assertEqual(q2.hamilton_product(q1), q2 * q1)
         # Mult by a real number. Scalar_mult setting shouldn't matter.
-        curr_val = Zi.scalar_mult()  # save current setting
-        Zi.scalar_mult(True)  # As scalar
-        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        Zi.scalar_mult(False)  # Cast First
-        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        Zi.scalar_mult(curr_val)  # Change back to current setting
+        self.assertTrue(Zi.scalar_mult())
+        with SetScalarMult(True):
+            self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+            self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        # Zi.scalar_mult(False)  # ==> Cast first, instead of scalar mult
+        with SetScalarMult(False):
+            self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+            self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertTrue(Zi.scalar_mult())
 
     def test_octonion(self):
         q1 = Zi(Zi(10, -7), Zi(-10, -2))
