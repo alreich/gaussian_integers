@@ -5,7 +5,7 @@ from math import sqrt
 from numbers import Number
 import regex
 
-from generic_utils import flatten, is_power_of_two, make_int_or_float, SetClassVariable
+from src.generic_utils import flatten, is_power_of_two, make_int_or_float, SetClassVariable
 
 # def flatten(list_of_lists):
 #     """Return a flat list, given a list of lists..."""
