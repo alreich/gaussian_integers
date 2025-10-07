@@ -29,6 +29,24 @@ def make_int_or_float(st: str):
     i_st = int(f_st)
     return i_st if i_st == f_st else f_st
 
+class SetClassVariable:
+    """A generic context manager to temporarily set a new value for a
+    class variable, and then reset it back to its original value.
+    It expects to use a getter/setter method to indirectly get/set
+    the class variable.
+    """
+    def __init__(self, getter_setter_method, new_value):
+        self.get_set_method = getter_setter_method
+        self.new_value = new_value
+        self.original_value = None
+
+    def __enter__(self):
+        self.original_value = self.get_set_method()
+        self.get_set_method(self.new_value)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.get_set_method(self.original_value)
+
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
@@ -634,3 +652,7 @@ class Zi:
             qdict[term[0]] = term[1]
 
         return list(qdict.values())
+
+class SetScalarMult(SetClassVariable):
+    def __init__(self, new_value):
+        super().__init__(Zi.scalar_mult, new_value)
