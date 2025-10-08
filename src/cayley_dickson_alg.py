@@ -4,50 +4,7 @@ from random import randint
 from math import sqrt
 from numbers import Number
 import regex
-
-from src.generic_utils import flatten, is_power_of_two, make_int_or_float, SetClassVariable
-
-# def flatten(list_of_lists):
-#     """Return a flat list, given a list of lists..."""
-#     if isinstance(list_of_lists[0], list):
-#         return [item for lst in list_of_lists for item in lst]
-#     else:
-#         return list_of_lists
-#
-# def is_power_of_two(n: int):
-#     """In binary representation, a power of two has exactly one '1' bit,
-#     and all other bits are '0'. So, when a power of two is decremented
-#     by one, all the '0' bits to the right of the '1' become '1', and the
-#     '1' bit becomes '0'. This means that, if n is a power of 2, a bitwise
-#     AND operation between n and n-1 will result in 0."""
-#     return n > 0 and (n & (n - 1)) == 0  # bitwise AND
-#
-# def make_int_or_float(st: str):
-#     """Cast a string representation of a number into an integer or a float."""
-#     try:
-#         f_st = float(st)
-#     except:
-#         raise ValueError(f"{st} is not a float nor an int")
-#     i_st = int(f_st)
-#     return i_st if i_st == f_st else f_st
-#
-# class SetClassVariable:
-#     """A generic context manager to temporarily set a new value for a
-#     class variable, and then reset it back to its original value.
-#     It expects to use a getter/setter method to indirectly get/set
-#     the class variable.
-#     """
-#     def __init__(self, getter_setter_method, new_value):
-#         self.get_set_method = getter_setter_method
-#         self.new_value = new_value
-#         self.original_value = None
-#
-#     def __enter__(self):
-#         self.original_value = self.get_set_method()
-#         self.get_set_method(self.new_value)
-#
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         self.get_set_method(self.original_value)
+from generic_utils import flatten, is_power_of_two, make_int_or_float, SetClassVariable
 
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
@@ -187,29 +144,6 @@ class Zi:
     def __isub__(self, other):
         """Implements the -= operation: self -= other"""
         return Zi(self.real - other.real, self.imag - other.imag)
-
-    # def __mul__(self, other):
-    #     """
-    #     Cayley-Dickson Construction -- see [Schafer, 1966]
-    #
-    #     Conjugation, denoted here by *, is defined recursively as:
-    #     a* = a and (u, v)* = (u*, -v)
-    #
-    #     Multiplication is also defined recursively as:
-    #     (a, b) x (c, d) = (a x c  +  mu x d x b*, a* x d  +  c x b)
-    #     where for now, mu = -1 is implicitly hardcoded, below.
-    #
-    #     If other is not a Zi, it is converted to a Zi before the
-    #     multiplication is performed.
-    #     """
-    #     if not isinstance(other, Zi):
-    #         oth = Zi(other)
-    #     else:
-    #         oth = other
-    #     a, b, c, d = self.__re, self.__im, oth.real, oth.imag
-    #     real_part = a * c - d.conjugate() * b
-    #     imag_part = d * a + b * c.conjugate()
-    #     return Zi(real_part, imag_part)
 
     def __mul__(self, other):
         """Cayley-Dickson Construction
@@ -412,26 +346,6 @@ class Zi:
         else:
             raise ValueError(f"Can make Zi out of {arr}")
 
-    # def from_array(arr):
-    #     n = len(arr)
-    #     if n == 2:
-    #         if isinstance(arr[0], (int, float)) and isinstance(arr[1], (int, float)):
-    #             return Zi(arr[0], arr[1])
-    #         else:
-    #             raise ValueError(f"{arr} cannot be transformed into a Zi")
-    #     elif n % 2 == 0:
-    #         return Zi(Zi.from_array(arr[:2]), Zi.from_array(arr[2:]))
-    #     else:
-    #         raise ValueError(f"Number of elements in array, {n}, must be even.")
-
-    # def from_array(arr):
-    #     re = arr[0]
-    #     im = arr[1]
-    #     if isinstance(re, int) and isinstance(im, int):
-    #         return Zi(re, im)
-    #     else:
-    #         return Zi(Zi.from_array(re), Zi.from_array(im))
-
     @staticmethod
     def quaternion(quat):
         """Create a Zi of order 2 (i.e., a quaternion) from a list of 4 elements
@@ -550,19 +464,19 @@ class Zi:
         us = Zi.units()
         return list(map(lambda u: u * self, us[1:]))  # skip multiplying by 1
 
-    # def is_associate(self, other):
-    #     """Return True if the other Zi is an associate of this Zi
-    #
-    #     Otherwise, return False.
-    #     """
-    #     q = self // other
-    #     if q:
-    #         if q in Zi.units():
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return False
+    def is_associate(self, other):
+        """Return True if the other Zi is an associate of this Zi
+
+        Otherwise, return False.
+        """
+        q = self // other
+        if q:
+            if q in Zi.units():
+                return True
+            else:
+                return False
+        else:
+            return False
 
     @staticmethod
     def parse_quaternion_string(qstr):

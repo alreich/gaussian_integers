@@ -1,5 +1,5 @@
-from unittest import TestCase # TextTestRunner, defaultTestLoader
-from src.cayley_dickson_alg import Zi, SetScalarMult
+from unittest import TestCase
+from cayley_dickson_alg import Zi, SetScalarMult
 from random import seed
 
 class TestZi(TestCase):
@@ -13,6 +13,7 @@ class TestZi(TestCase):
 
     def test_constructor(self):
         seed(42)
+        # self.assertEqual(Zi(), Zi(77777777, 77777777))
         self.assertEqual(Zi(), Zi(0, 0))
         self.assertEqual(Zi(1), Zi(1, 0))
         self.assertEqual(Zi.eye(), Zi(0, 1))

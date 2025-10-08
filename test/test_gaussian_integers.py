@@ -1,5 +1,5 @@
 from unittest import TestCase # TextTestRunner, defaultTestLoader
-from src.cayley_dickson_alg import Zi
+from cayley_dickson_alg import Zi
 # from random import seed
 
 # from unittest import TestCase
