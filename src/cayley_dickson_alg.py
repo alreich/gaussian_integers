@@ -464,19 +464,19 @@ class Zi:
         us = Zi.units()
         return list(map(lambda u: u * self, us[1:]))  # skip multiplying by 1
 
-    def is_associate(self, other):
-        """Return True if the other Zi is an associate of this Zi
-
-        Otherwise, return False.
-        """
-        q = self // other
-        if q:
-            if q in Zi.units():
-                return True
-            else:
-                return False
-        else:
-            return False
+    # def is_associate(self, other):
+    #     """Return True if the other Zi is an associate of this Zi
+    #
+    #     Otherwise, return False.
+    #     """
+    #     q = self // other
+    #     if q:
+    #         if q in Zi.units():
+    #             return True
+    #         else:
+    #             return False
+    #     else:
+    #         return False
 
     @staticmethod
     def parse_quaternion_string(qstr):
