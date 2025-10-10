@@ -4,13 +4,13 @@ from random import randint
 from math import sqrt
 from numbers import Number
 import regex
-from generic_utils import flatten, is_power_of_two, make_int_or_float, SetClassVariable
+import generic_utils as utils
 
 class Zi:
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
 
-    __SCALAR_MULTIPLICATION = True  # See the classmethod, scalar_mult
+    __SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
 
     def __init__(self, re=None, im=None):
 
@@ -87,7 +87,7 @@ class Zi:
         w.r.t. the higher order Zi, otherwise, prior to multiplication, the lower
         order Zi is cast to the same order as the higher order Zi.
         Calling scalar_mult() without an argument will simply return it's current
-        value, which by default is True."""
+        value, which by default is False."""
         if value is None:
             return cls.__SCALAR_MULTIPLICATION
         elif isinstance(value, bool):
@@ -194,7 +194,6 @@ class Zi:
         b = self.imag
         c = round(other.real)
         d = round(other.imag)
-        #return Zi(a * c - b * d, a * d + b * c)
         real_part = a * c - d * b.conjugate()
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
@@ -249,6 +248,23 @@ class Zi:
         else:
             return self
 
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            if index == 0:
+                return self.real
+            elif index == 1:
+                return self.imag
+            else:
+                raise IndexError(f"Index {index} out of range")
+        else:
+            raise TypeError(f"Index {index} must be a non-negative integer")
+
+    def __iter__(self):
+        return iter((self.real, self.imag))
+
     @property
     def real(self):
         return self.__re
@@ -285,6 +301,11 @@ class Zi:
             else:
                 return aux(x.real, d + 1)
         return aux(self.__re, 1)
+
+    def dim(self):
+        """Dimension is the total number of real numbers making up this Zi.
+        So, if n is its order, then its dimension is 2^n."""
+        return 2 ** self.order()
 
     def cast(self, d):
         """Return a Zi that is equivalent to this one, but has a higher order, d.
@@ -331,7 +352,7 @@ class Zi:
 
     @staticmethod
     def from_array(arr):
-        flat_arr = flatten(arr)
+        flat_arr = utils.flatten(arr)
         n = len(flat_arr)
         if n == 1:
             return Zi(flat_arr[0])
@@ -341,7 +362,7 @@ class Zi:
                 return Zi(a, b)
             else:
                 raise ValueError(f"Can make Zi out of {arr}")
-        elif is_power_of_two(n):
+        elif utils.is_power_of_two(n):
             return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
         else:
             raise ValueError(f"Can make Zi out of {arr}")
@@ -363,7 +384,7 @@ class Zi:
         unit_strs = ["", "i", "j", "k"]
         if self.is_quaternion():
             qstr = ""
-            for idx, coef in enumerate(flatten(self.to_array())):
+            for idx, coef in enumerate(utils.flatten(self.to_array())):
                 # Don't include terms with 0 coefficient
                 if coef > 0:
                     if idx == 0:
@@ -381,8 +402,8 @@ class Zi:
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product."""
         if Zi.is_quaternion(self) and Zi.is_quaternion(other):
-            a1, b1, c1, d1 = flatten(self.to_array())
-            a2, b2, c2, d2 = flatten(other.to_array())
+            a1, b1, c1, d1 = utils.flatten(self.to_array())
+            a2, b2, c2, d2 = utils.flatten(other.to_array())
             # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
             a = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2
             b = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2
@@ -501,9 +522,9 @@ class Zi:
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
             if regex.match(unit_term_pat, tm):
-                return tm[-1], make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
+                return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
             else:
-                return 'real', make_int_or_float(tm)  # e.g., ('real', -3.1)
+                return 'real', utils.make_int_or_float(tm)  # e.g., ('real', -3.1)
 
         def maybe_add_coefficient(tm):
             """If a term consists of a single unit (i, j, k), then put
@@ -569,11 +590,14 @@ class Zi:
 
         return list(qdict.values())
 
-class SetScalarMult(SetClassVariable):
+class SetScalarMult(utils.SetClassVariable):
+    """A context manager that, on entry, stores the current value of
+    scalar_mult, and then sets it to the input value. On exit, it restores
+    the value to the one that was saved on entry."""
 
     def __init__(self, new_value):
         super().__init__(Zi.scalar_mult, new_value)
 
     def __enter__(self):
         super().__enter__()
-        print(f"NOTE: Scalar Multiplication set to {self.new_value}")
+        print(f"\nNOTE: Scalar Multiplication set to {self.new_value}")

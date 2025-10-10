@@ -87,7 +87,7 @@ class TestZi(TestCase):
         self.assertEqual(q1.hamilton_product(q2), q1 * q2)
         self.assertEqual(q2.hamilton_product(q1), q2 * q1)
         # Mult by a real number. Scalar_mult setting shouldn't matter.
-        self.assertTrue(Zi.scalar_mult())
+        self.assertFalse(Zi.scalar_mult())
         with SetScalarMult(True):
             self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
             self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
@@ -95,7 +95,7 @@ class TestZi(TestCase):
         with SetScalarMult(False):
             self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
             self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        self.assertTrue(Zi.scalar_mult())
+        self.assertFalse(Zi.scalar_mult())
 
     def test_octonion(self):
         q1 = Zi(Zi(10, -7), Zi(-10, -2))
