@@ -342,11 +342,23 @@ class Zi:
         That is, the re & im parts are essentially quaternions."""
         return self.order() == 3
 
+    # def to_array(self):
+    #     if isinstance(self.__re, (float, int)) and isinstance(self.__im, (float, int)):
+    #         return [self.__re, self.__im]
+    #     elif isinstance(self.__re, Zi) and isinstance(self.__im, Zi):
+    #         return [self.__re.to_array(), self.__im.to_array()]
+    #     else:
+    #         raise Exception(f"Cannot create an array from {self}")
+
     def to_array(self):
-        if isinstance(self.__re, (float, int)) and isinstance(self.__im, (float, int)):
-            return [self.__re, self.__im]
-        elif isinstance(self.__re, Zi) and isinstance(self.__im, Zi):
-            return [self.__re.to_array(), self.__im.to_array()]
+        """Return an array of arrays representing the Zi of Zi's.
+        For example, Zi(1, 2).to_array() returns [1, 2], and
+        Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
+        re, im = self
+        if isinstance(re, (float, int)) and isinstance(im, (float, int)):
+            return [re, im]
+        elif isinstance(re, Zi) and isinstance(im, Zi):
+            return [re.to_array(), im.to_array()]
         else:
             raise Exception(f"Cannot create an array from {self}")
 
@@ -593,7 +605,7 @@ class Zi:
 class SetScalarMult(utils.SetClassVariable):
     """A context manager that, on entry, stores the current value of
     scalar_mult, and then sets it to the input value. On exit, it restores
-    the value to the one that was saved on entry."""
+    the current value."""
 
     def __init__(self, new_value):
         super().__init__(Zi.scalar_mult, new_value)
