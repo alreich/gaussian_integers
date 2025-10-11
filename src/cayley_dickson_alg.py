@@ -30,7 +30,7 @@ class Zi:
         # re is a complex, and im is None, a complex, or a Zi
 
         elif isinstance(re, complex):
-            if im is None:  #
+            if im is None:
                 self.__re = round(re.real)
                 self.__im = round(re.imag)
             elif isinstance(im, (complex, Zi)):
