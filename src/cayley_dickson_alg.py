@@ -5,80 +5,138 @@ from math import sqrt
 from numbers import Number
 import regex
 import generic_utils as utils
+from abc import ABC  #, abstractmethod
 
-class Zi:
+class CayleyDicksonBase(ABC):
+
+    def __init__(self, real=None, imag=None):
+        self._re = real
+        self._im = imag
+
+    @property
+    def real(self):
+        return self._re
+
+    @property
+    def imag(self):
+        return self._im
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.real}, {self.imag})"
+
+    def __hash__(self):
+        return hash((self.real, self.imag, type(self)))
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, index):
+        if isinstance(index, int):
+            if index == 0:
+                return self.real
+            elif index == 1:
+                return self.imag
+            else:
+                raise IndexError(f"Index {index} out of range")
+        else:
+            raise TypeError(f"Index {index} must be a non-negative integer")
+
+    def __iter__(self):
+        return iter((self.real, self.imag))
+
+    def __eq__(self, other):
+        if type(self) == type(other):
+            return self.real == other.real and self.imag == other.imag
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+
+class Zi(CayleyDicksonBase):
     """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
     and pairs of Quaternion integers (Octonion Integers), etc."""
 
     __SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
 
-    def __init__(self, re=None, im=None):
+    def __init__(self, real=None, imag=None):
 
         # --------------------------------------------------------
-        # re is a float or int, and im is a float, int, or None
+        # real is a float or int, and imag is a float, int, or None
 
-        if isinstance(re, (float, int)):
-            self.__re = round(re)
-            if im is None:
-                self.__im = 0
-            elif isinstance(im, (float, int)):
-                self.__im = round(im)
+        if isinstance(real, (float, int)):
+            re = round(real)
+            if imag is None:
+                im = 0
+            elif isinstance(imag, (float, int)):
+                im = round(imag)
             else:
-                raise Exception(f"Inputs incompatible: {re} and {im}")
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+            super().__init__(re, im)
 
         # --------------------------------------------------------
-        # re is a complex, and im is None, a complex, or a Zi
+        # real is a complex, and imag is None, a complex, or a Zi
 
-        elif isinstance(re, complex):
-            if im is None:
-                self.__re = round(re.real)
-                self.__im = round(re.imag)
-            elif isinstance(im, (complex, Zi)):
-                self.__re = Zi(re)
-                self.__im = Zi(im)
+        elif isinstance(real, complex):
+            if imag is None:
+                re = round(real.real)
+                im = round(real.imag)
+            elif isinstance(imag, (complex, Zi)):
+                re = Zi(real)
+                im = Zi(imag)
             else:
-                raise Exception(f"Inputs incompatible: {re} and {im}")
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+            super().__init__(re, im)
 
         # --------------------------------------------------------
-        # re is a Zi, and im is None, a complex, or a Zi
+        # real is a Zi, and imag is None, a complex, or a Zi
 
-        elif isinstance(re, Zi):
-            if im is None:
-                self.__re = re.real
-                self.__im = re.imag
-            elif isinstance(im, (complex, Zi)):
-                self.__re = Zi(re)
-                self.__im = Zi(im)
+        elif isinstance(real, Zi):
+            if imag is None:
+                re = real.real
+                im = real.imag
+            elif isinstance(imag, (complex, Zi)):
+                re = Zi(real)
+                im = Zi(imag)
             else:
-                raise Exception(f"Inputs incompatible: {re} and {im}")
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+            super().__init__(re, im)
 
         # --------------------------------------------------------
-        # re is a list or tuple of numbers with length equal to a
-        # power of 2, and im is None, or it is a tuple or list
-        # similar to the one input for re.
-        elif isinstance(re, (tuple, list)):
-            z = Zi.from_array(re)
-            if im is None:
-                self.__re = z.real
-                self.__im = z.imag
-            elif isinstance(im, (tuple, list)) and len(im) == len(re):
-                w = Zi.from_array(im)
-                self.__re = z
-                self.__im = w
+        # real is a list or tuple of numbers with length equal to a
+        # power of 2, and imag is None, or it is a tuple or list
+        # similar to the one input for real.
+
+        elif isinstance(real, (tuple, list)):
+            z = Zi.from_array(real)
+            if imag is None:
+                re = z.real
+                im = z.imag
+            elif isinstance(imag, (tuple, list)) and len(imag) == len(real):
+                w = Zi.from_array(imag)
+                re = z
+                im = w
             else:
-                raise Exception(f"Inputs incompatible: {re} and {im}")
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+            super().__init__(re, im)
 
         # --------------------------------------------------------
-        # Both re and im are None
+        # Both real and imag are None
 
-        elif re is None:
-            self.__re = 0
-            if im is None:
-                self.__im = 0
+        elif real is None:
+            re = 0
+            if imag is None:
+                im = 0
             else:
-                raise Exception(f"If re is None, then im must be None. But im = {im}")
+                raise Exception(f"If re is None, then im must be None. But im = {imag}")
+            super().__init__(re, im)
+
+        # --------------------------------------------------------
+        # Both real and imag are incompatible with the required input types
         else:
-            raise Exception(f"Unexpected combination of input types: {re} and {im}")
+            raise Exception(f"Unexpected combination of input types: {real} and {imag}")
 
     @classmethod
     def scalar_mult(cls, value=None):
@@ -96,9 +154,9 @@ class Zi:
         else:
             raise ValueError("scalar_mult must be a boolean value")
 
-    def __repr__(self):
-        """This representation method operates recursively"""
-        return f"{self.__class__.__name__}({repr(self.__re)}, {repr(self.__im)})"
+    # def __repr__(self):
+    #     """This representation method operates recursively"""
+    #     return f"{self.__class__.__name__}({repr(self.real)}, {repr(self.imag)})"
 
     def __str__(self):
         if isinstance(self, (float, int)):
@@ -108,23 +166,23 @@ class Zi:
         elif self.is_quaternion():
             return f"({self.quaternion_to_string()})"
         elif self.is_octonion():
-            return f"({str(self.__re)}, {str(self.__im)})"
+            return f"({str(self.real)}, {str(self.imag)})"
         else:
             return str(self.to_array())
 
     def __neg__(self):
-        return Zi(- self.__re, - self.__im)
+        return Zi(- self.real, - self.imag)
 
-    def __eq__(self, other) -> bool:
-        """Return True if this Zi equals other."""
-        return (self.real == other.real) and (self.imag == other.imag)
-
-    def __ne__(self, other) -> bool:
-        """Return True if this Zi does NOT equal other."""
-        return (self.real != other.real) or (self.imag != other.imag)
+    # def __eq__(self, other) -> bool:
+    #     """Return True if this Zi equals other."""
+    #     return (self.real == other.real) and (self.imag == other.imag)
+    #
+    # def __ne__(self, other) -> bool:
+    #     """Return True if this Zi does NOT equal other."""
+    #     return (self.real != other.real) or (self.imag != other.imag)
 
     def __add__(self, other):
-        return Zi(self.__re + other.real, self.__im + other.imag)
+        return Zi(self.real + other.real, self.imag + other.imag)
 
     def __radd__(self, other):
         """The reflected (swapped) operand for addition: other + self"""
@@ -135,7 +193,7 @@ class Zi:
         return Zi(self.real + other.real, self.imag + other.imag)
 
     def __sub__(self, other):
-        return Zi(self.__re - other.real, self.__im - other.imag)
+        return Zi(self.real - other.real, self.imag - other.imag)
 
     def __rsub__(self, other):
         """The reflected (swapped) operand for subtraction: other - self"""
@@ -200,7 +258,7 @@ class Zi:
 
     def __complex__(self) -> complex:
         if self.order() == 1:
-            return complex(self.__re, self.__im)
+            return complex(self.real, self.imag)
         else:
             raise Exception(f"Cannot create a complex from {self}")
 
@@ -228,9 +286,9 @@ class Zi:
             raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
-    def __hash__(self):
-        """Allow this Zi to be hashed."""
-        return hash((self.real, self.imag))
+    # def __hash__(self):
+    #     """Allow this Zi to be hashed."""
+    #     return hash((self.real, self.imag))
 
     def __abs__(self) -> float:
         """Returns the square root of the norm."""
@@ -248,38 +306,38 @@ class Zi:
         else:
             return self
 
-    def __len__(self):
-        return 2
+    # def __len__(self):
+    #     return 2
+    #
+    # def __getitem__(self, index):
+    #     if isinstance(index, int):
+    #         if index == 0:
+    #             return self.real
+    #         elif index == 1:
+    #             return self.imag
+    #         else:
+    #             raise IndexError(f"Index {index} out of range")
+    #     else:
+    #         raise TypeError(f"Index {index} must be a non-negative integer")
+    #
+    # def __iter__(self):
+    #     return iter((self.real, self.imag))
 
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            if index == 0:
-                return self.real
-            elif index == 1:
-                return self.imag
-            else:
-                raise IndexError(f"Index {index} out of range")
-        else:
-            raise TypeError(f"Index {index} must be a non-negative integer")
-
-    def __iter__(self):
-        return iter((self.real, self.imag))
-
-    @property
-    def real(self):
-        return self.__re
-
-    @property
-    def imag(self):
-        return self.__im
+    # @property
+    # def real(self):
+    #     return self.real
+    #
+    # @property
+    # def imag(self):
+    #     return self.imag
 
     @property
     def first(self):
         """Return the innermost first re value."""
-        if isinstance(self.__re, int):
-            return self.__re
-        elif isinstance(self.__re, Zi):
-            return self.__re.first
+        if isinstance(self.real, int):
+            return self.real
+        elif isinstance(self.real, Zi):
+            return self.real.first
         else:
             raise Exception(f"Cannot create a real from {self}")
 
@@ -289,7 +347,7 @@ class Zi:
 
     def conjugate(self):
         """This definition works recursively."""
-        return Zi(self.__re.conjugate(), - self.__im)
+        return Zi(self.real.conjugate(), - self.imag)
 
     def order(self):
         """Order is the number levels contained in the Zi.
@@ -300,7 +358,7 @@ class Zi:
                 return d
             else:
                 return aux(x.real, d + 1)
-        return aux(self.__re, 1)
+        return aux(self.real, 1)
 
     def dim(self):
         """Dimension is the total number of real numbers making up this Zi.
@@ -325,7 +383,7 @@ class Zi:
             raise ValueError(f"{d = }, is not an integer >= 1")
 
     def is_real(self):
-        return isinstance(self.__re, int) and self.__im == 0
+        return isinstance(self.real, int) and self.imag == 0
 
     def is_complex(self):
         """Return True if this Zi is essentially a complex number
