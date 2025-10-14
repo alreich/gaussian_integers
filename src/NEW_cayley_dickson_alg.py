@@ -1,6 +1,6 @@
 from abc import ABC  #, abstractmethod
 
-class CDalgBase(ABC):
+class CayleyDicksonBase(ABC):
 
     def __init__(self, real, imag):
         self._re = real
@@ -14,27 +14,54 @@ class CDalgBase(ABC):
     def imag(self):
         return self._im
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.real}, {self.imag})"
+
+    def __hash__(self):
+        return hash((self.real, self.imag, type(self)))
+
+
+class Zi(CayleyDicksonBase):
+
+    def __init__(self, real, imag):
+        if isinstance(real, (float, int)):
+            if imag is None:
+                super().__init__(round(real), 0)
+            elif isinstance(imag, (float, int)):
+                super().__init__(round(real), round(imag))
+            else:
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+        elif isinstance(real, complex):
+            if imag is None:
+                super().__init__(round(real.real), round(real.imag))
+            elif isinstance(imag, (complex, Zi)):
+                super().__init__(Zi(real, None), Zi(imag, None))
+            else:
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+        elif isinstance(real, Zi):
+            if imag is None:
+                super().__init__(real.real, real.imag)
+            elif isinstance(imag, (complex, Zi)):
+                super().__init__(Zi(real, None), Zi(imag, None))
+            else:
+                raise Exception(f"Inputs incompatible: {real} and {imag}")
+
+        elif real is None:
+            if imag is None:
+                super().__init__(0, 0)
+            else:
+                raise Exception(f"If re is None, then im must be None. But im = {imag}")
+        else:
+            raise Exception("We should never get to this point in the code")
+
     def __eq__(self, other):
-        if isinstance(other, CDalgBase):
+        if isinstance(other, Zi):
             return self.real == other.real and self.imag == other.imag
         else:
             return False
 
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.real}, {self.imag})"
-
-    def __hash__(self):
-        """Make objects hashable since they're immutable"""
-        return hash((self.real, self.imag, type(self)))
-
-
-class Zi(CDalgBase):
-
-    def __init__(self, real, imag):
-        super().__init__(round(real), round(imag))
 
     def __add__(self, other):
         if isinstance(other, Zi):
@@ -49,7 +76,7 @@ class Zi(CDalgBase):
             raise TypeError("Can only subtract Zi objects")
 
 
-class Qi(CDalgBase):
+class Qi(CayleyDicksonBase):
 
     def __init__(self, real, imag):
         super().__init__(float(real), float(imag))
