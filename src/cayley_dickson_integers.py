@@ -409,17 +409,17 @@ class Zi(CayleyDicksonBase):
     #     else:
     #         raise Exception(f"Cannot create an array from {self}")
 
-    def to_array(self):
-        """Return an array of arrays representing the Zi of Zi's.
-        For example, Zi(1, 2).to_array() returns [1, 2], and
-        Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
-        re, im = self
-        if isinstance(re, (float, int)) and isinstance(im, (float, int)):
-            return [re, im]
-        elif isinstance(re, Zi) and isinstance(im, Zi):
-            return [re.to_array(), im.to_array()]
-        else:
-            raise Exception(f"Cannot create an array from {self}")
+    # def to_array(self):
+    #     """Return an array of arrays representing the Zi of Zi's.
+    #     For example, Zi(1, 2).to_array() returns [1, 2], and
+    #     Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
+    #     re, im = self
+    #     if isinstance(re, (float, int)) and isinstance(im, (float, int)):
+    #         return [re, im]
+    #     elif isinstance(re, Zi) and isinstance(im, Zi):
+    #         return [re.to_array(), im.to_array()]
+    #     else:
+    #         raise Exception(f"Cannot create an array from {self}")
 
     @staticmethod
     def from_array(arr):
@@ -676,8 +676,26 @@ class SetScalarMult(utils.SetClassVariable):
 # Example usage and testing:
 if __name__ == "__main__":
 
-    print("\n=== Zi and Qi Demo ===\n")
+    print("\n=== Zi Demo ===\n")
 
-    print(f"{Zi(0, 0) = }")
+    print(f"{Zi() = }")
+    print(f"{Zi(1) = }")
+    print(f"{Zi.zero() = }")
+    print(f"{Zi.eye() = }")
+    print(f"{Zi.two() = }")
+    print(f"{Zi(2.3, 3.8) = }")
+    print(f"{Zi(-2.3, 3.8) = }")
+    print(f"{Zi(2.3, -3.8) = }")
+    print(f"{Zi(-2.3, -3.8) = }")
+    print(f"{Zi(2.3, 4) = }")
+    print(f"{Zi(-2.3, 4) = }")
+    print(f"{Zi(2, 3.8) = }")
+    print(f"{Zi(2, -3.8) = }")
+    print(f"{Zi(2.3) = }")
+    print(f"{Zi(2) = }")
+    print(f"{Zi((2.3 - 3.7j)) = }")
+    print(f"{Zi(-3.3j) = }")
+    print(f"{Zi(-3.3j).norm = }")
+    print(f"{Zi.two().norm = }")
 
     print("\n=== End of Demo ===\n")

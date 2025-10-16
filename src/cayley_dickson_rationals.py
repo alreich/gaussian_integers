@@ -29,25 +29,30 @@ class Qi(CayleyDicksonBase):
 
     __max_denominator = 1_000_000
 
-    def __init__(self, real=Fraction(0, 1), imag=Fraction(0, 1)):
+    def __init__(self, real=None, imag=None):
 
         if isinstance(real, Fraction):
-            self.__re = real
+            re = real
         elif isinstance(real, (str, int, float)):
-            self.__re = Fraction(real).limit_denominator(self.__max_denominator)
+            re = Fraction(real).limit_denominator(self.__max_denominator)
         elif isinstance(real, (complex, Zi)):
-            self.__re = Fraction(real.real).limit_denominator(self.__max_denominator)
+            re = Fraction(real.real).limit_denominator(self.__max_denominator)
+        elif real is None:
+            re = 0
         else:
             raise TypeError(f"{real} is not a supported type")
 
         if isinstance(real, (complex, Zi)):
-            self.__im = Fraction(real.imag).limit_denominator(self.__max_denominator)
+            im = Fraction(real.imag).limit_denominator(self.__max_denominator)
         elif isinstance(imag, Fraction):
-            self.__im = imag
+            im = imag
         elif isinstance(imag, (str, int, float)):
-            self.__im = Fraction(imag).limit_denominator(self.__max_denominator)
+            im = Fraction(imag).limit_denominator(self.__max_denominator)
+        elif imag is None:
+            im = 0
         else:
             raise TypeError(f"{imag} is not a supported type")
+        super().__init__(re, im)
 
     @classmethod
     def max_denominator(cls):
@@ -61,22 +66,22 @@ class Qi(CayleyDicksonBase):
         else:
             raise ValueError("max_denominator must be > 1")
 
-    @property
-    def real(self) -> Fraction:
-        return self.__re
-
-    @property
-    def imag(self) -> Fraction:
-        return self.__im
+    # @property
+    # def real(self) -> Fraction:
+    #     return self.__re
+    #
+    # @property
+    # def imag(self) -> Fraction:
+    #     return self.__im
 
     # def __repr__(self):
     #     return f"Qi({repr(str(self.real))}, {repr(str(self.imag))})"
 
-    def __str__(self):
-        if self.imag < 0:
-            return f"({self.real}{self.imag}j)"
-        else:
-            return f"({self.real}+{self.imag}j)"
+    # def __str__(self):
+    #     if self.imag < 0:
+    #         return f"({self.real}{self.imag}j)"
+    #     else:
+    #         return f"({self.real}+{self.imag}j)"
 
     @gaussian_rational
     def __add__(self, other):
@@ -247,3 +252,26 @@ class Qi(CayleyDicksonBase):
             return Qi(sign + re, '-' + im)
         else:
             raise ValueError(f"Can't parse {qi_str}")
+
+if __name__ == "__main__":
+    print("=== Qi Demo ===\n")
+
+    print(f"{Qi() = }")
+    print(f"{Qi(1) = }")
+    # print(f"{Qi.zero() = }")
+    # print(f"{Qi.eye() = }")
+    # print(f"{Qi.two() = }")
+    print(f"{Qi(2.5, 3.75) = }")
+    print(f"{Qi(-2.25, 3.75) = }")
+    print(f"{Qi(2.25, -3.75) = }")
+    print(f"{Qi(-2.25, -3.75) = }")
+    print(f"{Qi(2.25, 4) = }")
+    print(f"{Qi(-2.25, 4) = }")
+    print(f"{Qi(2, 3.75) = }")
+    print(f"{Qi(2, -3.75) = }")
+    print(f"{Qi(2.25) = }")
+    print(f"{Qi(2) = }")
+    print(f"{Qi((2.25 - 3.75j)) = }")
+    print(f"{Qi(-3.25j) = }")
+
+    print("\n=== End of Demo ===\n")

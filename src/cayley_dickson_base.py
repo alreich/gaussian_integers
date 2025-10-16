@@ -1,7 +1,11 @@
-from abc import ABC  #, abstractmethod
+from abc import ABC, abstractmethod
 
 class CayleyDicksonBase(ABC):
-    """The base class for subclasses the implement the Cayley-Dickson construction."""
+    """An Abstract Base Class (ABC) for subclasses that implement the Cayley-Dickson construction.
+    This class cannot be instantiated directly. All instances of this class are immutable.
+    Also, all instances of this class have only TWO components, each one consisting of a number
+    of some type (e.g., integer, Fraction) or another instance of CayleyDicksonBase subclass.
+    """
 
     def __init__(self, real=None, imag=None):
         self._re = real
@@ -46,3 +50,59 @@ class CayleyDicksonBase(ABC):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def to_array(self):
+        re, im = self
+        if isinstance(re, (float, int)) and isinstance(im, (float, int)):
+            return [re, im]
+        elif isinstance(re, CayleyDicksonBase) and isinstance(im, CayleyDicksonBase):
+            return [re.to_array(), im.to_array()]
+        else:
+            raise Exception(f"Cannot create an array from {self}")
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __add__(self, other):
+        pass
+
+    @abstractmethod
+    def __sub__(self, other):
+        pass
+
+    @abstractmethod
+    def __mul__(self, other):
+        pass
+
+    @abstractmethod
+    def __pow__(self, n: int):
+        pass
+
+    @abstractmethod
+    def __abs__(self):
+        pass
+
+    @abstractmethod
+    def __neg__(self):
+        pass
+
+    @abstractmethod
+    def __pos__(self):
+        pass
+
+    @abstractmethod
+    def __norm__(self):
+        pass
+
+    @abstractmethod
+    def from_array(self, array):
+        pass
+
+    @abstractmethod
+    def order(self) -> int:
+        pass
+
+
+
