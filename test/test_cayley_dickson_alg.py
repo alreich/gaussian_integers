@@ -1,5 +1,5 @@
 from unittest import TestCase
-from cayley_dickson_alg import Zi, SetScalarMult
+from cayley_dickson_integers import Zi, SetScalarMult
 from random import seed
 
 class TestZi(TestCase):
@@ -14,8 +14,8 @@ class TestZi(TestCase):
     def test_constructor(self):
         seed(42)
         # self.assertEqual(Zi(), Zi(77777777, 77777777))
-        self.assertEqual(Zi(), Zi(0, 0))
-        self.assertEqual(Zi(1), Zi(1, 0))
+        self.assertEqual(Zi(0, 0), Zi(0, 0))
+        self.assertEqual(Zi(1, 0), Zi(1, 0))
         self.assertEqual(Zi.eye(), Zi(0, 1))
         self.assertEqual(Zi.two(), Zi(1, 1))
         self.assertEqual(Zi(2.3, 3.8), Zi(2, 4))

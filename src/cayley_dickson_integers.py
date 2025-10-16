@@ -1,63 +1,64 @@
-# This is Work-In-Progress
+# Cayley-Dickson Algebra with integer components
 
 from random import randint
 from math import sqrt
 from numbers import Number
 import regex
+
 import generic_utils as utils
-from abc import ABC  #, abstractmethod
+from cayley_dickson_base import CayleyDicksonBase
 
-class CayleyDicksonBase(ABC):
+# from abc import ABC  #, abstractmethod
 
-    def __init__(self, real=None, imag=None):
-        self._re = real
-        self._im = imag
-
-    @property
-    def real(self):
-        return self._re
-
-    @property
-    def imag(self):
-        return self._im
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.real}, {self.imag})"
-
-    def __hash__(self):
-        return hash((self.real, self.imag, type(self)))
-
-    def __len__(self):
-        return 2
-
-    def __getitem__(self, index):
-        if isinstance(index, int):
-            if index == 0:
-                return self.real
-            elif index == 1:
-                return self.imag
-            else:
-                raise IndexError(f"Index {index} out of range")
-        else:
-            raise TypeError(f"Index {index} must be a non-negative integer")
-
-    def __iter__(self):
-        return iter((self.real, self.imag))
-
-    def __eq__(self, other):
-        if type(self) == type(other):
-            return self.real == other.real and self.imag == other.imag
-        else:
-            return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-
+# class CayleyDicksonBase(ABC):
+#     """The base class for subclasses the implement the Cayley-Dickson construction."""
+#
+#     def __init__(self, real=None, imag=None):
+#         self._re = real
+#         self._im = imag
+#
+#     @property
+#     def real(self):
+#         return self._re
+#
+#     @property
+#     def imag(self):
+#         return self._im
+#
+#     def __repr__(self):
+#         return f"{self.__class__.__name__}({self.real}, {self.imag})"
+#
+#     def __hash__(self):
+#         return hash((self.real, self.imag, type(self)))
+#
+#     def __len__(self):
+#         return 2
+#
+#     def __getitem__(self, index):
+#         if isinstance(index, int):
+#             if index == 0:
+#                 return self.real
+#             elif index == 1:
+#                 return self.imag
+#             else:
+#                 raise IndexError(f"Index {index} out of range")
+#         else:
+#             raise TypeError(f"Index {index} must be a non-negative integer")
+#
+#     def __iter__(self):
+#         return iter((self.real, self.imag))
+#
+#     def __eq__(self, other):
+#         if type(self) == type(other):
+#             return self.real == other.real and self.imag == other.imag
+#         else:
+#             return False
+#
+#     def __ne__(self, other):
+#         return not self.__eq__(other)
 
 class Zi(CayleyDicksonBase):
-    """Pairs of integers (Gaussian Integers), pairs of Gaussian integers (Quaternion Integers),
-    and pairs of Quaternion integers (Octonion Integers), etc."""
+    """Cayley-Dickson Algebra with integer components"""
 
     __SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
 
@@ -671,3 +672,12 @@ class SetScalarMult(utils.SetClassVariable):
     def __enter__(self):
         super().__enter__()
         print(f"\nNOTE: Scalar Multiplication set to {self.new_value}")
+
+# Example usage and testing:
+if __name__ == "__main__":
+
+    print("\n=== Zi and Qi Demo ===\n")
+
+    print(f"{Zi(0, 0) = }")
+
+    print("\n=== End of Demo ===\n")
