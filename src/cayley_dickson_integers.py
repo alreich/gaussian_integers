@@ -608,6 +608,10 @@ if __name__ == "__main__":
     print(f"{Zi(-3.3j).norm = }")
     print(f"{Zi.two().norm = }")
 
+    print(f"{str(Zi(2, 3)) = }")
     print(f"{Zi(Zi(1, 2), Zi(3, 4)) = }")
+    print(f"{str(Zi(Zi(1, 2), Zi(3, 4))) = }")
+    print(f"{Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4))) = }")
+    print(f"{str(Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4)))) = }")
 
     print("\n=== End of Demo ===\n")
