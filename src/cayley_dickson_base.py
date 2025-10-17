@@ -20,7 +20,7 @@ class CayleyDicksonBase(ABC):
         return self._im
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.real}, {self.imag})"
+        return f"{self.__class__.__name__}({repr(self.real)}, {repr(self.imag)})"
 
     def __hash__(self):
         return hash((self.real, self.imag, type(self)))
@@ -60,49 +60,49 @@ class CayleyDicksonBase(ABC):
         else:
             raise Exception(f"Cannot create an array from {self}")
 
-    @abstractmethod
-    def __str__(self):
-        pass
-
-    @abstractmethod
-    def __add__(self, other):
-        pass
-
-    @abstractmethod
-    def __sub__(self, other):
-        pass
-
-    @abstractmethod
-    def __mul__(self, other):
-        pass
-
-    @abstractmethod
-    def __pow__(self, n: int):
-        pass
-
-    @abstractmethod
-    def __abs__(self):
-        pass
-
-    @abstractmethod
-    def __neg__(self):
-        pass
-
-    @abstractmethod
-    def __pos__(self):
-        pass
-
-    @abstractmethod
-    def __norm__(self):
-        pass
-
-    @abstractmethod
-    def from_array(self, array):
-        pass
-
-    @abstractmethod
-    def order(self) -> int:
-        pass
+    # @abstractmethod
+    # def __str__(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def __add__(self, other):
+    #     pass
+    #
+    # @abstractmethod
+    # def __sub__(self, other):
+    #     pass
+    #
+    # @abstractmethod
+    # def __mul__(self, other):
+    #     pass
+    #
+    # @abstractmethod
+    # def __pow__(self, n: int):
+    #     pass
+    #
+    # @abstractmethod
+    # def __abs__(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def __neg__(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def __pos__(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def __norm__(self):
+    #     pass
+    #
+    # @abstractmethod
+    # def from_array(self, array):
+    #     pass
+    #
+    # @abstractmethod
+    # def order(self) -> int:
+    #     pass
 
 
 

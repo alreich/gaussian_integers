@@ -8,55 +8,6 @@ import regex
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
 
-# from abc import ABC  #, abstractmethod
-
-# class CayleyDicksonBase(ABC):
-#     """The base class for subclasses the implement the Cayley-Dickson construction."""
-#
-#     def __init__(self, real=None, imag=None):
-#         self._re = real
-#         self._im = imag
-#
-#     @property
-#     def real(self):
-#         return self._re
-#
-#     @property
-#     def imag(self):
-#         return self._im
-#
-#     def __repr__(self):
-#         return f"{self.__class__.__name__}({self.real}, {self.imag})"
-#
-#     def __hash__(self):
-#         return hash((self.real, self.imag, type(self)))
-#
-#     def __len__(self):
-#         return 2
-#
-#     def __getitem__(self, index):
-#         if isinstance(index, int):
-#             if index == 0:
-#                 return self.real
-#             elif index == 1:
-#                 return self.imag
-#             else:
-#                 raise IndexError(f"Index {index} out of range")
-#         else:
-#             raise TypeError(f"Index {index} must be a non-negative integer")
-#
-#     def __iter__(self):
-#         return iter((self.real, self.imag))
-#
-#     def __eq__(self, other):
-#         if type(self) == type(other):
-#             return self.real == other.real and self.imag == other.imag
-#         else:
-#             return False
-#
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
-
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
 
@@ -155,10 +106,6 @@ class Zi(CayleyDicksonBase):
         else:
             raise ValueError("scalar_mult must be a boolean value")
 
-    # def __repr__(self):
-    #     """This representation method operates recursively"""
-    #     return f"{self.__class__.__name__}({repr(self.real)}, {repr(self.imag)})"
-
     def __str__(self):
         if isinstance(self, (float, int)):
             return self
@@ -173,14 +120,6 @@ class Zi(CayleyDicksonBase):
 
     def __neg__(self):
         return Zi(- self.real, - self.imag)
-
-    # def __eq__(self, other) -> bool:
-    #     """Return True if this Zi equals other."""
-    #     return (self.real == other.real) and (self.imag == other.imag)
-    #
-    # def __ne__(self, other) -> bool:
-    #     """Return True if this Zi does NOT equal other."""
-    #     return (self.real != other.real) or (self.imag != other.imag)
 
     def __add__(self, other):
         return Zi(self.real + other.real, self.imag + other.imag)
@@ -287,10 +226,6 @@ class Zi(CayleyDicksonBase):
             raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
-    # def __hash__(self):
-    #     """Allow this Zi to be hashed."""
-    #     return hash((self.real, self.imag))
-
     def __abs__(self) -> float:
         """Returns the square root of the norm."""
         return sqrt(self.norm)
@@ -306,31 +241,6 @@ class Zi(CayleyDicksonBase):
             return Zi(round(self.real), round(self.imag))
         else:
             return self
-
-    # def __len__(self):
-    #     return 2
-    #
-    # def __getitem__(self, index):
-    #     if isinstance(index, int):
-    #         if index == 0:
-    #             return self.real
-    #         elif index == 1:
-    #             return self.imag
-    #         else:
-    #             raise IndexError(f"Index {index} out of range")
-    #     else:
-    #         raise TypeError(f"Index {index} must be a non-negative integer")
-    #
-    # def __iter__(self):
-    #     return iter((self.real, self.imag))
-
-    # @property
-    # def real(self):
-    #     return self.real
-    #
-    # @property
-    # def imag(self):
-    #     return self.imag
 
     @property
     def first(self):
@@ -402,24 +312,24 @@ class Zi(CayleyDicksonBase):
         return self.order() == 3
 
     # def to_array(self):
-    #     if isinstance(self.__re, (float, int)) and isinstance(self.__im, (float, int)):
-    #         return [self.__re, self.__im]
-    #     elif isinstance(self.__re, Zi) and isinstance(self.__im, Zi):
-    #         return [self.__re.to_array(), self.__im.to_array()]
+    #     if isinstance(self.real, (float, int)) and isinstance(self.imag, (float, int)):
+    #         return [self.real, self.imag]
+    #     elif isinstance(self.real, Zi) and isinstance(self.imag, Zi):
+    #         return [self.real.to_array(), self.imag.to_array()]
     #     else:
     #         raise Exception(f"Cannot create an array from {self}")
 
-    # def to_array(self):
-    #     """Return an array of arrays representing the Zi of Zi's.
-    #     For example, Zi(1, 2).to_array() returns [1, 2], and
-    #     Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
-    #     re, im = self
-    #     if isinstance(re, (float, int)) and isinstance(im, (float, int)):
-    #         return [re, im]
-    #     elif isinstance(re, Zi) and isinstance(im, Zi):
-    #         return [re.to_array(), im.to_array()]
-    #     else:
-    #         raise Exception(f"Cannot create an array from {self}")
+    def to_array(self):
+        """Return an array of arrays representing the Zi of Zi's.
+        For example, Zi(1, 2).to_array() returns [1, 2], and
+        Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
+        re, im = self
+        if isinstance(re, (float, int)) and isinstance(im, (float, int)):
+            return [re, im]
+        elif isinstance(re, Zi) and isinstance(im, Zi):
+            return [re.to_array(), im.to_array()]
+        else:
+            raise Exception(f"Cannot create an array from {self}")
 
     @staticmethod
     def from_array(arr):
@@ -697,5 +607,7 @@ if __name__ == "__main__":
     print(f"{Zi(-3.3j) = }")
     print(f"{Zi(-3.3j).norm = }")
     print(f"{Zi.two().norm = }")
+
+    print(f"{Zi(Zi(1, 2), Zi(3, 4)) = }")
 
     print("\n=== End of Demo ===\n")
