@@ -7,7 +7,7 @@ import regex
 
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
-from cayley_dickson_rationals import Qi, gaussian_rational
+# from cayley_dickson_rationals import Qi, gaussian_rational
 
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
@@ -179,21 +179,23 @@ class Zi(CayleyDicksonBase):
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
 
-    @gaussian_rational
+    # @gaussian_rational
     def __truediv__(self, other):  # self / other
         """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
 
         The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
         """
-        return Qi(self) / other  # Despite the Qi, this could still output a Zi
+        # return Qi(self) / other  # Despite the Qi, this could still output a Zi
+        return complex(self) / other
 
-    @gaussian_rational
+    # @gaussian_rational
     def __rtruediv__(self, other):  # other / self
         """Divide pother by self, exactly, and return the resulting Gaussian rational or integer.
 
         The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
         """
-        return other / Qi(self)
+        # return other / Qi(self)
+        return other / complex(self)
 
     def __floordiv__(self, other):  # self // other
         """Implements the // operator using 'round', instead of 'floor'.
@@ -213,17 +215,17 @@ class Zi(CayleyDicksonBase):
         else:
             raise TypeError(f"{other} is not a supported type.")
 
-    def __mod__(self, other):
-        """Implements the % operator.
-
-        Returns the remainder of the result from modified_divmod
-        """
-        if isinstance(other, (int, float, complex)):
-            oth = Zi(other)
-        else:
-            oth = other
-        _, r = Zi.modified_divmod(self, oth)
-        return r
+    # def __mod__(self, other):
+    #     """Implements the % operator.
+    #
+    #     Returns the remainder of the result from modified_divmod
+    #     """
+    #     if isinstance(other, (int, float, complex)):
+    #         oth = Zi(other)
+    #     else:
+    #         oth = other
+    #     _, r = Zi.modified_divmod(self, oth)
+    #     return r
 
     def __complex__(self) -> complex:
         if self.order() == 1:
