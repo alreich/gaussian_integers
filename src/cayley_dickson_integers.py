@@ -7,11 +7,10 @@ import regex
 
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
+from cayley_dickson_rationals import Qi, gaussian_rational
 
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
-
-    __SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
 
     def __init__(self, real=None, imag=None):
 
@@ -89,22 +88,6 @@ class Zi(CayleyDicksonBase):
         # Both real and imag are incompatible with the required input types
         else:
             raise Exception(f"Unexpected combination of input types: {real} and {imag}")
-
-    @classmethod
-    def scalar_mult(cls, value=None):
-        """Determines how multiplication of two Zi's of different orders works.
-        If scalar_mult is True, then the lower order Zi is treated like a scalar
-        w.r.t. the higher order Zi, otherwise, prior to multiplication, the lower
-        order Zi is cast to the same order as the higher order Zi.
-        Calling scalar_mult() without an argument will simply return it's current
-        value, which by default is False."""
-        if value is None:
-            return cls.__SCALAR_MULTIPLICATION
-        elif isinstance(value, bool):
-            cls.__SCALAR_MULTIPLICATION = value
-            return cls.__SCALAR_MULTIPLICATION
-        else:
-            raise ValueError("scalar_mult must be a boolean value")
 
     def __str__(self):
         if isinstance(self, (float, int)):
@@ -196,6 +179,52 @@ class Zi(CayleyDicksonBase):
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
 
+    @gaussian_rational
+    def __truediv__(self, other):  # self / other
+        """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
+
+        The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
+        """
+        return Qi(self) / other  # Despite the Qi, this could still output a Zi
+
+    @gaussian_rational
+    def __rtruediv__(self, other):  # other / self
+        """Divide pother by self, exactly, and return the resulting Gaussian rational or integer.
+
+        The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
+        """
+        return other / Qi(self)
+
+    def __floordiv__(self, other):  # self // other
+        """Implements the // operator using 'round', instead of 'floor'.
+
+        Returns the closest integer approximation to the quotient, self / other,
+        as a Zi, by rounding the real and imag parts after division, not flooring.
+        'other' can be an int, float, complex, or Zi.
+        """
+        if isinstance(other, (int, float, complex, Zi)):
+            return Zi(complex(self) / complex(other))
+        else:
+            raise TypeError(f"{other} is not a supported type.")
+
+    def __rfloordiv__(self, other):  # other // self
+        if isinstance(other, (int, float, complex)):
+            return Zi(complex(other) / complex(self))
+        else:
+            raise TypeError(f"{other} is not a supported type.")
+
+    def __mod__(self, other):
+        """Implements the % operator.
+
+        Returns the remainder of the result from modified_divmod
+        """
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        else:
+            oth = other
+        _, r = Zi.modified_divmod(self, oth)
+        return r
+
     def __complex__(self) -> complex:
         if self.order() == 1:
             return complex(self.real, self.imag)
@@ -242,39 +271,9 @@ class Zi(CayleyDicksonBase):
         else:
             return self
 
-    @property
-    def first(self):
-        """Return the innermost first re value."""
-        if isinstance(self.real, int):
-            return self.real
-        elif isinstance(self.real, Zi):
-            return self.real.first
-        else:
-            raise Exception(f"Cannot create a real from {self}")
-
-    @property
-    def norm(self):
-        return (self * self.conjugate()).first
-
     def conjugate(self):
         """This definition works recursively."""
         return Zi(self.real.conjugate(), - self.imag)
-
-    def order(self):
-        """Order is the number levels contained in the Zi.
-        That is, a Zi made up of two integers has order 1, and a Zi
-        made up of two other Zi's, each of order n, has order n+1."""
-        def aux(x, d):
-            if isinstance(x, int):
-                return d
-            else:
-                return aux(x.real, d + 1)
-        return aux(self.real, 1)
-
-    def dim(self):
-        """Dimension is the total number of real numbers making up this Zi.
-        So, if n is its order, then its dimension is 2^n."""
-        return 2 ** self.order()
 
     def cast(self, d):
         """Return a Zi that is equivalent to this one, but has a higher order, d.
@@ -292,32 +291,6 @@ class Zi(CayleyDicksonBase):
                     raise Exception(f"Should not reach this line, {self = }, {d = }")
         else:
             raise ValueError(f"{d = }, is not an integer >= 1")
-
-    def is_real(self):
-        return isinstance(self.real, int) and self.imag == 0
-
-    def is_complex(self):
-        """Return True if this Zi is essentially a complex number
-        That is, the re & im parts are numbers, not other Zis."""
-        return self.order() == 1
-
-    def is_quaternion(self):
-        """Return True if this Zi is essentially a quaternion
-        That is, the re & im parts are essentially complex numbers."""
-        return self.order() == 2
-
-    def is_octonion(self):
-        """Return True if this Zi is essentially an octonion
-        That is, the re & im parts are essentially quaternions."""
-        return self.order() == 3
-
-    # def to_array(self):
-    #     if isinstance(self.real, (float, int)) and isinstance(self.imag, (float, int)):
-    #         return [self.real, self.imag]
-    #     elif isinstance(self.real, Zi) and isinstance(self.imag, Zi):
-    #         return [self.real.to_array(), self.imag.to_array()]
-    #     else:
-    #         raise Exception(f"Cannot create an array from {self}")
 
     def to_array(self):
         """Return an array of arrays representing the Zi of Zi's.

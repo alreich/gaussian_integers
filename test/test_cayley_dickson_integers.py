@@ -5,15 +5,10 @@ from random import seed
 class TestZi(TestCase):
 
     def setUp(self) -> None:
-        self.c1 = Zi(4, 5)
-        self.c1_conj = Zi(4, -5)
-        self.c2 = Zi(1, -2)
-        self.c1_x_c2 = Zi(14, -3)  # c1 * c2
-        self.c4 = Zi(4, 12)
+        pass
 
     def test_constructor(self):
         seed(42)
-        # self.assertEqual(Zi(), Zi(77777777, 77777777))
         self.assertEqual(Zi(0, 0), Zi(0, 0))
         self.assertEqual(Zi(1, 0), Zi(1, 0))
         self.assertEqual(Zi.eye(), Zi(0, 1))

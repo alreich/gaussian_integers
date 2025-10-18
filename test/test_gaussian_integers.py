@@ -1,5 +1,6 @@
 from unittest import TestCase # TextTestRunner, defaultTestLoader
 from cayley_dickson_integers import Zi
+from cayley_dickson_rationals import Qi
 # from random import seed
 
 # from unittest import TestCase
@@ -63,20 +64,20 @@ class TestZi(TestCase):
         self.assertEqual(Zi(4, 5) * (1.9-1.1j), Zi(13, 6))
         self.assertEqual((1.9-1.1j) * Zi(4, 5), Zi(13, 6))
 
-    # def test_truediv(self):  # __truediv__ & __rtruediv__
-    #     self.assertEqual(Zi(4, 5) / Zi(1, -2), Qi('-6/5', '13/5'))
-    #     self.assertEqual(Zi(4, 5) / Zi(1, -2), Qi('-6/5', '13/5'))
-    #     self.assertEqual(Zi(4, 5) / (1.1 - 1.9j), Qi('-255/241', '655/241'))
-    #     self.assertEqual(Zi(4, 5) / (0.9 - 2.3j), Qi('-79/61', '137/61'))
-    #     self.assertEqual(complex(Zi(4, 5) / (0.9 - 2.3j)), (-1.2950819672131149 + 2.2459016393442623j))
-    #     self.assertEqual(complex(Zi(4, 5)) / (0.9 - 2.3j), (-1.2950819672131149 + 2.2459016393442623j))
-    #     self.assertEqual(Zi(4, 5) / 5, Qi('4/5', '1'))
-    #     self.assertEqual(Zi(4, 8) / 2, Zi(2, 4))
-    #     self.assertEqual(Zi(4, 5) / 5.3, Qi('40/53', '50/53'))
-    #     self.assertEqual((1 - 2j) / Zi(4, 5), Qi('-6/41', '-13/41'))
-    #     self.assertEqual(5.0 / Zi(4, 5), Qi('20/41', '-25/41'))
-    #     self.assertEqual(5 / Zi(4, 5), Qi('20/41', '-25/41'))
-    #
+    def test_truediv(self):  # __truediv__ & __rtruediv__
+        self.assertEqual(Zi(4, 5) / Zi(1, -2), Qi('-6/5', '13/5'))
+        self.assertEqual(Zi(4, 5) / Zi(1, -2), Qi('-6/5', '13/5'))
+        self.assertEqual(Zi(4, 5) / (1.1 - 1.9j), Qi('-255/241', '655/241'))
+        self.assertEqual(Zi(4, 5) / (0.9 - 2.3j), Qi('-79/61', '137/61'))
+        self.assertEqual(complex(Zi(4, 5) / (0.9 - 2.3j)), (-1.2950819672131149 + 2.2459016393442623j))
+        self.assertEqual(complex(Zi(4, 5)) / (0.9 - 2.3j), (-1.2950819672131149 + 2.2459016393442623j))
+        self.assertEqual(Zi(4, 5) / 5, Qi('4/5', '1'))
+        self.assertEqual(Zi(4, 8) / 2, Zi(2, 4))
+        self.assertEqual(Zi(4, 5) / 5.3, Qi('40/53', '50/53'))
+        self.assertEqual((1 - 2j) / Zi(4, 5), Qi('-6/41', '-13/41'))
+        self.assertEqual(5.0 / Zi(4, 5), Qi('20/41', '-25/41'))
+        self.assertEqual(5 / Zi(4, 5), Qi('20/41', '-25/41'))
+
     # def test_floordiv(self):  # __floordiv__ & __rfloordiv__
     #     self.assertEqual(self.c1_x_c2 // self.c1, self.c2)
     #     self.assertEqual(self.c1_x_c2 // self.c2, self.c1)
