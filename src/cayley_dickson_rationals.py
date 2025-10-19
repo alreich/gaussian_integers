@@ -119,12 +119,12 @@ class Qi(CayleyDicksonBase):
             return Zi(real_part, imag_part)
         # Otherwise, scalar-like (default) or cast-first multiplication
         elif m < n:
-            if Qi.__SCALAR_MULTIPLICATION:
+            if Qi.SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
                 return self * oth.cast(self.order())
         elif m > n:
-            if Qi.__SCALAR_MULTIPLICATION:
+            if Qi.SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
                 return self.cast(oth.order()) * oth

@@ -8,7 +8,7 @@ class CayleyDicksonBase(ABC):
     of some type (e.g., integer, Fraction) or another instance of CayleyDicksonBase subclass.
     """
 
-    __SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
+    SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
 
     def __init__(self, real=None, imag=None):
         self._re = real
@@ -66,10 +66,10 @@ class CayleyDicksonBase(ABC):
         Calling scalar_mult() without an argument will simply return it's current
         value, which by default is False."""
         if value is None:
-            return cls.__SCALAR_MULTIPLICATION
+            return cls.SCALAR_MULTIPLICATION
         elif isinstance(value, bool):
-            cls.__SCALAR_MULTIPLICATION = value
-            return cls.__SCALAR_MULTIPLICATION
+            cls.SCALAR_MULTIPLICATION = value
+            return cls.SCALAR_MULTIPLICATION
         else:
             raise ValueError("scalar_mult must be a boolean value")
 

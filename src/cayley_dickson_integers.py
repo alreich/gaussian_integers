@@ -154,12 +154,12 @@ class Zi(CayleyDicksonBase):
             return Zi(real_part, imag_part)
         # Otherwise, scalar-like (default) or cast-first multiplication
         elif m < n:
-            if Zi.__SCALAR_MULTIPLICATION:
+            if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
                 return self * oth.cast(self.order())
         elif m > n:
-            if Zi.__SCALAR_MULTIPLICATION:
+            if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
                 return self.cast(oth.order()) * oth
@@ -179,23 +179,21 @@ class Zi(CayleyDicksonBase):
         imag_part = a.conjugate() * d + c * b
         return Zi(real_part, imag_part)
 
-    # @gaussian_rational
-    def __truediv__(self, other):  # self / other
-        """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
-
-        The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
-        """
-        # return Qi(self) / other  # Despite the Qi, this could still output a Zi
-        return complex(self) / other
-
-    # @gaussian_rational
-    def __rtruediv__(self, other):  # other / self
-        """Divide pother by self, exactly, and return the resulting Gaussian rational or integer.
-
-        The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
-        """
-        # return other / Qi(self)
-        return other / complex(self)
+    # # @gaussian_rational
+    # def __truediv__(self, other):  # self / other
+    #     """Divide self by other, exactly, and return the resulting Gaussian rational or integer.
+    #
+    #     The divisor (other) is first cast into a Gaussian rational (Qi) prior to division.
+    #     """
+    #     return Qi(self) / other  # Despite the Qi, this could still output a Zi
+    #
+    # # @gaussian_rational
+    # def __rtruediv__(self, other):  # other / self
+    #     """Divide pother by self, exactly, and return the resulting Gaussian rational or integer.
+    #
+    #     The dividend (other) is first cast into a Gaussian rational (Qi) prior to division.
+    #     """
+    #     return other / Qi(self)
 
     def __floordiv__(self, other):  # self // other
         """Implements the // operator using 'round', instead of 'floor'.
