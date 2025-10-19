@@ -114,6 +114,7 @@ class Qi(CayleyDicksonBase):
         # If n == m, then Cayley-Dickson multiplication
         if n == m:
             a, b, c, d = self.real, self.imag, oth.real, oth.imag
+            # TODO: Explicitely code mu = -1
             real_part = a * c - d.conjugate() * b
             imag_part = d * a + b * c.conjugate()
             return Zi(real_part, imag_part)

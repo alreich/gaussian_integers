@@ -292,18 +292,6 @@ class Zi(CayleyDicksonBase):
         else:
             raise ValueError(f"{d = }, is not an integer >= 1")
 
-    def to_array(self):
-        """Return an array of arrays representing the Zi of Zi's.
-        For example, Zi(1, 2).to_array() returns [1, 2], and
-        Zi(Zi(1, 2), Zi(3, 4)).to_array() returns [[1, 2], [3, 4]]."""
-        re, im = self
-        if isinstance(re, (float, int)) and isinstance(im, (float, int)):
-            return [re, im]
-        elif isinstance(re, Zi) and isinstance(im, Zi):
-            return [re.to_array(), im.to_array()]
-        else:
-            raise Exception(f"Cannot create an array from {self}")
-
     @staticmethod
     def from_array(arr):
         flat_arr = utils.flatten(arr)

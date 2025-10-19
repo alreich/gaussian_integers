@@ -136,10 +136,6 @@ class CayleyDicksonBase(ABC):
         That is, the re & im parts are essentially quaternions."""
         return self.order() == 3
 
-    # @abstractmethod
-    # def __str__(self):
-    #     pass
-
     @abstractmethod
     def __add__(self, other):
         pass
@@ -152,6 +148,10 @@ class CayleyDicksonBase(ABC):
     def __mul__(self, other):
         pass
 
+    # @abstractmethod
+    # def __str__(self):
+    #     pass
+    #
     # @abstractmethod
     # def __pow__(self, n: int):
     #     pass
