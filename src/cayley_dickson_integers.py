@@ -322,6 +322,7 @@ class Zi(CayleyDicksonBase):
         else:
             raise ValueError(f"Cannot create a quaternion from {quat}")
 
+    # TODO: Print, or don't print, coefficients that are zero (0) based on a class variable setting
     def quaternion_to_string(self):
         unit_strs = ["", "i", "j", "k"]
         if self.is_quaternion():
