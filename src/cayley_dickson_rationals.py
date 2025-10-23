@@ -32,29 +32,84 @@ class Qi(CayleyDicksonBase):
     __max_denominator = 1_000_000
 
     def __init__(self, real=None, imag=None):
-
-        if isinstance(real, Fraction):
-            re = real
-        elif isinstance(real, (str, int, float)):
+        """Create a Cayley-Dickson element with rational components."""
+        if isinstance(real, (str, int, float)):
             re = Fraction(real).limit_denominator(self.__max_denominator)
+            if isinstance(imag, (str, int, float)):
+                im = Fraction(imag).limit_denominator(self.__max_denominator)
+            elif isinstance(imag, Fraction):
+                im = imag
+            elif imag is None:
+                im = 0
+            else:
+                raise TypeError(f"A str, int, or float real value is not compatible with imag={imag}")
+        elif isinstance(real, Fraction):
+            re = real
+            if isinstance(imag, (str, int, float)):
+                im = Fraction(imag).limit_denominator(self.__max_denominator)
+            elif isinstance(imag, Fraction):
+                im = imag
+            elif imag is None:
+                im = 0
+            else:
+                raise TypeError(f"A Fraction real value is not compatible with imag={imag}")
         elif isinstance(real, (complex, Zi)):
-            re = Fraction(real.real).limit_denominator(self.__max_denominator)
-        elif real is None:
+            if isinstance(imag, (complex, Zi)):
+                re = Qi(real)
+                im = Qi(imag)
+            elif isinstance(imag, Qi):
+                re = Qi(real)
+                im = imag
+            elif imag is None:
+                re = real.real
+                im = real.imag
+            else:
+                raise TypeError(f"A complex or Zi real value is not compatible with imag={imag}")
+        elif isinstance(real, Qi):
+            if isinstance(imag, (complex, Zi)):
+                re = real
+                im = Qi(imag)
+            elif isinstance(imag, Qi):
+                re = real
+                im = imag
+            elif imag is None:
+                re = real.real
+                im = real.imag
+            else:
+                raise TypeError(f"A Qi real value is not compatible with imag={imag}")
+        elif real is None and imag is None:
             re = 0
-        else:
-            raise TypeError(f"{real} is not a supported type")
-
-        if isinstance(real, (complex, Zi)):
-            im = Fraction(real.imag).limit_denominator(self.__max_denominator)
-        elif isinstance(imag, Fraction):
-            im = imag
-        elif isinstance(imag, (str, int, float)):
-            im = Fraction(imag).limit_denominator(self.__max_denominator)
-        elif imag is None:
             im = 0
         else:
-            raise TypeError(f"{imag} is not a supported type")
+            raise TypeError(f"real={real} is not a valid type.")
         super().__init__(re, im)
+
+    # def __init__(self, real=None, imag=None):
+    #
+    #     if isinstance(real, Fraction):
+    #         re = real
+    #     elif isinstance(real, (str, int, float)):
+    #         re = Fraction(real).limit_denominator(self.__max_denominator)
+    #     elif isinstance(real, (complex, Zi)):
+    #         re = Fraction(real.real).limit_denominator(self.__max_denominator)
+    #     elif real is None:
+    #         re = 0
+    #     else:
+    #         raise TypeError(f"{real} is not a supported type")
+    #
+    #     if isinstance(real, (complex, Zi)):
+    #         im = Fraction(real.imag).limit_denominator(self.__max_denominator)
+    #     elif isinstance(imag, Fraction):
+    #         im = imag
+    #     elif isinstance(imag, (str, int, float)):
+    #         im = Fraction(imag).limit_denominator(self.__max_denominator)
+    #     elif imag is None:
+    #         im = 0
+    #     else:
+    #         raise TypeError(f"{imag} is not a supported type")
+    #     super().__init__(re, im)
+
+    # TODO: Turn the following two max_denominator methods into one method
 
     @classmethod
     def max_denominator(cls):

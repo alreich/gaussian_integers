@@ -75,33 +75,42 @@ class TestQi(TestCase):
         self.assertEqual(Qi(Fraction(1, 2)), Qi(1/2, 0))
 
         # complex - complex
-        self.assertEqual(Qi((-1.5+2j), (3-0.75j)), Qi(-3/2, 2))
+        self.assertEqual(Qi((-1.5+2j), (3-0.75j)), Qi(Qi(-1.5, 2.0), Qi(3.0, -0.75)))
 
         # complex - Qi
-        self.assertEqual(Qi((-1.5+2j), Qi(1/4, 3/4)), Qi(-3/2, 2))
+        self.assertEqual(Qi((-1.5+2j), Qi(1/4, 3/4)), Qi(Qi(-1.5, 2.0), Qi(1/4, 3/4)))
 
         # complex - Zi
-        self.assertEqual(Qi((-1.5+2j), Zi(-2, 5)), Qi(-3/2, 2))
+        self.assertEqual(Qi((-1.5+2j), Zi(-2, 5)), Qi(Qi(-1.5, 2.0), Qi(-2, 5)))
 
-        # TODO: Implement this case
+        # complex - None
+        self.assertEqual(Qi((-1.5+2j)), Qi(-1.5, 2.0))
+
         # Qi - complex
-        # <<< NOT IMPLEMENTED YET >>> Qi(1/2, 3/4) is not a supported type
+        self.assertEqual(Qi(Qi(1/2, 3/4), (3-0.75j)), Qi(Qi(1/2, 3/4), Qi(3.0, -0.75)))
 
-        # TODO: Implement this case
         # Qi - Qi
-        # <<< NOT IMPLEMENTED YET >>> Qi(1/2, 3/4) is not a supported type
+        self.assertEqual(Qi(Qi(1/2, 3/4), Qi(1/4, 3/4)), Qi(Qi(1/2, 3/4), Qi(1/4, 3/4)))
 
-        # TODO: Implement this case
         # Qi - Zi
-        # <<< NOT IMPLEMENTED YET >>> Qi(1/2, 3/4) is not a supported type
+        self.assertEqual(Qi(Qi(1/2, 3/4), Zi(-2, 5)), Qi(Qi(1/2, 3/4), Qi(-2, 5)))
+
+        # Qi - None
+        self.assertEqual(Qi(Qi(1/2, 3/4)), Qi(1/2, 3/4))
 
         # Zi - complex
-        self.assertEqual(Qi(Zi(3, -7), (3-0.75j)), Qi(3, -7))
+        self.assertEqual(Qi(Zi(3, -7), (3-0.75j)), Qi(Qi(3, -7), Qi(3.0, -0.75)))
 
         # Zi - Qi
-        self.assertEqual(Qi(Zi(3, -7), Qi(1/4, 3/4)), Qi(3, -7))
+        self.assertEqual(Qi(Zi(3, -7), Qi(1/4, 3/4)), Qi(Qi(3, -7), Qi(1/4, 3/4)))
 
         # Zi - Zi
-        self.assertEqual(Qi(Zi(3, -7), Zi(-2, 5)), Qi(3, -7))
+        self.assertEqual(Qi(Zi(3, -7), Zi(-2, 5)), Qi(Qi(3, -7), Qi(-2, 5)))
+
+        # Zi - None
+        self.assertEqual(Qi(Zi(3, -7)), Qi(3, -7))
+
+        # None - None
+        self.assertEqual(Qi(), Qi(0, 0))
 
 # END OF FILE
