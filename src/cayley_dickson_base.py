@@ -58,7 +58,7 @@ class CayleyDicksonBase(ABC):
         return not self.__eq__(other)
 
     @classmethod
-    def scalar_mult(cls, value=None):
+    def scalar_mult(cls, value=False):
         """Determines how multiplication of two elements of different orders works.
         If scalar_mult is True, then the lower order element is treated like a scalar
         w.r.t. the higher order element, otherwise, prior to multiplication, the lower
