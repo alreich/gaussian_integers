@@ -12,84 +12,172 @@ from cayley_dickson_base import CayleyDicksonBase
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
 
-    # TODO: Update this init method, using the same technique used for the rationals
     def __init__(self, real=None, imag=None):
 
-        # --------------------------------------------------------
-        # real is a float or int, and imag is a float, int, or None
-
-        if isinstance(real, (float, int)):
-            re = round(real)
-            if imag is None:
+        if isinstance(real, float):
+            re = int(round(real))
+            if isinstance(imag, float):
+                im = int(round(imag))
+            elif isinstance(imag, int):
+                im = imag
+            elif imag is None:
                 im = 0
-            elif isinstance(imag, (float, int)):
-                im = round(imag)
             else:
-                raise Exception(f"Inputs incompatible: {real} and {imag}")
-            super().__init__(re, im)
+                raise TypeError(f"A float real value is not compatible with imag={imag}")
 
-        # --------------------------------------------------------
-        # real is a complex, and imag is None, a complex, or a Zi
+        elif isinstance(real, int):
+            re = real
+            if isinstance(imag, float):
+                im = round(imag)
+            elif isinstance(imag, int):
+                im = imag
+            elif imag is None:
+                im = 0
+            else:
+                raise TypeError(f"An integer real value is not compatible with imag={imag}")
 
         elif isinstance(real, complex):
-            if imag is None:
+            if imag is not None:
+                re = Zi(real)
+            else:
+                re = None
+            if isinstance(imag, complex):
+                im = Zi(imag)
+            elif isinstance(imag, Zi):
+                im = imag
+            elif isinstance(imag, tuple):
+                im = Zi.from_array(imag)
+            elif isinstance(imag, list):
+                im = Zi.from_array(imag)
+            elif imag is None:
                 re = round(real.real)
                 im = round(real.imag)
-            elif isinstance(imag, (complex, Zi)):
-                re = Zi(real)
-                im = Zi(imag)
             else:
-                raise Exception(f"Inputs incompatible: {real} and {imag}")
-            super().__init__(re, im)
-
-        # --------------------------------------------------------
-        # real is a Zi, and imag is None, a complex, or a Zi
+                raise TypeError(f"A complex real value is not compatible with imag={imag}")
 
         elif isinstance(real, Zi):
-            if imag is None:
-                re = real.real
-                im = real.imag
-            elif isinstance(imag, (complex, Zi)):
-                re = Zi(real)
+            if imag is not None:
+                re = real
+            else:
+                re = None
+            if isinstance(imag, complex):
                 im = Zi(imag)
+            elif isinstance(imag, Zi):
+                im = imag
+            elif isinstance(imag, tuple):
+                im = Zi.from_array(imag)
+            elif isinstance(imag, list):
+                im = Zi.from_array(imag)
+            elif imag is None:
+                re = round(real.real)
+                im = round(real.imag)
             else:
-                raise Exception(f"Inputs incompatible: {real} and {imag}")
-            super().__init__(re, im)
+                raise TypeError(f"A Zi real value is not compatible with imag={imag}")
 
-        # --------------------------------------------------------
-        # real is a list or tuple of numbers with length equal to a
-        # power of 2, and imag is None, or it is a tuple or list
-        # similar to the one input for real.
-
-        # TODO: Test this option, but first do the update mentioned in the TODO above
         elif isinstance(real, (tuple, list)):
-            z = Zi.from_array(real)
-            if imag is None:
-                re = z.real
-                im = z.imag
-            elif isinstance(imag, (tuple, list)) and len(imag) == len(real):
-                w = Zi.from_array(imag)
-                re = z
-                im = w
+            if isinstance(imag, complex):
+                re = Zi.from_array(real)
+                im = Zi(imag)
+            elif isinstance(imag, Zi):
+                re = Zi.from_array(real)
+                im = imag
+            elif isinstance(imag, tuple):
+                re = Zi.from_array(real)
+                im = Zi.from_array(imag)
+            elif isinstance(imag, (tuple, list)):
+                re = Zi.from_array(real)
+                im = Zi.from_array(imag)
+            elif imag is None:
+                re = round(real[0])
+                im = round(real[1])
             else:
-                raise Exception(f"Inputs incompatible: {real} and {imag}")
-            super().__init__(re, im)
+                raise TypeError(f"A tuple or list real value is not compatible with imag={imag}")
 
-        # --------------------------------------------------------
-        # Both real and imag are None
-
-        elif real is None:
+        elif real is None and imag is None:
             re = 0
-            if imag is None:
-                im = 0
-            else:
-                raise Exception(f"If re is None, then im must be None. But im = {imag}")
-            super().__init__(re, im)
-
-        # --------------------------------------------------------
-        # Both real and imag are incompatible with the required input types
+            im = 0
         else:
-            raise Exception(f"Unexpected combination of input types: {real} and {imag}")
+            raise TypeError(f"real={real} is not a valid type for creating a Zi.")
+
+        super().__init__(re, im)
+
+    # def __init__(self, real=None, imag=None):
+    #
+    #     # --------------------------------------------------------
+    #     # real is a float or int, and imag is a float, int, or None
+    #
+    #     if isinstance(real, (float, int)):
+    #         re = round(real)
+    #         if imag is None:
+    #             im = 0
+    #         elif isinstance(imag, (float, int)):
+    #             im = round(imag)
+    #         else:
+    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
+    #         super().__init__(re, im)
+    #
+    #     # --------------------------------------------------------
+    #     # real is a complex, and imag is None, a complex, or a Zi
+    #
+    #     elif isinstance(real, complex):
+    #         if imag is None:
+    #             re = round(real.real)
+    #             im = round(real.imag)
+    #         elif isinstance(imag, (complex, Zi)):
+    #             re = Zi(real)
+    #             im = Zi(imag)
+    #         else:
+    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
+    #         super().__init__(re, im)
+    #
+    #     # --------------------------------------------------------
+    #     # real is a Zi, and imag is None, a complex, or a Zi
+    #
+    #     elif isinstance(real, Zi):
+    #         if imag is None:
+    #             re = real.real
+    #             im = real.imag
+    #         elif isinstance(imag, (complex, Zi)):
+    #             re = Zi(real)
+    #             im = Zi(imag)
+    #         else:
+    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
+    #         super().__init__(re, im)
+    #
+    #     # --------------------------------------------------------
+    #     # real is a list or tuple of numbers with length equal to a
+    #     # power of 2, and imag is None, or it is a tuple or list
+    #     # similar to the one input for real.
+    #
+    #     # TODO: Test this option, but first do the update mentioned in the TODO above
+    #     elif isinstance(real, (tuple, list)):
+    #         z = Zi.from_array(real)
+    #         if imag is None:
+    #             re = z.real
+    #             im = z.imag
+    #         elif isinstance(imag, (tuple, list)) and len(imag) == len(real):
+    #             w = Zi.from_array(imag)
+    #             re = z
+    #             im = w
+    #         else:
+    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
+    #         super().__init__(re, im)
+    #
+    #     # --------------------------------------------------------
+    #     # Both real and imag are None
+    #
+    #     elif real is None:
+    #         re = 0
+    #         if imag is None:
+    #             im = 0
+    #         else:
+    #             raise Exception(f"If re is None, then im must be None. But im = {imag}")
+    #         super().__init__(re, im)
+    #
+    #     # --------------------------------------------------------
+    #     # Both real and imag are incompatible with the required input types
+    #     else:
+    #         raise Exception(f"Unexpected combination of input types: {real} and {imag}")
 
     def __str__(self):
         if isinstance(self, (float, int)):

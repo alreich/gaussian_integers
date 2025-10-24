@@ -7,7 +7,7 @@ class TestZi(TestCase):
     def setUp(self) -> None:
         pass
 
-    def test_constructor(self):
+    def test_constructor_v1(self):
         seed(42)
         self.assertEqual(Zi(0, 0), Zi(0, 0))
         self.assertEqual(Zi(1, 0), Zi(1, 0))
@@ -45,6 +45,94 @@ class TestZi(TestCase):
         self.assertEqual(Zi((-1j)), Zi(0, -1))
         self.assertEqual(Zi(Zi(), Zi(1)), Zi(Zi(0, 0), Zi(1, 0)))
         self.assertEqual(str(Zi(Zi(), Zi(1))), '(+1j)')
+
+    def test_constructor_v2(self):
+        """Test every possible combination of types that can be used to
+        construct a Zi object."""
+        #-------------------
+        # real type - imag type
+        #-------------------
+
+        # float - float
+        self.assertEqual(Zi(0.4, 0.85), Zi(0, 1))
+
+        # float - int
+        self.assertEqual(Zi(0.4, 7), Zi(0, 7))
+
+        # float - None
+        self.assertEqual(Zi(0.4), Zi(0, 0))
+
+        # int - float
+        self.assertEqual(Zi(-3, 0.85), Zi(-3, 1))
+
+        # int - int
+        self.assertEqual(Zi(-3, 7), Zi(-3, 7))
+
+        # int - None
+        self.assertEqual(Zi(-3), Zi(-3, 0))
+
+        # complex - complex
+        self.assertEqual(Zi((-1.7+2j), (3-0.75j)), Zi(Zi(-2, 2), Zi(3, -1)))
+
+        # complex - Zi
+        self.assertEqual(Zi((-1.7+2j), Zi(-2, 5)), Zi(Zi(-2, 2), Zi(-2, 5)))
+
+        # complex - tuple
+        self.assertEqual(Zi((-1.7+2j), (5, -8)), Zi(Zi(-2, 2), Zi(5, -8)))
+
+        # complex - list
+        self.assertEqual(Zi((-1.7+2j), [-1, 2]), Zi(Zi(-2, 2), Zi(-1, 2)))
+
+        # complex - None
+        self.assertEqual(Zi((-1.7+2j)), Zi(-2, 2))
+
+        # Zi - complex
+        self.assertEqual(Zi(Zi(3, -7), (3-0.75j)), Zi(Zi(3, -7), Zi(3, -1)))
+
+        # Zi - Zi
+        self.assertEqual(Zi(Zi(3, -7), Zi(-2, 5)), Zi(Zi(3, -7), Zi(-2, 5)))
+
+        # Zi - tuple
+        self.assertEqual(Zi(Zi(3, -7), (5, -8)), Zi(Zi(3, -7), Zi(5, -8)))
+
+        # Zi - list
+        self.assertEqual(Zi(Zi(3, -7), [-1, 2]), Zi(Zi(3, -7), Zi(-1, 2)))
+
+        # Zi - None
+        self.assertEqual(Zi(Zi(3, -7)), Zi(3, -7))
+
+        # tuple - complex
+        self.assertEqual(Zi((9, 4), (3-0.75j)), Zi(Zi(9, 4), Zi(3, -1)))
+
+        # tuple - Zi
+        self.assertEqual(Zi((9, 4), Zi(-2, 5)), Zi(Zi(9, 4), Zi(-2, 5)))
+
+        # tuple - tuple
+        self.assertEqual(Zi((9, 4), (5, -8)), Zi(Zi(9, 4), Zi(5, -8)))
+
+        # tuple - list
+        self.assertEqual(Zi((9, 4), [-1, 2]), Zi(Zi(9, 4), Zi(-1, 2)))
+
+        # tuple - None
+        self.assertEqual(Zi((9, 4)), Zi(9, 4))
+
+        # list - complex
+        self.assertEqual(Zi([-6, 1], (3-0.75j)), Zi(Zi(-6, 1), Zi(3, -1)))
+
+        # list - Zi
+        self.assertEqual(Zi([-6, 1], Zi(-2, 5)), Zi(Zi(-6, 1), Zi(-2, 5)))
+
+        # list - tuple
+        self.assertEqual(Zi([-6, 1], (5, -8)), Zi(Zi(-6, 1), Zi(5, -8)))
+
+        # list - list
+        self.assertEqual(Zi([-6, 1], [-1, 2]), Zi(Zi(-6, 1), Zi(-1, 2)))
+
+        # list - None
+        self.assertEqual(Zi([-6, 1]), Zi(-6, 1))
+
+        # None - None
+        self.assertEqual(Zi(), Zi(0, 0))
 
     def test_random(self):
         seed(42)
