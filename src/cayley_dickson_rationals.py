@@ -61,8 +61,8 @@ class Qi(CayleyDicksonBase):
                 re = Qi(real)
                 im = imag
             elif imag is None:
-                re = real.real
-                im = real.imag
+                re = Fraction(real.real).limit_denominator(self.__max_denominator)
+                im = Fraction(real.imag).limit_denominator(self.__max_denominator)
             else:
                 raise TypeError(f"A complex or Zi real value is not compatible with imag={imag}")
         elif isinstance(real, Qi):
@@ -73,8 +73,8 @@ class Qi(CayleyDicksonBase):
                 re = real
                 im = imag
             elif imag is None:
-                re = real.real
-                im = real.imag
+                re = Fraction(real.real).limit_denominator(self.__max_denominator)
+                im = Fraction(real.imag).limit_denominator(self.__max_denominator)
             else:
                 raise TypeError(f"A Qi real value is not compatible with imag={imag}")
         elif real is None and imag is None:

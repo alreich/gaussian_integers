@@ -1,8 +1,8 @@
-from unittest import TestCase
 from fractions import Fraction
 from cayley_dickson_integers import Zi
 from cayley_dickson_rationals import Qi
 from random import seed
+from unittest import TestCase
 
 class TestQi(TestCase):
 
@@ -75,19 +75,19 @@ class TestQi(TestCase):
         self.assertEqual(Qi(Fraction(1, 2)), Qi(1/2, 0))
 
         # complex - complex
-        self.assertEqual(Qi((-1.5+2j), (3-0.75j)), Qi(Qi(-1.5, 2.0), Qi(3.0, -0.75)))
+        self.assertEqual(Qi((-1.5+2j), (3-0.75j)), Qi(Qi(-3/2, 2), Qi(3, -3/4)))
 
         # complex - Qi
-        self.assertEqual(Qi((-1.5+2j), Qi(1/4, 3/4)), Qi(Qi(-1.5, 2.0), Qi(1/4, 3/4)))
+        self.assertEqual(Qi((-1.5+2j), Qi(1/4, 3/4)), Qi(Qi(-3/2, 2), Qi(1/4, 3/4)))
 
         # complex - Zi
-        self.assertEqual(Qi((-1.5+2j), Zi(-2, 5)), Qi(Qi(-1.5, 2.0), Qi(-2, 5)))
+        self.assertEqual(Qi((-1.5+2j), Zi(-2, 5)), Qi(Qi(-3/2, 2), Qi(-2, 5)))
 
         # complex - None
-        self.assertEqual(Qi((-1.5+2j)), Qi(-1.5, 2.0))
+        self.assertEqual(Qi((-1.5+2j)), Qi(-3/2, 2))
 
         # Qi - complex
-        self.assertEqual(Qi(Qi(1/2, 3/4), (3-0.75j)), Qi(Qi(1/2, 3/4), Qi(3.0, -0.75)))
+        self.assertEqual(Qi(Qi(1/2, 3/4), (3-0.75j)), Qi(Qi(1/2, 3/4), Qi(3, -3/4)))
 
         # Qi - Qi
         self.assertEqual(Qi(Qi(1/2, 3/4), Qi(1/4, 3/4)), Qi(Qi(1/2, 3/4), Qi(1/4, 3/4)))
@@ -99,7 +99,7 @@ class TestQi(TestCase):
         self.assertEqual(Qi(Qi(1/2, 3/4)), Qi(1/2, 3/4))
 
         # Zi - complex
-        self.assertEqual(Qi(Zi(3, -7), (3-0.75j)), Qi(Qi(3, -7), Qi(3.0, -0.75)))
+        self.assertEqual(Qi(Zi(3, -7), (3-0.75j)), Qi(Qi(3, -7), Qi(3, -3/4)))
 
         # Zi - Qi
         self.assertEqual(Qi(Zi(3, -7), Qi(1/4, 3/4)), Qi(Qi(3, -7), Qi(1/4, 3/4)))

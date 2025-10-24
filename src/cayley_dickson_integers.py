@@ -12,6 +12,7 @@ from cayley_dickson_base import CayleyDicksonBase
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
 
+    # TODO: Update this init method, using the same technique used for the rationals
     def __init__(self, real=None, imag=None):
 
         # --------------------------------------------------------
@@ -60,6 +61,7 @@ class Zi(CayleyDicksonBase):
         # power of 2, and imag is None, or it is a tuple or list
         # similar to the one input for real.
 
+        # TODO: Test this option, but first do the update mentioned in the TODO above
         elif isinstance(real, (tuple, list)):
             z = Zi.from_array(real)
             if imag is None:
