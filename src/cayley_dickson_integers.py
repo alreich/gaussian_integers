@@ -187,8 +187,8 @@ class Zi(CayleyDicksonBase):
         elif self.is_quaternion():
             return f"({self.quaternion_to_string()})"
         elif self.is_octonion():
-            # return f"({str(self.real)}, {str(self.imag)})"
-            return f"({self.octonion_to_string()})"
+            return f"({str(self.real)}, {str(self.imag)})"
+            # return f"({self.octonion_to_string()})"
         else:
             return str(self.to_array())
 
@@ -394,11 +394,11 @@ class Zi(CayleyDicksonBase):
             if isinstance(a, (float, int)) and isinstance(b, (float, int)):
                 return Zi(a, b)
             else:
-                raise ValueError(f"Can make Zi out of {arr}")
+                raise ValueError(f"Can't make Zi out of {arr}")
         elif utils.is_power_of_two(n):
             return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
         else:
-            raise ValueError(f"Can make Zi out of {arr}")
+            raise ValueError(f"Can't make Zi out of {arr}")
 
     @staticmethod
     def quaternion(quat):
