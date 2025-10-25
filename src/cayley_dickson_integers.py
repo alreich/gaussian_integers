@@ -187,7 +187,8 @@ class Zi(CayleyDicksonBase):
         elif self.is_quaternion():
             return f"({self.quaternion_to_string()})"
         elif self.is_octonion():
-            return f"({str(self.real)}, {str(self.imag)})"
+            # return f"({str(self.real)}, {str(self.imag)})"
+            return f"({self.octonion_to_string()})"
         else:
             return str(self.to_array())
 
@@ -384,7 +385,7 @@ class Zi(CayleyDicksonBase):
 
     @staticmethod
     def from_array(arr):
-        flat_arr = utils.flatten(arr)
+        flat_arr = list(utils.flatten(arr))
         n = len(flat_arr)
         if n == 1:
             return Zi(flat_arr[0])
@@ -417,7 +418,7 @@ class Zi(CayleyDicksonBase):
         unit_strs = ["", "i", "j", "k"]
         if self.is_quaternion():
             qstr = ""
-            for idx, coef in enumerate(utils.flatten(self.to_array())):
+            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
                 # Don't include terms with 0 coefficient
                 if coef > 0:
                     if idx == 0:
@@ -432,11 +433,30 @@ class Zi(CayleyDicksonBase):
         else:
             raise Exception(f"{self} is not a quaternion")
 
+    def octonion_to_string(self):
+        unit_strs = ["", "i", "j", "k", "L", "Li", "Lj", "Lk"]
+        if self.is_octonion():
+            qstr = ""
+            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
+                # Don't include terms with 0 coefficient
+                if coef > 0:
+                    if idx == 0:
+                        qstr = qstr + f"{coef}{unit_strs[idx]}"
+                    else:
+                        qstr = qstr + f"+{coef}{unit_strs[idx]}"
+                elif coef < 0:
+                    qstr = qstr + f"{coef}{unit_strs[idx]}"
+                else:
+                    pass
+            return qstr
+        else:
+            raise Exception(f"{self} is not a octonion")
+
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product."""
         if Zi.is_quaternion(self) and Zi.is_quaternion(other):
-            a1, b1, c1, d1 = utils.flatten(self.to_array())
-            a2, b2, c2, d2 = utils.flatten(other.to_array())
+            a1, b1, c1, d1 = list(utils.flatten(self.to_array()))
+            a2, b2, c2, d2 = list(utils.flatten(other.to_array()))
             # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
             a = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2
             b = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2

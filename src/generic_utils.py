@@ -6,12 +6,20 @@ __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
 __version__ = "1.0.0"
 
-def flatten(list_of_lists):
-    """Return a flat list, given a list of lists..."""
-    if isinstance(list_of_lists[0], list):
-        return [item for lst in list_of_lists for item in lst]
-    else:
-        return list_of_lists
+# def flatten(list_of_lists):
+#     """Return a flat list, given a list of lists..."""
+#     if isinstance(list_of_lists[0], list):
+#         return [item for lst in list_of_lists for item in lst]
+#     else:
+#         return list_of_lists
+
+def flatten(nested_list):
+    """Returns a generator of a flat list."""
+    for item in nested_list:
+        if isinstance(item, list):
+            yield from flatten(item)
+        else:
+            yield item
 
 def is_power_of_two(n: int):
     """In binary representation, a power of two has exactly one '1' bit,
