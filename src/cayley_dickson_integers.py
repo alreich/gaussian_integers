@@ -187,8 +187,8 @@ class Zi(CayleyDicksonBase):
         elif self.is_quaternion():
             return f"({self.quaternion_to_string()})"
         elif self.is_octonion():
-            return f"({str(self.real)}, {str(self.imag)})"
-            # return f"({self.octonion_to_string()})"
+            # return f"({str(self.real)}, {str(self.imag)})"
+            return f"({self.octonion_to_string()})"
         else:
             return str(self.to_array())
 
@@ -396,9 +396,26 @@ class Zi(CayleyDicksonBase):
             else:
                 raise ValueError(f"Can't make Zi out of {arr}")
         elif utils.is_power_of_two(n):
-            return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
+            k = int(n / 2)
+            return Zi(Zi.from_array(flat_arr[:k]), Zi.from_array(flat_arr[k:]))
         else:
             raise ValueError(f"Can't make Zi out of {arr}")
+
+    # def from_array(arr):
+    #     flat_arr = list(utils.flatten(arr))
+    #     n = len(flat_arr)
+    #     if n == 1:
+    #         return Zi(flat_arr[0])
+    #     elif n == 2:
+    #         a, b = flat_arr
+    #         if isinstance(a, (float, int)) and isinstance(b, (float, int)):
+    #             return Zi(a, b)
+    #         else:
+    #             raise ValueError(f"Can't make Zi out of {arr}")
+    #     elif utils.is_power_of_two(n):
+    #         return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
+    #     else:
+    #         raise ValueError(f"Can't make Zi out of {arr}")
 
     @staticmethod
     def quaternion(quat):
@@ -566,14 +583,21 @@ class Zi(CayleyDicksonBase):
         """
 
         def make_term(tm):
-            """Return a pair where the first element is one of 'real', 'i', 'j', or 'k'
-            and the second element is the coefficient as a float or int. These will be
-            used to update a dictionary."""
+            """Return a pair where the first element is one of 'real', 'i', 'j', 'k',
+            'Li', 'Lj', or 'Lk', and the second element is the coefficient as a float
+            or int. These will be used to update a dictionary."""
 
-            # Pattern for a valid quaternion term that ends in i, j, or k.
+            # Pattern for a valid quaternion term that ends in i, j, k, Li, Lj, or Lk
+            # unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?L[ijk]|[ijk]$'
             unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
+            # if regex.match(unit_term_pat, tm):
+            #     if 'L' in tm:
+            #         m = -2
+            #     else:
+            #         m = -1
+            #     return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3)
             if regex.match(unit_term_pat, tm):
                 return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
             else:
@@ -582,6 +606,12 @@ class Zi(CayleyDicksonBase):
         def maybe_add_coefficient(tm):
             """If a term consists of a single unit (i, j, k), then put
             a coefficient of 1 on it, otherwise just return the term."""
+
+            # unit_strings = ['i', 'j', 'k', 'L', 'Li', 'Lj', 'Lk']
+            # if tm in unit_strings:
+            #     return '1' + tm
+            # else:
+            #     return tm
 
             if tm == 'i':
                 return '1i'
