@@ -3,7 +3,8 @@
 from random import randint
 from math import sqrt
 from numbers import Number
-import regex
+# import regex
+import re
 
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
@@ -149,7 +150,6 @@ class Zi(CayleyDicksonBase):
     #     # power of 2, and imag is None, or it is a tuple or list
     #     # similar to the one input for real.
     #
-    #     # TODO: Test this option, but first do the update mentioned in the TODO above
     #     elif isinstance(real, (tuple, list)):
     #         z = Zi.from_array(real)
     #         if imag is None:
@@ -584,12 +584,12 @@ class Zi(CayleyDicksonBase):
 
         def make_term(tm):
             """Return a pair where the first element is one of 'real', 'i', 'j', 'k',
-            'Li', 'Lj', or 'Lk', and the second element is the coefficient as a float
-            or int. These will be used to update a dictionary."""
+            'L', 'Li', 'Lj', or 'Lk', and the second element is the coefficient as a
+            float or int. These will be used to update a dictionary."""
 
-            # Pattern for a valid quaternion term that ends in i, j, k, Li, Lj, or Lk
-            # unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?L[ijk]|[ijk]$'
-            unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
+            # Pattern for a valid quaternion term that ends in i, j, k, L, Li, Lj, or Lk
+            unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(L[ijk]?|[ijk])$'
+            # unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
             # if regex.match(unit_term_pat, tm):
@@ -598,7 +598,8 @@ class Zi(CayleyDicksonBase):
             #     else:
             #         m = -1
             #     return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3)
-            if regex.match(unit_term_pat, tm):
+            # if regex.match(unit_term_pat, tm):
+            if re.match(unit_term_pat, tm):
                 return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
             else:
                 return 'real', utils.make_int_or_float(tm)  # e.g., ('real', -3.1)
@@ -607,20 +608,20 @@ class Zi(CayleyDicksonBase):
             """If a term consists of a single unit (i, j, k), then put
             a coefficient of 1 on it, otherwise just return the term."""
 
-            # unit_strings = ['i', 'j', 'k', 'L', 'Li', 'Lj', 'Lk']
-            # if tm in unit_strings:
-            #     return '1' + tm
-            # else:
-            #     return tm
-
-            if tm == 'i':
-                return '1i'
-            elif tm == 'j':
-                return '1j'
-            elif tm == 'k':
-                return '1k'
+            unit_strings = ['i', 'j', 'k', 'L', 'Li', 'Lj', 'Lk']
+            if tm in unit_strings:
+                return '1' + tm
             else:
                 return tm
+
+            # if tm == 'i':
+            #     return '1i'
+            # elif tm == 'j':
+            #     return '1j'
+            # elif tm == 'k':
+            #     return '1k'
+            # else:
+            #     return tm
 
         # The strategy below is to perform a succession of simple edits on
         # the string to turn it into a 4-element array, rather than to try
@@ -656,9 +657,11 @@ class Zi(CayleyDicksonBase):
         q5 = [maybe_add_coefficient(t) for t in q4]
 
         # Make sure each term in the quaternion is valid
-        qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
+        # qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
+        qterm_pat   = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(L[ijk]?|[ijk])?$'
         for term in q5:
-            mat = regex.match(qterm_pat, term)
+            # mat = regex.match(qterm_pat, term)
+            mat = re.match(qterm_pat, term)
             if mat is None:
                 raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
 
