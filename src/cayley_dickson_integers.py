@@ -605,7 +605,7 @@ class Zi(CayleyDicksonBase):
             """If a term consists of a single unit (i, j, k), then put
             a coefficient of 1 on it, otherwise just return the term."""
 
-            unit_strings = ['i', 'j', 'k', 'L', 'Li', 'Lj', 'Lk']
+            unit_strings = ['i', 'j', 'k', 'l', 'li', 'lj', 'lk', 'L', 'Li', 'Lj', 'Lk']
             if tm in unit_strings:
                 return '1' + tm
             else:
