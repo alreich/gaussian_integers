@@ -268,6 +268,8 @@ class TestZi(TestCase):
         self.assertEqual((1.9 - 1.1j) * Zi(4, 5), Zi(13, 6))
 
     def test_parse_quaternion_string(self):
+        self.assertEqual(Zi.parse_quaternion_string('1+2i+3j+4k+6Li+7Lj+8Lk'), [1, 2, 3, 4, 0, 6, 7, 8])
+        self.assertEqual(Zi.parse_quaternion_string('1+2i+3j+4k+5L+6Li+7Lj+8Lk'), [1, 2, 3, 4, 5, 6, 7, 8])
         self.assertEqual(Zi.parse_quaternion_string('1+2i+3j+4k'), [1, 2, 3, 4])
         self.assertEqual(Zi.parse_quaternion_string('-1+3i-3j+7k'), [-1, 3, -3, 7])
         self.assertEqual(Zi.parse_quaternion_string('-1-4i-9j-2k'), [-1, -4, -9, -2])
@@ -275,6 +277,7 @@ class TestZi(TestCase):
         self.assertEqual(Zi.parse_quaternion_string('7+2i'), [7, 2, 0, 0])
         self.assertEqual(Zi.parse_quaternion_string('2i-6k'), [0, 2, 0, -6])
         self.assertEqual(Zi.parse_quaternion_string('1-5j+2k'), [1, 0, -5, 2])
+        self.assertEqual(Zi.parse_quaternion_string('1-5j'), [1, 0, -5, 0])
         self.assertEqual(Zi.parse_quaternion_string('3+4i-9k'), [3, 4, 0, -9])
         self.assertEqual(Zi.parse_quaternion_string('42i+j-k'), [0, 42, 1, -1])
         self.assertEqual(Zi.parse_quaternion_string('6-2i+j-3k'), [6, -2, 1, -3])
@@ -295,4 +298,3 @@ class TestZi(TestCase):
         self.assertEqual(Zi.parse_quaternion_string('1+2i+3j+4K'), [1, 2, 3, 4])
         self.assertEqual(Zi.parse_quaternion_string('7.1E-2 +4.3k+i'), [0.071, 1, 0, 4.3])
         self.assertEqual(Zi.parse_quaternion_string('3 - 2E-3i-4j'), [3, -0.002, -4, 0])
-

@@ -588,19 +588,18 @@ class Zi(CayleyDicksonBase):
             float or int. These will be used to update a dictionary."""
 
             # Pattern for a valid quaternion term that ends in i, j, k, L, Li, Lj, or Lk
-            unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(L[ijk]?|[ijk])$'
+            unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])$'
             # unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
-            # if regex.match(unit_term_pat, tm):
-            #     if 'L' in tm:
-            #         m = -2
-            #     else:
-            #         m = -1
-            #     return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3)
-            # if regex.match(unit_term_pat, tm):
+            # if re.match(unit_term_pat, tm):
+            #     return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
             if re.match(unit_term_pat, tm):
-                return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
+                if 'li' in tm or 'lj' in tm or 'lk' in tm:
+                    m = -2
+                else:
+                    m = -1
+                return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3)
             else:
                 return 'real', utils.make_int_or_float(tm)  # e.g., ('real', -3.1)
 
@@ -632,8 +631,12 @@ class Zi(CayleyDicksonBase):
         q0 = qstr.lower().strip().replace(' ', '')
 
         # Put a coefficient of 1 in front of units where it is implied to be 1.
-        q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
-        q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
+        # q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
+        # q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
+        q00 = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
+        q01 = q00.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
+        q02 = q01.replace('+Li', '+1Li').replace('+Lj', '+1Lj').replace('+Lk', '+1Lk')
+        q0b = q02.replace('-Li', '-1Li').replace('-Lj', '-1Lj').replace('-Lk', '-1Lk')
 
         # Put single space in front of + & -
         q1 = q0b.replace('+', ' +').replace('-', ' -')
@@ -648,7 +651,7 @@ class Zi(CayleyDicksonBase):
         q3 = q2.replace('(', '').replace(')', '').strip()
 
         # Split string at spaces.
-        # The input string has now been transformed into a list of strings that
+        # The input string will now be transformed into a list of strings that
         # correspond to terms in the quaternion.
         q4 = q3.split()
 
@@ -657,10 +660,12 @@ class Zi(CayleyDicksonBase):
         q5 = [maybe_add_coefficient(t) for t in q4]
 
         # Make sure each term in the quaternion is valid
+        # NOTE: the only differenc between the re pattern, below, and the
+        # one used earlier, above, is that 'L' is now lowercase, 'l'.
         # qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
-        qterm_pat   = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(L[ijk]?|[ijk])?$'
+        # qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(l|l[ijk]|[ijk])?$'
+        qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])?$'
         for term in q5:
-            # mat = regex.match(qterm_pat, term)
             mat = re.match(qterm_pat, term)
             if mat is None:
                 raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
@@ -670,11 +675,17 @@ class Zi(CayleyDicksonBase):
         # 'j', or 'k', and the value is the quaternion coefficient (float or int)
         # that corresponds to the key.
         q6 = [make_term(t) for t in q5]
-        qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0}
+        qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0, 'l':0, 'li':0, 'lj':0, 'lk':0}
         for term in q6:
             qdict[term[0]] = term[1]
+        result = list(qdict.values())
 
-        return list(qdict.values())
+        # If the last 4 elements of the result are all zero, then just return
+        # the first 4 elements.
+        if all(x == 0 for x in result[4:]):
+            return result[:4]
+        else:
+            return result
 
 class SetScalarMult(utils.SetClassVariable):
     """A context manager that, on entry, stores the current value of
