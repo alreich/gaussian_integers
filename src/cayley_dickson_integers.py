@@ -571,13 +571,14 @@ class Zi(CayleyDicksonBase):
 
     @staticmethod
     def parse_quaternion_string(qstr):
-        """Parse a quaternion string into a Zi.
-        The quaternion string can be formatted in many different ways...
-        * It may be normal: 1+2i-3j-4k
-        * It may have missing terms: 1-3k, 2i-4k
-        * It may have missing coefficients: i+j-k (they are assumed to be 1)
-        * It may not be in the right order: 2i-1+3k-4j
-        * The coefficients must be ints or floats: 7-2.4i+3.75j-4.0k
+        """Parse a complex/quaternion/octonion string into an array that
+        can be used to instantiate a Zi. The string can be formatted in
+        many different ways.
+        * It may be normal: 1+2i, or 1+2i-3j-4k, or 1+2i-3j-4k-5L+6Li-7Lj+8Lk
+        * It may have missing terms: 1-3k, 2i-4k, 2j-8Lk
+        * It may have missing coefficients: i+j-k, j+L (they are assumed to be 1)
+        * It may not be in the right order: 2i-1+3k-4j, L-k
+        * The coefficients must be ints, floats, or scientific notation: 7-2.4e-3i+3.75j-4.0k
         * There will always be a single + or - between terms
         * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
         """
@@ -589,17 +590,14 @@ class Zi(CayleyDicksonBase):
 
             # Pattern for a valid quaternion term that ends in i, j, k, L, Li, Lj, or Lk
             unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])$'
-            # unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]$'
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
-            # if re.match(unit_term_pat, tm):
-            #     return tm[-1], utils.make_int_or_float(tm[:-1])  # e.g., ('i', 2.3)
             if re.match(unit_term_pat, tm):
                 if 'li' in tm or 'lj' in tm or 'lk' in tm:
                     m = -2
                 else:
                     m = -1
-                return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3)
+                return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3), ('lk', 7)
             else:
                 return 'real', utils.make_int_or_float(tm)  # e.g., ('real', -3.1)
 
@@ -613,15 +611,6 @@ class Zi(CayleyDicksonBase):
             else:
                 return tm
 
-            # if tm == 'i':
-            #     return '1i'
-            # elif tm == 'j':
-            #     return '1j'
-            # elif tm == 'k':
-            #     return '1k'
-            # else:
-            #     return tm
-
         # The strategy below is to perform a succession of simple edits on
         # the string to turn it into a 4-element array, rather than to try
         # to write some enormous, unreadable regular expression. The regex's
@@ -631,8 +620,6 @@ class Zi(CayleyDicksonBase):
         q0 = qstr.lower().strip().replace(' ', '')
 
         # Put a coefficient of 1 in front of units where it is implied to be 1.
-        # q0a = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
-        # q0b = q0a.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
         q00 = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
         q01 = q00.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
         q02 = q01.replace('+Li', '+1Li').replace('+Lj', '+1Lj').replace('+Lk', '+1Lk')
@@ -659,11 +646,11 @@ class Zi(CayleyDicksonBase):
         # Add a coefficient of 1 or -1 to those terms.
         q5 = [maybe_add_coefficient(t) for t in q4]
 
-        # Make sure each term in the quaternion is valid
-        # NOTE: the only differenc between the re pattern, below, and the
-        # one used earlier, above, is that 'L' is now lowercase, 'l'.
-        # qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijk]?$'
-        # qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?(l|l[ijk]|[ijk])?$'
+        # Make sure each individual term in the string is a valid term.
+        # That is, a possible sign (+-), possibly followed by a number,
+        # possibly followed by a unit element (i, j, k, l, li, lj, lk).
+        # NOTE: The only difference between the re pattern, below, and the
+        #       one used earlier, above, is the '?' near the very end.
         qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])?$'
         for term in q5:
             mat = re.match(qterm_pat, term)
@@ -672,20 +659,26 @@ class Zi(CayleyDicksonBase):
 
         # Each call to make_term returns a key-value pair that can be used to
         # update the dictionary, qdict, where the key is one of 'real', 'i',
-        # 'j', or 'k', and the value is the quaternion coefficient (float or int)
-        # that corresponds to the key.
+        # 'j', 'k', 'l', 'li', 'lj', or 'lk', and the value is the coefficient
+        # (float or int) that corresponds to the key.
         q6 = [make_term(t) for t in q5]
         qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0, 'l':0, 'li':0, 'lj':0, 'lk':0}
         for term in q6:
             qdict[term[0]] = term[1]
         result = list(qdict.values())
 
-        # If the last 4 elements of the result are all zero, then just return
-        # the first 4 elements.
+        # If the last 4 elements of the result are all zero, then we've parsed
+        # a quaternion string, so just return the first 4 elements, but if the
+        # last half of those 4 are also zero, then we've parsed a complex number,
+        # so, in that case, just return the first 2 elements. Otherwise, we've
+        # parsed an octonion, so return the entire 8-element list of coefficients.
         if all(x == 0 for x in result[4:]):
-            return result[:4]
+            if all(x == 0 for x in result[2:4]):
+                return result[:2]  # complex (2 elements)
+            else:
+                return result[:4]  # quaternion (4 elements)
         else:
-            return result
+            return result  # octonion (8 elements)
 
 class SetScalarMult(utils.SetClassVariable):
     """A context manager that, on entry, stores the current value of
