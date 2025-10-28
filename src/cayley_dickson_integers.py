@@ -593,7 +593,7 @@ class Zi(CayleyDicksonBase):
 
             # The term is either associated with a unit (i,j,k) or it's 'real'
             if re.match(unit_term_pat, tm):
-                if 'li' in tm or 'lj' in tm or 'lk' in tm:
+                if 'li' in tm or 'lj' in tm or 'lk' in tm or 'Li' in tm or 'Lj' in tm or 'Lk' in tm:
                     m = -2
                 else:
                     m = -1
@@ -623,7 +623,11 @@ class Zi(CayleyDicksonBase):
         q00 = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
         q01 = q00.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
         q02 = q01.replace('+Li', '+1Li').replace('+Lj', '+1Lj').replace('+Lk', '+1Lk')
-        q0b = q02.replace('-Li', '-1Li').replace('-Lj', '-1Lj').replace('-Lk', '-1Lk')
+        q03 = q02.replace('-Li', '-1Li').replace('-Lj', '-1Lj').replace('-Lk', '-1Lk')
+        q04 = q03.replace('+li', '+1li').replace('+lj', '+1lj').replace('+lk', '+1lk')
+        q05 = q04.replace('-li', '-1li').replace('-lj', '-1lj').replace('-lk', '-1lk')
+        q06 = q05.replace('-L-', '-1L-').replace('-L+', '-1L+').replace('+L-', '+1L-').replace('+L+', '+1L+')
+        q0b = q06.replace('-l-', '-1l-').replace('-l+', '-1l+').replace('+l-', '+1l-').replace('+l+', '+1l+')
 
         # Put single space in front of + & -
         q1 = q0b.replace('+', ' +').replace('-', ' -')
