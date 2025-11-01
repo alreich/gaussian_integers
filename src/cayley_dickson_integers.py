@@ -401,6 +401,10 @@ class Zi(CayleyDicksonBase):
         else:
             raise ValueError(f"Can't make Zi out of {arr}")
 
+    @staticmethod
+    def from_string(s):
+        return Zi.from_array(parse_hypercomplex_string(s))
+
     # def from_array(arr):
     #     flat_arr = list(utils.flatten(arr))
     #     n = len(flat_arr)
@@ -684,57 +688,94 @@ class Zi(CayleyDicksonBase):
     #     else:
     #         return result  # octonion (8 elements)
 
-    @staticmethod
-    def parse_hypercomplex_string(qs):
+    # @staticmethod
+    # def parse_hypercomplex_string(qs):
+    #
+    #     pat1 = r'[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijkLIJK]'
+    #
+    #     # Remove spaces
+    #     qstr = qs.strip().replace(' ', '')
+    #
+    #     # This constructs the of terms (as strings) involving i, j, and k,
+    #     # but it does not include the real term, if there is one.
+    #     terms = []
+    #     real = None
+    #     for match in re.finditer(pat1, qstr):
+    #         trm = match.group(0)
+    #         terms.append(trm)
+    #
+    #     # Use the process of elimination to find the real term.
+    #     for tm in terms:
+    #         qstr = qstr.replace(tm, '')
+    #     if qstr == '':
+    #         real = '0'
+    #     else:
+    #         real = qstr  # Whatever is left over is the real coefficient (string)
+    #
+    #     # Initialize a dictionary of term coefficients.
+    #     term_dict = {'real': utils.make_int_or_float(real), 'i':0, 'j': 0, 'k': 0, 'L':0, 'I':0, 'J':0, 'K':0}
+    #
+    #     # Convert coefficient strings into numbers;
+    #     # also, make implied coefficients of 1 or -1 explicit.
+    #     for tm in terms:
+    #         coeff_str = tm[:-1]
+    #         if coeff_str == '+' or coeff_str == '':
+    #             coeff_str = '1'
+    #         elif coeff_str == '-':
+    #             coeff_str = '-1'
+    #         else:
+    #             pass
+    #         unit_str = tm[-1:]
+    #         term_dict[unit_str] = utils.make_int_or_float(coeff_str)
+    #
+    #     # Convert the term dictionary into an ordered list of coefficients
+    #     # The length of the list returned depends on what type of string
+    #     # was input (complex, quaternion, octonion, etc.)
+    #     result = list(term_dict.values())
+    #     if all(x == 0 for x in result[4:]):
+    #         if all(x == 0 for x in result[2:4]):
+    #             return result[:2]  # complex (2 elements)
+    #         else:
+    #             return result[:4]  # quaternion (4 elements)
+    #     else:
+    #         return result  # octonion (8 elements)
 
-        pat1 = r'[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijkLIJK]'
+def parse_hypercomplex_string(qs):
 
-        # Remove spaces
-        qstr = qs.strip().replace(' ', '')
+    # Remove spaces, add '-1' or '+1' whenever '-' or '+' are not followed by a number,
+    # and add '1' to a lone 'i', 'j', or 'k', at the front of the string.
+    qstr = qs.strip().replace(' ', '')
+    qstr = re.sub('[-](?![0-9])','-1', qstr)
+    qstr = re.sub('[+](?![0-9])','+1', qstr)
+    qstr = re.sub(r"^([ijkLIJK])", r"1\1", qstr)
 
-        # This constructs the of terms (as strings) involving i, j, and k,
-        # but it does not include the real term, if there is one.
-        terms = []
-        real = None
-        for match in re.finditer(pat1, qstr):
-            trm = match.group(0)
-            terms.append(trm)
+    # Construct a dictionary of terms with keys, 'i', 'j', and 'k'.
+    # However, this does not find the real term, if it exists.
+    unit_term_pat = r'[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijkLIJK]'
+    terms = []
+    term_dict = {'real': 0, 'i': 0, 'j': 0, 'k': 0, 'L': 0, 'I': 0, 'J': 0, 'K': 0}
+    for match in re.finditer(unit_term_pat, qstr):
+        term = match.group(0)
+        terms.append(term)
+        term_dict[term[-1:]] = utils.make_int_or_float(term[:-1])
 
-        # Use the process of elimination to find the real term.
-        for tm in terms:
-            qstr = qstr.replace(tm, '')
-        if qstr == '':
-            real = '0'
+    # Use the process of elimination to identify the real term.
+    for tm in terms:
+        qstr = qstr.replace(tm, '')
+    if qstr != '':
+        term_dict['real'] = utils.make_int_or_float(qstr)
+
+    # Convert the dictionary into an ordered list of coefficients.
+    # The length of the list returned depends on what type of string
+    # was input (complex, quaternion, octonion, etc.)
+    result = list(term_dict.values())
+    if all(x == 0 for x in result[4:]):
+        if all(x == 0 for x in result[2:4]):
+            return result[:2]  # complex (2 elements)
         else:
-            real = qstr  # Whatever is left over is the real coefficient (string)
-
-        # Initialize a dictionary of term coefficients.
-        term_dict = {'real': utils.make_int_or_float(real), 'i':0, 'j': 0, 'k': 0, 'L':0, 'I':0, 'J':0, 'K':0}
-
-        # Convert coefficient strings into numbers;
-        # also, make implied coefficients of 1 or -1 explicit.
-        for tm in terms:
-            coeff_str = tm[:-1]
-            if coeff_str == '+' or coeff_str == '':
-                coeff_str = '1'
-            elif coeff_str == '-':
-                coeff_str = '-1'
-            else:
-                pass
-            unit_str = tm[-1:]
-            term_dict[unit_str] = utils.make_int_or_float(coeff_str)
-
-        # Convert the term dictionary into an ordered list of coefficients
-        # The length of the list returned depends on what type of string
-        # was input (complex, quaternion, octonion, etc.)
-        result = list(term_dict.values())
-        if all(x == 0 for x in result[4:]):
-            if all(x == 0 for x in result[2:4]):
-                return result[:2]  # complex (2 elements)
-            else:
-                return result[:4]  # quaternion (4 elements)
-        else:
-            return result  # octonion (8 elements)
+            return result[:4]  # quaternion (4 elements)
+    else:
+        return result  # octonion (8 elements)
 
 class SetScalarMult(utils.SetClassVariable):
     """A context manager that, on entry, stores the current value of
