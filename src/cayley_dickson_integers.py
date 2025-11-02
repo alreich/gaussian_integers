@@ -3,224 +3,141 @@
 from random import randint
 from math import sqrt
 from numbers import Number
-# import regex
 import re
 
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
-# from cayley_dickson_rationals import Qi, gaussian_rational
 
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
 
+    # TODO: Allow hypercomplex strings as input also
     def __init__(self, real=None, imag=None):
 
         if isinstance(real, float):
-            re = int(round(real))
+            _re = int(round(real))
             if isinstance(imag, float):
-                im = int(round(imag))
+                _im = int(round(imag))
             elif isinstance(imag, int):
-                im = imag
+                _im = imag
             elif imag is None:
-                im = 0
+                _im = 0
             else:
                 raise TypeError(f"A float real value is not compatible with imag={imag}")
 
         elif isinstance(real, int):
-            re = real
+            _re = real
             if isinstance(imag, float):
-                im = round(imag)
+                _im = round(imag)
             elif isinstance(imag, int):
-                im = imag
+                _im = imag
             elif imag is None:
-                im = 0
+                _im = 0
             else:
                 raise TypeError(f"An integer real value is not compatible with imag={imag}")
 
         elif isinstance(real, complex):
             if imag is not None:
-                re = Zi(real)
+                _re = Zi(real)
             else:
-                re = None
+                _re = None
             if isinstance(imag, complex):
-                im = Zi(imag)
+                _im = Zi(imag)
             elif isinstance(imag, Zi):
-                im = imag
+                _im = imag
             elif isinstance(imag, tuple):
-                im = Zi.from_array(imag)
+                _im = Zi.from_array(imag)
             elif isinstance(imag, list):
-                im = Zi.from_array(imag)
+                _im = Zi.from_array(imag)
             elif imag is None:
-                re = round(real.real)
-                im = round(real.imag)
+                _re = round(real.real)
+                _im = round(real.imag)
             else:
                 raise TypeError(f"A complex real value is not compatible with imag={imag}")
 
         elif isinstance(real, Zi):
             if imag is not None:
-                re = real
+                _re = real
             else:
-                re = None
+                _re = None
             if isinstance(imag, complex):
-                im = Zi(imag)
+                _im = Zi(imag)
             elif isinstance(imag, Zi):
-                im = imag
+                _im = imag
             elif isinstance(imag, tuple):
-                im = Zi.from_array(imag)
+                _im = Zi.from_array(imag)
             elif isinstance(imag, list):
-                im = Zi.from_array(imag)
+                _im = Zi.from_array(imag)
             elif imag is None:
-                re = round(real.real)
-                im = round(real.imag)
+                _re = round(real.real)
+                _im = round(real.imag)
             else:
                 raise TypeError(f"A Zi real value is not compatible with imag={imag}")
 
         elif isinstance(real, (tuple, list)):
             if isinstance(imag, complex):
-                re = Zi.from_array(real)
-                im = Zi(imag)
+                _re = Zi.from_array(real)
+                _im = Zi(imag)
             elif isinstance(imag, Zi):
-                re = Zi.from_array(real)
-                im = imag
+                _re = Zi.from_array(real)
+                _im = imag
             elif isinstance(imag, tuple):
-                re = Zi.from_array(real)
-                im = Zi.from_array(imag)
+                _re = Zi.from_array(real)
+                _im = Zi.from_array(imag)
             elif isinstance(imag, (tuple, list)):
-                re = Zi.from_array(real)
-                im = Zi.from_array(imag)
+                _re = Zi.from_array(real)
+                _im = Zi.from_array(imag)
             elif imag is None:
-                re = round(real[0])
-                im = round(real[1])
+                _re = round(real[0])
+                _im = round(real[1])
             else:
                 raise TypeError(f"A tuple or list real value is not compatible with imag={imag}")
 
         elif real is None and imag is None:
-            re = 0
-            im = 0
+            _re = 0
+            _im = 0
+
         else:
             raise TypeError(f"real={real} is not a valid type for creating a Zi.")
 
-        super().__init__(re, im)
-
-    # def __init__(self, real=None, imag=None):
-    #
-    #     # --------------------------------------------------------
-    #     # real is a float or int, and imag is a float, int, or None
-    #
-    #     if isinstance(real, (float, int)):
-    #         re = round(real)
-    #         if imag is None:
-    #             im = 0
-    #         elif isinstance(imag, (float, int)):
-    #             im = round(imag)
-    #         else:
-    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
-    #         super().__init__(re, im)
-    #
-    #     # --------------------------------------------------------
-    #     # real is a complex, and imag is None, a complex, or a Zi
-    #
-    #     elif isinstance(real, complex):
-    #         if imag is None:
-    #             re = round(real.real)
-    #             im = round(real.imag)
-    #         elif isinstance(imag, (complex, Zi)):
-    #             re = Zi(real)
-    #             im = Zi(imag)
-    #         else:
-    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
-    #         super().__init__(re, im)
-    #
-    #     # --------------------------------------------------------
-    #     # real is a Zi, and imag is None, a complex, or a Zi
-    #
-    #     elif isinstance(real, Zi):
-    #         if imag is None:
-    #             re = real.real
-    #             im = real.imag
-    #         elif isinstance(imag, (complex, Zi)):
-    #             re = Zi(real)
-    #             im = Zi(imag)
-    #         else:
-    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
-    #         super().__init__(re, im)
-    #
-    #     # --------------------------------------------------------
-    #     # real is a list or tuple of numbers with length equal to a
-    #     # power of 2, and imag is None, or it is a tuple or list
-    #     # similar to the one input for real.
-    #
-    #     elif isinstance(real, (tuple, list)):
-    #         z = Zi.from_array(real)
-    #         if imag is None:
-    #             re = z.real
-    #             im = z.imag
-    #         elif isinstance(imag, (tuple, list)) and len(imag) == len(real):
-    #             w = Zi.from_array(imag)
-    #             re = z
-    #             im = w
-    #         else:
-    #             raise Exception(f"Inputs incompatible: {real} and {imag}")
-    #         super().__init__(re, im)
-    #
-    #     # --------------------------------------------------------
-    #     # Both real and imag are None
-    #
-    #     elif real is None:
-    #         re = 0
-    #         if imag is None:
-    #             im = 0
-    #         else:
-    #             raise Exception(f"If re is None, then im must be None. But im = {imag}")
-    #         super().__init__(re, im)
-    #
-    #     # --------------------------------------------------------
-    #     # Both real and imag are incompatible with the required input types
-    #     else:
-    #         raise Exception(f"Unexpected combination of input types: {real} and {imag}")
-
-    # def __str__(self):
-    #     if isinstance(self, (float, int)):
-    #         return self
-    #     if self.is_complex():
-    #         return str(complex(self))
-    #     elif self.is_quaternion():
-    #         return f"({self.to_string()})"
-    #     elif self.is_octonion():
-    #         # return f"({str(self.real)}, {str(self.imag)})"
-    #         return f"({self.to_string()})"
-    #     else:
-    #         return str(self.to_array())
+        super().__init__(_re, _im)
 
     def __str__(self):
-        unit_strs = ["", "i", "j", "k", "L", "I", "J", "K"]
         result = ""
+        unit_str = Zi.UNIT_STRINGS
         # If the Zi represents a complex (1), quaternion (2), or octonion (3):
         if self.order() <= 3:
             for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
                 # Don't include terms with 0 coefficient
-                if coef > 0:
-                    if idx == 0:
-                        result = result + f"{coef}{unit_strs[idx]}"
+                if idx == 0:
+                    if coef == 0:
+                        pass
                     else:
-                        if coef == 1:
-                            result = result + f"+{unit_strs[idx]}"
-                        else:
-                            result = result + f"+{coef}{unit_strs[idx]}"
-                elif coef < 0:
-                    if coef == -1:
-                        result = result + f"-{unit_strs[idx]}"
-                    else:
-                        result = result + f"{coef}{unit_strs[idx]}"
+                        result = str(coef)
                 else:
-                    pass
-        # Otherwise, for sedenion or greater, return an array in string form
+                    if coef > 0:
+                        if coef == 1:
+                            if result == "":
+                                result = f"{unit_str[idx]}"
+                            else:
+                                result = result + f"+{unit_str[idx]}"
+                        else:
+                            if result == "":
+                                result = f"{coef}{unit_str[idx]}"
+                            else:
+                                result = result + f"+{coef}{unit_str[idx]}"
+                    elif coef < 0:
+                        if coef == -1:
+                            result = result + f"-{unit_str[idx]}"
+                        else:
+                            result = result + f"{coef}{unit_str[idx]}"
+                    else:
+                        pass
+        # Otherwise, for sedenion or greater, return a flat array in string form
         else:
-            return str(self.to_array())
+            return str(list(utils.flatten(self.to_array())))
         if result == "":
             return '0'
-        elif result[0] == "+":
-            return result[1:]
         else:
             return result
 
@@ -435,34 +352,18 @@ class Zi(CayleyDicksonBase):
 
     @staticmethod
     def from_string(s):
-        return Zi.from_array(parse_hypercomplex_string(s))
-
-    # def from_array(arr):
-    #     flat_arr = list(utils.flatten(arr))
-    #     n = len(flat_arr)
-    #     if n == 1:
-    #         return Zi(flat_arr[0])
-    #     elif n == 2:
-    #         a, b = flat_arr
-    #         if isinstance(a, (float, int)) and isinstance(b, (float, int)):
-    #             return Zi(a, b)
-    #         else:
-    #             raise ValueError(f"Can't make Zi out of {arr}")
-    #     elif utils.is_power_of_two(n):
-    #         return Zi(Zi.from_array(flat_arr[:2]), Zi.from_array(flat_arr[2:]))
-    #     else:
-    #         raise ValueError(f"Can't make Zi out of {arr}")
+        return Zi.from_array(hypercomplex_string_to_array(s))
 
     @staticmethod
     def quaternion(quat):
         """Create a Zi of order 2 (i.e., a quaternion) from a list of 4 elements
         or a string representation of a quaternion."""
         if isinstance(quat, list) and len(quat) == 4:
-            re = Zi(quat[0], quat[1])
-            im = Zi(quat[2], quat[3])
-            return Zi(re, im)
+            _re = Zi(quat[0], quat[1])
+            _im = Zi(quat[2], quat[3])
+            return Zi(_re, _im)
         elif isinstance(quat, str):
-            return Zi(parse_hypercomplex_string(quat))
+            return Zi(hypercomplex_string_to_array(quat))
         else:
             raise ValueError(f"Cannot create a quaternion from {quat}")
 
@@ -553,193 +454,13 @@ class Zi(CayleyDicksonBase):
         us = Zi.units()
         return list(map(lambda u: u * self, us[1:]))  # skip multiplying by 1
 
-    # def is_associate(self, other):
-    #     """Return True if the other Zi is an associate of this Zi
-    #
-    #     Otherwise, return False.
-    #     """
-    #     q = self // other
-    #     if q:
-    #         if q in Zi.units():
-    #             return True
-    #         else:
-    #             return False
-    #     else:
-    #         return False
-
-    # @staticmethod
-    # def parse_quaternion_string(qstr):
-    #     """Parse a complex/quaternion/octonion string into an array that
-    #     can be used to instantiate a Zi. The string can be formatted in
-    #     many different ways.
-    #     * It may be normal: 1+2i, or 1+2i-3j-4k, or 1+2i-3j-4k-5L+6Li-7Lj+8Lk
-    #     * It may have missing terms: 1-3k, 2i-4k, 2j-8Lk
-    #     * It may have missing coefficients: i+j-k, j+L (they are assumed to be 1)
-    #     * It may not be in the right order: 2i-1+3k-4j, L-k
-    #     * The coefficients must be ints, floats, or scientific notation: 7-2.4e-3i+3.75j-4.0k
-    #     * There will always be a single + or - between terms
-    #     * All inputs must be valid with at least 1 term, and without repeated units (2j - 3j)
-    #     """
-    #
-    #     def make_term(tm):
-    #         """Return a pair where the first element is one of 'real', 'i', 'j', 'k',
-    #         'L', 'Li', 'Lj', or 'Lk', and the second element is the coefficient as a
-    #         float or int. These will be used to update a dictionary."""
-    #
-    #         # Pattern for a valid quaternion term that ends in i, j, k, L, Li, Lj, or Lk
-    #         unit_term_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])$'
-    #
-    #         # The term is either associated with a unit (i,j,k) or it's 'real'
-    #         if re.match(unit_term_pat, tm):
-    #             if 'li' in tm or 'lj' in tm or 'lk' in tm or 'Li' in tm or 'Lj' in tm or 'Lk' in tm:
-    #                 m = -2
-    #             else:
-    #                 m = -1
-    #             return tm[m:], utils.make_int_or_float(tm[:m])  # e.g., ('i', 2.3), ('lk', 7)
-    #         else:
-    #             return 'real', utils.make_int_or_float(tm)  # e.g., ('real', -3.1)
-    #
-    #     def maybe_add_coefficient(tm):
-    #         """If a term consists of a single unit (i, j, k), then put
-    #         a coefficient of 1 on it, otherwise just return the term."""
-    #
-    #         unit_strings = ['i', 'j', 'k', 'l', 'li', 'lj', 'lk', 'L', 'Li', 'Lj', 'Lk']
-    #         if tm in unit_strings:
-    #             return '1' + tm
-    #         else:
-    #             return tm
-    #
-    #     # The strategy below is to perform a succession of simple edits on
-    #     # the string to turn it into a 4-element array, rather than to try
-    #     # to write some enormous, unreadable regular expression. The regex's
-    #     # used here are already a bit difficult to read.
-    #
-    #     # Make lowercase and remove all spaces
-    #     q0 = qstr.lower().strip().replace(' ', '')
-    #
-    #     # Put a coefficient of 1 in front of units where it is implied to be 1.
-    #     q00 = q0.replace('+i', '+1i').replace('+j', '+1j').replace('+k', '+1k')
-    #     q01 = q00.replace('-i', '-1i').replace('-j', '-1j').replace('-k', '-1k')
-    #     q02 = q01.replace('+Li', '+1Li').replace('+Lj', '+1Lj').replace('+Lk', '+1Lk')
-    #     q03 = q02.replace('-Li', '-1Li').replace('-Lj', '-1Lj').replace('-Lk', '-1Lk')
-    #     q04 = q03.replace('+li', '+1li').replace('+lj', '+1lj').replace('+lk', '+1lk')
-    #     q05 = q04.replace('-li', '-1li').replace('-lj', '-1lj').replace('-lk', '-1lk')
-    #     q06 = q05.replace('-L-', '-1L-').replace('-L+', '-1L+').replace('+L-', '+1L-').replace('+L+', '+1L+')
-    #     q0b = q06.replace('-l-', '-1l-').replace('-l+', '-1l+').replace('+l-', '+1l-').replace('+l+', '+1l+')
-    #
-    #     # Put single space in front of + & -
-    #     q1 = q0b.replace('+', ' +').replace('-', ' -')
-    #
-    #     # If scientific notation, remove the space that was added in the previous step
-    #     q1a = q1.replace('e -', 'e-').replace('e +', 'e+')
-    #
-    #     # Remove any space after leading parenthesis (created by the step above)
-    #     q2 = q1a.replace('( ', '(')
-    #
-    #     # Remove parentheses, if they exist
-    #     q3 = q2.replace('(', '').replace(')', '').strip()
-    #
-    #     # Split string at spaces.
-    #     # The input string will now be transformed into a list of strings that
-    #     # correspond to terms in the quaternion.
-    #     q4 = q3.split()
-    #
-    #     # Some terms are just units (i, j, k), possibly with a sign (-+)
-    #     # Add a coefficient of 1 or -1 to those terms.
-    #     q5 = [maybe_add_coefficient(t) for t in q4]
-    #
-    #     # Make sure each individual term in the string is a valid term.
-    #     # That is, a possible sign (+-), possibly followed by a number,
-    #     # possibly followed by a unit element (i, j, k, l, li, lj, lk).
-    #     # NOTE: The only difference between the re pattern, below, and the
-    #     #       one used earlier, above, is the '?' near the very end.
-    #     qterm_pat = r'^[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?([lL]|[lL][ijk]|[ijk])?$'
-    #     for term in q5:
-    #         mat = re.match(qterm_pat, term)
-    #         if mat is None:
-    #             raise ValueError(f"{term} in {qstr} is not a valid quaternion term.")
-    #
-    #     # Each call to make_term returns a key-value pair that can be used to
-    #     # update the dictionary, qdict, where the key is one of 'real', 'i',
-    #     # 'j', 'k', 'l', 'li', 'lj', or 'lk', and the value is the coefficient
-    #     # (float or int) that corresponds to the key.
-    #     q6 = [make_term(t) for t in q5]
-    #     qdict = {'real': 0, 'i': 0, 'j': 0, 'k': 0, 'l':0, 'li':0, 'lj':0, 'lk':0}
-    #     for term in q6:
-    #         qdict[term[0]] = term[1]
-    #     result = list(qdict.values())
-    #
-    #     # If the last 4 elements of the result are all zero, then we've parsed
-    #     # a quaternion string, so just return the first 4 elements, but if the
-    #     # last half of those 4 are also zero, then we've parsed a complex number,
-    #     # so, in that case, just return the first 2 elements. Otherwise, we've
-    #     # parsed an octonion, so return the entire 8-element list of coefficients.
-    #     if all(x == 0 for x in result[4:]):
-    #         if all(x == 0 for x in result[2:4]):
-    #             return result[:2]  # complex (2 elements)
-    #         else:
-    #             return result[:4]  # quaternion (4 elements)
-    #     else:
-    #         return result  # octonion (8 elements)
-
-    # @staticmethod
-    # def parse_hypercomplex_string(qs):
-    #
-    #     pat1 = r'[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijkLIJK]'
-    #
-    #     # Remove spaces
-    #     qstr = qs.strip().replace(' ', '')
-    #
-    #     # This constructs the of terms (as strings) involving i, j, and k,
-    #     # but it does not include the real term, if there is one.
-    #     terms = []
-    #     real = None
-    #     for match in re.finditer(pat1, qstr):
-    #         trm = match.group(0)
-    #         terms.append(trm)
-    #
-    #     # Use the process of elimination to find the real term.
-    #     for tm in terms:
-    #         qstr = qstr.replace(tm, '')
-    #     if qstr == '':
-    #         real = '0'
-    #     else:
-    #         real = qstr  # Whatever is left over is the real coefficient (string)
-    #
-    #     # Initialize a dictionary of term coefficients.
-    #     term_dict = {'real': utils.make_int_or_float(real), 'i':0, 'j': 0, 'k': 0, 'L':0, 'I':0, 'J':0, 'K':0}
-    #
-    #     # Convert coefficient strings into numbers;
-    #     # also, make implied coefficients of 1 or -1 explicit.
-    #     for tm in terms:
-    #         coeff_str = tm[:-1]
-    #         if coeff_str == '+' or coeff_str == '':
-    #             coeff_str = '1'
-    #         elif coeff_str == '-':
-    #             coeff_str = '-1'
-    #         else:
-    #             pass
-    #         unit_str = tm[-1:]
-    #         term_dict[unit_str] = utils.make_int_or_float(coeff_str)
-    #
-    #     # Convert the term dictionary into an ordered list of coefficients
-    #     # The length of the list returned depends on what type of string
-    #     # was input (complex, quaternion, octonion, etc.)
-    #     result = list(term_dict.values())
-    #     if all(x == 0 for x in result[4:]):
-    #         if all(x == 0 for x in result[2:4]):
-    #             return result[:2]  # complex (2 elements)
-    #         else:
-    #             return result[:4]  # quaternion (4 elements)
-    #     else:
-    #         return result  # octonion (8 elements)
-
-def parse_hypercomplex_string(qs):
+def hypercomplex_string_to_array(qs):
 
     # Remove spaces, add '-1' or '+1' whenever '-' or '+' are not followed by a number,
     # and add '1' to a lone 'i', 'j', or 'k', at the front of the string.
     qstr = qs.strip().replace(' ', '')
-    qstr = re.sub('[-](?![0-9])','-1', qstr)
+    # qstr = re.sub('[-](?![0-9])','-1', qstr)
+    qstr = re.sub('-(?![0-9])','-1', qstr)
     qstr = re.sub('[+](?![0-9])','+1', qstr)
     qstr = re.sub(r"^([ijkLIJK])", r"1\1", qstr)
 
@@ -793,6 +514,8 @@ if __name__ == "__main__":
     print(f"{Zi.zero() = }")
     print(f"{Zi.eye() = }")
     print(f"{Zi.two() = }")
+
+    # floats get rounded
     print(f"{Zi(2.3, 3.8) = }")
     print(f"{Zi(-2.3, 3.8) = }")
     print(f"{Zi(2.3, -3.8) = }")

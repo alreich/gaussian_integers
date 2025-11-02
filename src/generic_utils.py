@@ -6,12 +6,16 @@ __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
 __version__ = "1.0.0"
 
-# def flatten(list_of_lists):
-#     """Return a flat list, given a list of lists..."""
-#     if isinstance(list_of_lists[0], list):
-#         return [item for lst in list_of_lists for item in lst]
-#     else:
-#         return list_of_lists
+def generic_unit_strings(prefix: str = 'e', n: int = 8) -> list[str]:
+    """Returns a list of strings of the following form:
+    ['', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
+    """
+    count: int = 1
+    result = ['']
+    for x in range(n-1):
+        result.append(prefix + str(count))
+        count += 1
+    return result
 
 def flatten(nested_list):
     """Returns a generator of a flat list."""

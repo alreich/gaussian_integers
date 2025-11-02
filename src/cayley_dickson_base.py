@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from fractions import Fraction
 
+# import generic_utils as utils
+
 class CayleyDicksonBase(ABC):
     """An Abstract Base Class (ABC) for subclasses that implement the Cayley-Dickson construction.
     This class cannot be instantiated directly. All instances of this class are immutable.
@@ -8,7 +10,17 @@ class CayleyDicksonBase(ABC):
     of some type (e.g., integer, Fraction) or another instance of CayleyDicksonBase subclass.
     """
 
-    SCALAR_MULTIPLICATION = False  # See the classmethod, scalar_mult
+    SCALAR_MULTIPLICATION: bool = False  # See the classmethod, scalar_mult
+
+    # See the Fano plan figure at https://en.wikipedia.org/wiki/Octonion
+    # The default list of case-sensitive unit strings, below, corresponds to
+    # the notation in that figure as follows:
+    # '' = real part,    L = e_4 (L)
+    # i = e_1 (I),       I = e_5 (IL)
+    # j = e_2 (J),       J = e_6 (JL)
+    # k = e_3 (IJ),      K = e_7 (IJL)
+    DEFAULT_UNIT_STRINGS: list[str] = ["", "i", "j", "k", "L", "I", "J", "K"]
+    UNIT_STRINGS = DEFAULT_UNIT_STRINGS
 
     def __init__(self, real=None, imag=None):
         self._re = real
@@ -56,6 +68,39 @@ class CayleyDicksonBase(ABC):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    @classmethod
+    def unit_strings(cls, value=None, prefix=None, size=None):
+
+        if value is None:
+
+            # No changes; output current list of unit strings
+            if prefix is None and size is None:
+                pass
+
+            # Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ...
+            elif isinstance(prefix, str) and isinstance(size, int) and size > 0:
+                count = 1
+                generic_list = ['']
+                for x in range(size - 1):
+                    generic_list.append(prefix + str(count))
+                    count += 1
+                cls.UNIT_STRINGS = generic_list
+            else:
+                raise TypeError(f"Inconsistent inputs")
+
+        # Use a custom, user-provided list of unit strings
+        elif isinstance(value, list):
+            cls.UNIT_STRINGS = value
+
+        # Reset the list of unit strings to their default value
+        elif isinstance(value, bool) and value:
+            cls.UNIT_STRINGS = cls.DEFAULT_UNIT_STRINGS  # Reset to default
+
+        else:
+            raise TypeError(f"inputs inconsistent")
+
+        return cls.UNIT_STRINGS
 
     @classmethod
     def scalar_mult(cls, value=False):
