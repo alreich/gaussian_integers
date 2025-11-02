@@ -179,18 +179,50 @@ class Zi(CayleyDicksonBase):
     #     else:
     #         raise Exception(f"Unexpected combination of input types: {real} and {imag}")
 
+    # def __str__(self):
+    #     if isinstance(self, (float, int)):
+    #         return self
+    #     if self.is_complex():
+    #         return str(complex(self))
+    #     elif self.is_quaternion():
+    #         return f"({self.to_string()})"
+    #     elif self.is_octonion():
+    #         # return f"({str(self.real)}, {str(self.imag)})"
+    #         return f"({self.to_string()})"
+    #     else:
+    #         return str(self.to_array())
+
     def __str__(self):
-        if isinstance(self, (float, int)):
-            return self
-        if self.is_complex():
-            return str(complex(self))
-        elif self.is_quaternion():
-            return f"({self.quaternion_to_string()})"
-        elif self.is_octonion():
-            # return f"({str(self.real)}, {str(self.imag)})"
-            return f"({self.octonion_to_string()})"
+        unit_strs = ["", "i", "j", "k", "L", "I", "J", "K"]
+        result = ""
+        # If the Zi represents a complex (1), quaternion (2), or octonion (3):
+        if self.order() <= 3:
+            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
+                # Don't include terms with 0 coefficient
+                if coef > 0:
+                    if idx == 0:
+                        result = result + f"{coef}{unit_strs[idx]}"
+                    else:
+                        if coef == 1:
+                            result = result + f"+{unit_strs[idx]}"
+                        else:
+                            result = result + f"+{coef}{unit_strs[idx]}"
+                elif coef < 0:
+                    if coef == -1:
+                        result = result + f"-{unit_strs[idx]}"
+                    else:
+                        result = result + f"{coef}{unit_strs[idx]}"
+                else:
+                    pass
+        # Otherwise, for sedenion or greater, return an array in string form
         else:
             return str(self.to_array())
+        if result == "":
+            return '0'
+        elif result[0] == "+":
+            return result[1:]
+        else:
+            return result
 
     def __neg__(self):
         return Zi(- self.real, - self.imag)
@@ -430,51 +462,13 @@ class Zi(CayleyDicksonBase):
             im = Zi(quat[2], quat[3])
             return Zi(re, im)
         elif isinstance(quat, str):
-            return Zi(Zi.parse_hypercomplex_string(quat))
+            return Zi(parse_hypercomplex_string(quat))
         else:
             raise ValueError(f"Cannot create a quaternion from {quat}")
 
-    # TODO: Print, or don't print, coefficients that are zero (0) based on a class variable setting
-    def quaternion_to_string(self):
-        unit_strs = ["", "i", "j", "k"]
-        if self.is_quaternion():
-            qstr = ""
-            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
-                # Don't include terms with 0 coefficient
-                if coef > 0:
-                    if idx == 0:
-                        qstr = qstr + f"{coef}{unit_strs[idx]}"
-                    else:
-                        qstr = qstr + f"+{coef}{unit_strs[idx]}"
-                elif coef < 0:
-                    qstr = qstr + f"{coef}{unit_strs[idx]}"
-                else:
-                    pass
-            return qstr
-        else:
-            raise Exception(f"{self} is not a quaternion")
-
-    def octonion_to_string(self):
-        unit_strs = ["", "i", "j", "k", "L", "I", "J", "K"]
-        if self.is_octonion():
-            qstr = ""
-            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
-                # Don't include terms with 0 coefficient
-                if coef > 0:
-                    if idx == 0:
-                        qstr = qstr + f"{coef}{unit_strs[idx]}"
-                    else:
-                        qstr = qstr + f"+{coef}{unit_strs[idx]}"
-                elif coef < 0:
-                    qstr = qstr + f"{coef}{unit_strs[idx]}"
-                else:
-                    pass
-            return qstr
-        else:
-            raise Exception(f"{self} is not a octonion")
-
     def hamilton_product(self, other):
-        """Multiplication of two quaternions according to the classic Hamilton product."""
+        """Multiplication of two quaternions according to the classic Hamilton product.
+        For verification purposes."""
         if Zi.is_quaternion(self) and Zi.is_quaternion(other):
             a1, b1, c1, d1 = list(utils.flatten(self.to_array()))
             a2, b2, c2, d2 = list(utils.flatten(other.to_array()))

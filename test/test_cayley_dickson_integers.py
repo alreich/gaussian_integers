@@ -44,7 +44,7 @@ class TestZi(TestCase):
         self.assertEqual(Zi((1.9 + 2.1j)), Zi(2, 2))
         self.assertEqual(Zi((-1j)), Zi(0, -1))
         self.assertEqual(Zi(Zi(), Zi(1)), Zi(Zi(0, 0), Zi(1, 0)))
-        self.assertEqual(str(Zi(Zi(), Zi(1))), '(+1j)')
+        self.assertEqual(str(Zi(Zi(), Zi(1))), 'j')
 
     def test_constructor_v2(self):
         """Test every possible combination of types that can be used to
@@ -143,7 +143,7 @@ class TestZi(TestCase):
 
     def test_properties(self):
         z1 = Zi(10, -7)
-        self.assertEqual(str(z1), '(10-7j)')
+        self.assertEqual(str(z1), '10-7i')
         self.assertEqual(-z1, Zi(-10, 7))
         self.assertEqual(z1.real, 10)
         self.assertEqual(z1.imag, -7)
@@ -188,7 +188,7 @@ class TestZi(TestCase):
         o0 = Zi(q1, q2)
         self.assertEqual(o0, Zi(Zi(Zi(10, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         # self.assertEqual(str(o0), '((10-7i-10j-2k), (-3-3i-6j-7k))')
-        self.assertEqual(str(o0), '(10-7i-10j-2k-3L-3I-6J-7K)')
+        self.assertEqual(str(o0), '10-7i-10j-2k-3L-3I-6J-7K')
         self.assertEqual(o0.order(), 3)
         self.assertEqual(o0.norm, 356)
         self.assertEqual(o0.is_quaternion(), False)
@@ -214,7 +214,7 @@ class TestZi(TestCase):
         self.assertEqual(Zi.random(order=2), Zi(Zi(-3, -3), Zi(-6, -7)))
         o1 = Zi.random(order=3)
         # self.assertEqual(str(o1), '((7-8i+8j+3k), (-9-10i-8j-4k))')
-        self.assertEqual(str(o1), '(7-8i+8j+3k-9L-10I-8J-4K)')
+        self.assertEqual(str(o1), '7-8i+8j+3k-9L-10I-8J-4K')
         # o2 = Zi.random(order=3)
         # o3 = Zi.random(order=3)
 
@@ -232,9 +232,9 @@ class TestZi(TestCase):
 
     def test_string(self):
         quat = Zi(Zi(), Zi(1))
-        self.assertEqual(str(Zi()), '0j')
-        self.assertEqual(str(Zi(1)), '(1+0j)')
-        self.assertEqual(str(quat), '(+1j)')
+        self.assertEqual(str(Zi()), '0')
+        self.assertEqual(str(Zi(1)), '1')
+        self.assertEqual(str(quat), 'j')
 
     def test_add(self):  # __add__ & __radd__
         self.assertEqual(Zi(4, 5) + Zi(1, -2), Zi(5, 3))
