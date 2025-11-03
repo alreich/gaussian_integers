@@ -136,7 +136,7 @@ class CayleyDicksonBase(ABC):
 
     @property
     def first(self):
-        """Return the innermost first re value."""
+        """Return the first re value."""
         if isinstance(self.real, (int, float, complex, Fraction)):
             return self.real
         elif isinstance(self.real, CayleyDicksonBase):
@@ -144,6 +144,7 @@ class CayleyDicksonBase(ABC):
         else:
             raise Exception(f"Cannot create a real from {self}")
 
+    @abstractmethod
     def conjugate(self):
         pass
 
@@ -193,37 +194,27 @@ class CayleyDicksonBase(ABC):
     def __mul__(self, other):
         pass
 
-    # @abstractmethod
-    # def __str__(self):
-    #     pass
-    #
+    @abstractmethod
+    def __str__(self):
+        pass
+
+    @abstractmethod
+    def __abs__(self):
+        pass
+
+    @abstractmethod
+    def __neg__(self):
+        pass
+
+    @abstractmethod
+    def __pos__(self):
+        pass
+
+    @staticmethod
+    def from_array(arr):
+        pass
+
     # @abstractmethod
     # def __pow__(self, n: int):
     #     pass
-    #
-    # @abstractmethod
-    # def __abs__(self):
-    #     pass
-    #
-    # @abstractmethod
-    # def __neg__(self):
-    #     pass
-    #
-    # @abstractmethod
-    # def __pos__(self):
-    #     pass
-    #
-    # @abstractmethod
-    # def __norm__(self):
-    #     pass
-    #
-    # @abstractmethod
-    # def from_array(self, array):
-    #     pass
-    #
-    # @abstractmethod
-    # def order(self) -> int:
-    #     pass
-
-
 
