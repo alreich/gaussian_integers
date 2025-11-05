@@ -197,12 +197,12 @@ class Zi(CayleyDicksonBase):
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
-                return self * oth.cast(self.order())
+                return self * oth.increase_order(self.order())
         elif m > n:
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
-                return self.cast(oth.order()) * oth
+                return self.increase_order(oth.order()) * oth
         else:
             raise Exception(f"Multiplication should never reach this line!")
 
@@ -315,20 +315,32 @@ class Zi(CayleyDicksonBase):
         """This definition works recursively."""
         return Zi(self.real.conjugate(), - self.imag)
 
-    def cast(self, d):
-        """Return a Zi that is equivalent to this one, but has a higher order, d.
-        Example: increase_order(Zi(2, -3), 2) -> Zi(Zi(2, -3), Zi(0, 0))"""
+    # def cast(self, d):
+    #     """Return a Zi that is equivalent to this one, but has a higher order, d.
+    #     Example: increase_order(Zi(2, -3), 2) -> Zi(Zi(2, -3), Zi(0, 0))"""
+    #     if isinstance(d, int) and d >= 1:
+    #         if isinstance(self, (int, float)):
+    #             return Zi.cast(Zi(self), d)
+    #         else:
+    #             n = self.order()
+    #             if n == d:
+    #                 return self
+    #             elif n < d:
+    #                 return Zi.cast(Zi(self, Zi.zero(n)), d)
+    #             else:
+    #                 raise Exception(f"Should not reach this line, {self = }, {d = }")
+    #     else:
+    #         raise ValueError(f"{d = }, is not an integer >= 1")
+
+    def increase_order(self, d: int):
         if isinstance(d, int) and d >= 1:
-            if isinstance(self, (int, float)):
-                return Zi.cast(Zi(self), d)
+            n = self.order()
+            if n == d:
+                return self
+            elif n < d:
+                return Zi(self, Zi.zero(n)).increase_order(d - 1)
             else:
-                n = self.order()
-                if n == d:
-                    return self
-                elif n < d:
-                    return Zi.cast(Zi(self, Zi.zero(n)), d)
-                else:
-                    raise Exception(f"Should not reach this line, {self = }, {d = }")
+                raise Exception(f"Should not reach this line, {self = }, {d = }")
         else:
             raise ValueError(f"{d = }, is not an integer >= 1")
 
