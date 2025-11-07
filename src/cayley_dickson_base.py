@@ -12,7 +12,7 @@ class CayleyDicksonBase(ABC):
 
     SCALAR_MULTIPLICATION: bool = False  # See the classmethod, scalar_mult
 
-    # See the Fano plan figure at https://en.wikipedia.org/wiki/Octonion
+    # See the Fano plane figure at https://en.wikipedia.org/wiki/Octonion
     # The default list of case-sensitive unit strings, below, corresponds to
     # the notation in that figure as follows:
     # '' = real part,    L = e_4 (L)

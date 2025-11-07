@@ -41,15 +41,11 @@ class Zi(CayleyDicksonBase):
         elif isinstance(real, complex):
             if imag is not None:
                 _re = Zi(real)
-            # else:
-            #     _re = None
             if isinstance(imag, complex):
                 _im = Zi(imag)
             elif isinstance(imag, Zi):
                 _im = imag
-            elif isinstance(imag, tuple):
-                _im = Zi.from_array(imag)
-            elif isinstance(imag, list):
+            elif isinstance(imag, (tuple, list)):
                 _im = Zi.from_array(imag)
             elif imag is None:
                 _re = round(real.real)
@@ -60,15 +56,11 @@ class Zi(CayleyDicksonBase):
         elif isinstance(real, Zi):
             if imag is not None:
                 _re = real
-            # else:
-            #     _re = None
             if isinstance(imag, complex):
                 _im = Zi(imag)
             elif isinstance(imag, Zi):
                 _im = imag
-            elif isinstance(imag, tuple):
-                _im = Zi.from_array(imag)
-            elif isinstance(imag, list):
+            elif isinstance(imag, (tuple, list)):
                 _im = Zi.from_array(imag)
             elif imag is None:
                 _re = round(real.real)
@@ -83,9 +75,6 @@ class Zi(CayleyDicksonBase):
             elif isinstance(imag, Zi):
                 _re = Zi.from_array(real)
                 _im = imag
-            elif isinstance(imag, tuple):
-                _re = Zi.from_array(real)
-                _im = Zi.from_array(imag)
             elif isinstance(imag, (tuple, list)):
                 _re = Zi.from_array(real)
                 _im = Zi.from_array(imag)
@@ -102,7 +91,10 @@ class Zi(CayleyDicksonBase):
         else:
             raise TypeError(f"real={real} is not a valid type for creating a Zi.")
 
-        super().__init__(_re, _im)
+        if (isinstance(_re, int) and isinstance(_im, int)) or (_re.order == _im.order):
+            super().__init__(_re, _im)
+        else:
+            raise TypeError(f"Inputs must resolve to two ints or two Zi's of equal order.")
 
     def __str__(self):
         result = ""
@@ -194,13 +186,13 @@ class Zi(CayleyDicksonBase):
             real_part = a * c - d.conjugate() * b
             imag_part = d * a + b * c.conjugate()
             return Zi(real_part, imag_part)
-        # Otherwise, scalar-like (default) or cast-first multiplication
-        elif m < n:
+        # Otherwise, scalar-like (default) or increase_order first multiplication
+        elif n > m:
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
                 return self * oth.increase_order(self.order)
-        elif m > n:
+        elif n < m:
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
@@ -316,23 +308,6 @@ class Zi(CayleyDicksonBase):
     def conjugate(self):
         """This definition works recursively."""
         return Zi(self.real.conjugate(), - self.imag)
-
-    # def cast(self, d):
-    #     """Return a Zi that is equivalent to this one, but has a higher order, d.
-    #     Example: increase_order(Zi(2, -3), 2) -> Zi(Zi(2, -3), Zi(0, 0))"""
-    #     if isinstance(d, int) and d >= 1:
-    #         if isinstance(self, (int, float)):
-    #             return Zi.cast(Zi(self), d)
-    #         else:
-    #             n = self.order()
-    #             if n == d:
-    #                 return self
-    #             elif n < d:
-    #                 return Zi.cast(Zi(self, Zi.zero(n)), d)
-    #             else:
-    #                 raise Exception(f"Should not reach this line, {self = }, {d = }")
-    #     else:
-    #         raise ValueError(f"{d = }, is not an integer >= 1")
 
     def increase_order(self, d: int):
         if isinstance(d, int) and d >= 1:

@@ -152,6 +152,7 @@ class TestZi(TestCase):
         self.assertEqual(z1.order, 1)
         self.assertEqual(z1.is_complex, True)
         self.assertEqual(z1.is_quaternion, False)
+        self.assertEqual(z1.is_octonion, False)
         self.assertEqual(complex(z1), (10 - 7j))
 
     def test_quaternion(self):
@@ -176,11 +177,10 @@ class TestZi(TestCase):
         with SetScalarMult(True):
             self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
             self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        # Zi.scalar_mult(False)  # ==> Cast first, instead of scalar mult
+        # Zi.scalar_mult(False)  # ==> increase_order first, instead of scalar mult
         with SetScalarMult(False):
-            pass
-            # self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-            # self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+            self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+            self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
         self.assertFalse(Zi.scalar_mult())
 
     def test_octonion(self):
@@ -188,7 +188,6 @@ class TestZi(TestCase):
         q2 = Zi(Zi(-3, -3), Zi(-6, -7))
         o0 = Zi(q1, q2)
         self.assertEqual(o0, Zi(Zi(Zi(10, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
-        # self.assertEqual(str(o0), '((10-7i-10j-2k), (-3-3i-6j-7k))')
         self.assertEqual(str(o0), '10-7i-10j-2k-3L-3I-6J-7K')
         self.assertEqual(o0.order, 3)
         self.assertEqual(o0.norm, 356)
@@ -214,10 +213,7 @@ class TestZi(TestCase):
         self.assertEqual(Zi.random(order=1), Zi(-10, -2))
         self.assertEqual(Zi.random(order=2), Zi(Zi(-3, -3), Zi(-6, -7)))
         o1 = Zi.random(order=3)
-        # self.assertEqual(str(o1), '((7-8i+8j+3k), (-9-10i-8j-4k))')
         self.assertEqual(str(o1), '7-8i+8j+3k-9L-10I-8J-4K')
-        # o2 = Zi.random(order=3)
-        # o3 = Zi.random(order=3)
 
     def test_to_from_array(self):
         q1 = Zi(Zi(10, -7), Zi(-10, -2))
