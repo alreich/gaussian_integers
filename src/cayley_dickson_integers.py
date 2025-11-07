@@ -14,6 +14,8 @@ class Zi(CayleyDicksonBase):
     # TODO: Allow hypercomplex strings as input also
     def __init__(self, real=None, imag=None):
 
+        _re, _im = None, None
+
         if isinstance(real, float):
             _re = int(round(real))
             if isinstance(imag, float):
@@ -39,8 +41,8 @@ class Zi(CayleyDicksonBase):
         elif isinstance(real, complex):
             if imag is not None:
                 _re = Zi(real)
-            else:
-                _re = None
+            # else:
+            #     _re = None
             if isinstance(imag, complex):
                 _im = Zi(imag)
             elif isinstance(imag, Zi):
@@ -58,8 +60,8 @@ class Zi(CayleyDicksonBase):
         elif isinstance(real, Zi):
             if imag is not None:
                 _re = real
-            else:
-                _re = None
+            # else:
+            #     _re = None
             if isinstance(imag, complex):
                 _im = Zi(imag)
             elif isinstance(imag, Zi):
@@ -106,7 +108,7 @@ class Zi(CayleyDicksonBase):
         result = ""
         unit_str = Zi.UNIT_STRINGS
         # If the Zi represents a complex (1), quaternion (2), or octonion (3):
-        if self.order() <= 3:
+        if self.order <= 3:
             for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
                 # Don't include terms with 0 coefficient
                 if idx == 0:
@@ -184,8 +186,8 @@ class Zi(CayleyDicksonBase):
             oth = Zi(other)
         else:
             oth = other
-        n = self.order()
-        m = oth.order()
+        n = self.order
+        m = oth.order
         # If n == m, then Cayley-Dickson multiplication
         if n == m:
             a, b, c, d = self.real, self.imag, oth.real, oth.imag
@@ -197,12 +199,12 @@ class Zi(CayleyDicksonBase):
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self.real * oth, self.imag * oth)
             else:
-                return self * oth.increase_order(self.order())
+                return self * oth.increase_order(self.order)
         elif m > n:
             if Zi.SCALAR_MULTIPLICATION:
                 return Zi(self * oth.real, self * oth.imag)
             else:
-                return self.increase_order(oth.order()) * oth
+                return self.increase_order(oth.order) * oth
         else:
             raise Exception(f"Multiplication should never reach this line!")
 
@@ -266,7 +268,7 @@ class Zi(CayleyDicksonBase):
     #     return r
 
     def __complex__(self) -> complex:
-        if self.order() == 1:
+        if self.order == 1:
             return complex(self.real, self.imag)
         else:
             raise Exception(f"Cannot create a complex from {self}")
@@ -334,11 +336,11 @@ class Zi(CayleyDicksonBase):
 
     def increase_order(self, d: int):
         if isinstance(d, int) and d >= 1:
-            n = self.order()
+            n = self.order
             if n == d:
                 return self
             elif n < d:
-                return Zi(self, Zi.zero(n)).increase_order(d - 1)
+                return Zi(self, Zi.zero(n)).increase_order(d)
             else:
                 raise Exception(f"Should not reach this line, {self = }, {d = }")
         else:
@@ -382,7 +384,7 @@ class Zi(CayleyDicksonBase):
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product.
         For verification purposes."""
-        if Zi.is_quaternion(self) and Zi.is_quaternion(other):
+        if self.is_quaternion and other.is_quaternion:
             a1, b1, c1, d1 = list(utils.flatten(self.to_array()))
             a2, b2, c2, d2 = list(utils.flatten(other.to_array()))
             # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product

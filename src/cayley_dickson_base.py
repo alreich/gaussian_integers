@@ -118,6 +118,7 @@ class CayleyDicksonBase(ABC):
         else:
             raise ValueError("scalar_mult must be a boolean value")
 
+    @property
     def order(self):
         """Order is the number levels contained in the Zi.
         That is, a Zi made up of two integers has order 1, and a Zi
@@ -129,10 +130,11 @@ class CayleyDicksonBase(ABC):
                 return aux(x.real, d + 1)
         return aux(self.real, 1)
 
+    @property
     def dim(self):
         """Dimension is the total number of numbers making up this Zi.
         So, if n is its order, then its dimension is 2^n."""
-        return 2 ** self.order()
+        return 2 ** self.order
 
     @property
     def first(self):
@@ -161,26 +163,30 @@ class CayleyDicksonBase(ABC):
         else:
             raise Exception(f"Cannot create an array from {self}")
 
+    @property
     def is_real(self):
         if isinstance(self.real, (int, float, complex, Fraction)) and self.imag == 0:
             return self.real
         else:
             return False
 
+    @property
     def is_complex(self):
         """Return True if this Zi is essentially a complex number
         That is, the re & im parts are numbers, not other Zis."""
-        return self.order() == 1
+        return self.order == 1
 
+    @property
     def is_quaternion(self):
         """Return True if this Zi is essentially a quaternion
         That is, the re & im parts are essentially complex numbers."""
-        return self.order() == 2
+        return self.order == 2
 
+    @property
     def is_octonion(self):
         """Return True if this Zi is essentially an octonion
         That is, the re & im parts are essentially quaternions."""
-        return self.order() == 3
+        return self.order == 3
 
     @abstractmethod
     def __add__(self, other):
