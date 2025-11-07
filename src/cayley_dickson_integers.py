@@ -359,9 +359,21 @@ class Zi(CayleyDicksonBase):
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product.
         For verification purposes."""
+        # TODO: Can the restriction to quaternions be replaced with a restriction to equal orders?
+        # The following code will work without the restriction to quaternions, as long as the
+        # two inputs have the same order. So, for example, two octonions can be "multiplied"
+        # like this -- the a, b, c, & d values would be complexes (Zi's). However, the resulting
+        # product will not match the corresponding cayley-dickson product for octonions.
+        # Perhaps there's a modification of the Wikipedia formula that will work.
         if self.is_quaternion and other.is_quaternion:
-            a1, b1, c1, d1 = list(utils.flatten(self.to_array()))
-            a2, b2, c2, d2 = list(utils.flatten(other.to_array()))
+            # Decompose each quaternion into its component complex values (e.g., Zi's)
+            z0, z1 = self
+            z2, z3 = other
+            # then decompose each complex (Zi) into its real (int) values
+            a1, b1 = z0
+            c1, d1 = z1
+            a2, b2 = z2
+            c2, d2 = z3
             # See https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
             a = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2
             b = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2

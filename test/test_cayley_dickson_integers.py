@@ -1,5 +1,6 @@
 from unittest import TestCase
 from cayley_dickson_integers import Zi, SetScalarMult, hypercomplex_string_to_array
+import generic_utils as utils
 from random import seed
 
 class TestZi(TestCase):
@@ -163,6 +164,7 @@ class TestZi(TestCase):
         self.assertEqual(q1, Zi(Zi(10, -7), Zi(-10, -2)))
         self.assertEqual(q2, Zi(Zi(-3, -3), Zi(-6, -7)))
         self.assertEqual(q1.order, 2)
+        self.assertEqual(q1.conjugate(), Zi(Zi(10, 7), Zi(10, 2)))
         self.assertEqual(q1.is_complex, False)
         self.assertEqual(q1.is_quaternion, True)
         self.assertEqual(q1.norm, 253)
@@ -191,6 +193,7 @@ class TestZi(TestCase):
         self.assertEqual(str(o0), '10-7i-10j-2k-3L-3I-6J-7K')
         self.assertEqual(o0.order, 3)
         self.assertEqual(o0.norm, 356)
+        self.assertEqual(o0.conjugate(), Zi(Zi(Zi(10, 7), Zi(10, 2)), Zi(Zi(3, 3), Zi(6, 7))))
         self.assertEqual(o0.is_quaternion, False)
         self.assertEqual(o0.is_octonion, True)
 
@@ -200,12 +203,15 @@ class TestZi(TestCase):
         self.assertEqual(o1 + o2, Zi(Zi(Zi(7, -1), Zi(-1, -12)), Zi(Zi(4, -7), Zi(4, 0))))
         self.assertEqual(o1 - o2, Zi(Zi(Zi(13, -13), Zi(-19, 8)), Zi(Zi(-10, 1), Zi(-16, -14))))
         self.assertEqual(o1 * o2, Zi(Zi(Zi(200, 204), Zi(1, -15)), Zi(Zi(163, -135), Zi(90, 148))))
+        #self.assertEqual(o1.hamilton_product(o2), Zi(Zi(Zi(200, 204), Zi(1, -15)), Zi(Zi(163, -135), Zi(90, 148))))
         self.assertEqual(o1 + 2, Zi(Zi(Zi(12, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(2 + o1, Zi(Zi(Zi(12, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(o1 - 2, Zi(Zi(Zi(8, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(-(2 - o1), Zi(Zi(Zi(8, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(o1.to_array(), [[[10, -7], [-10, -2]], [[-3, -3], [-6, -7]]])
         self.assertTrue(Zi.from_array(o1.to_array()) == o1)
+        self.assertEqual(list(utils.flatten(o1.to_array())), [10, -7, -10, -2, -3, -3, -6, -7])
+        self.assertTrue(Zi.from_array(list(utils.flatten(o1.to_array()))) == o1)
 
     def test_rand_gen_higher_orders(self):
         seed(42)
