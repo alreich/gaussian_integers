@@ -15,11 +15,11 @@ class CayleyDicksonBase(ABC):
     # See the Fano plane figure at https://en.wikipedia.org/wiki/Octonion
     # The default list of case-sensitive unit strings, below, corresponds to
     # the notation in that figure as follows:
-    # '' = real part,    L = e_4 (L)
+    # 1 = real part,     L = e_4 (L)
     # i = e_1 (I),       I = e_5 (IL)
     # j = e_2 (J),       J = e_6 (JL)
     # k = e_3 (IJ),      K = e_7 (IJL)
-    DEFAULT_UNIT_STRINGS: list[str] = ["", "i", "j", "k", "L", "I", "J", "K"]
+    DEFAULT_UNIT_STRINGS: list[str] = ["1", "i", "j", "k", "L", "I", "J", "K"]
     UNIT_STRINGS = DEFAULT_UNIT_STRINGS
 
     def __init__(self, real=None, imag=None):
@@ -71,6 +71,11 @@ class CayleyDicksonBase(ABC):
 
     @classmethod
     def unit_strings(cls, value=None, prefix=None, size=None):
+        """
+        value -- Custom, user-provided list of unit strings
+        prefix - Prefix to use for each element, if generating unit strings
+        size --- Number of unit strings to generate
+        """
 
         if value is None:
 
@@ -81,7 +86,7 @@ class CayleyDicksonBase(ABC):
             # Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ...
             elif isinstance(prefix, str) and isinstance(size, int) and size > 0:
                 count = 1
-                generic_list = ['']
+                generic_list = ['1']
                 for x in range(size - 1):
                     generic_list.append(prefix + str(count))
                     count += 1

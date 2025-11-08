@@ -365,7 +365,7 @@ class Zi(CayleyDicksonBase):
         # two inputs have the same order. So, for example, two octonions can be "multiplied"
         # like this -- the a, b, c, & d values would be complexes (Zi's). However, the resulting
         # product will not match the corresponding cayley-dickson product for octonions.
-        # Perhaps there's a modification of the Wikipedia formula that will work.
+        # Perhaps there's a modification of the Hanilton product that will work.
         if self.is_quaternion and other.is_quaternion:
             # Decompose each quaternion into its component complex values (e.g., Zi's)
             z0, z1 = self
@@ -494,12 +494,112 @@ def hypercomplex_string_to_array(qs):
     else:
         return result  # octonion (8 elements)
 
-def print_unit_mult_table(order):
+# def print_unit_mult_table(order):
+#     """Derive and print a units multiplication table of a given
+#     order. e.g., order=3 produces the table in Wikipedia, shown
+#     here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
+#
+#     dim = 2 ** order
+#
+#     # Create a dictionary of units, where
+#     # Key = unit name (str)
+#     # Value = unit element (Zi)
+#     units = dict()
+#     for pos in range(dim):
+#         arr = np.zeros(dim, dtype=int)
+#         arr[pos] = 1
+#         units['e' + str(pos)] = Zi.from_array(list(arr.data))
+#
+#     # Create a reverse dictionary from the one above,
+#     # then create a reverse dictionary of the negative units,
+#     # and use that to augment the original reverse dictionary
+#     rev = {val: key for key, val in units.items()}
+#     negs = {-z: '-' + e for z, e in rev.items()}
+#     rev.update(negs)
+#
+#     # Extract a list of the unit names (str)
+#     unit_names = list(units.keys())
+#
+#     # Print the table's column headings
+#     colwidth = len(unit_names[-1]) + 1
+#     header = f"{' ':>{colwidth}} "
+#     for x in unit_names:
+#         header += f"{x:>{colwidth}} "
+#     print(header)
+#
+#     # Print the table's rows
+#     for x in unit_names:
+#         row = f"{x:>{colwidth}} "
+#         for y in unit_names:
+#             prod = rev[units[x] * units[y]]
+#             row += f"{prod:>{colwidth}} "
+#         print(row)
+#
+#     return None
+
+# def print_unit_mult_table(order, unit_strs=Zi.DEFAULT_UNIT_STRINGS):
+#     """Derive and print a units multiplication table of a given
+#     order. e.g., order=3 produces the table in Wikipedia, shown
+#     here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
+#
+#     dim = 2 ** order
+#
+#     if isinstance(unit_strs, str):
+#         unit_strs = Zi.unit_strings(prefix=unit_strs, size=dim)
+#
+#     # Create a dictionary of units, where
+#     # Key = unit name (str)
+#     # Value = unit element (Zi)
+#     units = dict()
+#     for pos in range(dim):
+#         arr = np.zeros(dim, dtype=int)
+#         arr[pos] = 1
+#         # units['e' + str(pos)] = Zi.from_array(list(arr.data))
+#         units[unit_strs[pos]] = Zi.from_array(list(arr.data))
+#
+#     # Create a reverse dictionary from the one above,
+#     # then create a reverse dictionary of the negative units,
+#     # and use that to augment the original reverse dictionary
+#     rev = {val: key for key, val in units.items()}
+#     negs = {-z: '-' + e for z, e in rev.items()}
+#     rev.update(negs)
+#
+#     # Extract a list of the unit names (str)
+#     unit_names = list(units.keys())
+#
+#     # Print the table's column headings
+#     colwidth = len(unit_names[-1]) + 1
+#     header = f"{' ':>{colwidth}} |"
+#     for x in unit_names:
+#         header += f"{x:>{colwidth}} "
+#     print(header)
+#     # print("-"*(dim + 1)*(colwidth + 1))
+#     print("-"*colwidth + "-+" + "-"*(dim)*(colwidth + 1))
+#
+#     # Print the table's rows
+#     for x in unit_names:
+#         row = f"{x:>{colwidth}} |"
+#         for y in unit_names:
+#             prod = rev[units[x] * units[y]]
+#             row += f"{prod:>{colwidth}} "
+#         print(row)
+#
+#     return None
+
+def print_unit_mult_table(order, prefix=None):
     """Derive and print a units multiplication table of a given
     order. e.g., order=3 produces the table in Wikipedia, shown
     here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
 
     dim = 2 ** order
+
+    if dim > 8:
+        unit_strs = Zi.unit_strings(prefix='e', size=dim)
+    else:
+        if prefix is None:
+            unit_strs = Zi.DEFAULT_UNIT_STRINGS
+        else:
+            unit_strs = Zi.unit_strings(prefix=prefix, size=dim)
 
     # Create a dictionary of units, where
     # Key = unit name (str)
@@ -508,7 +608,8 @@ def print_unit_mult_table(order):
     for pos in range(dim):
         arr = np.zeros(dim, dtype=int)
         arr[pos] = 1
-        units['e' + str(pos)] = Zi.from_array(list(arr.data))
+        # units['e' + str(pos)] = Zi.from_array(list(arr.data))
+        units[unit_strs[pos]] = Zi.from_array(list(arr.data))
 
     # Create a reverse dictionary from the one above,
     # then create a reverse dictionary of the negative units,
@@ -522,14 +623,16 @@ def print_unit_mult_table(order):
 
     # Print the table's column headings
     colwidth = len(unit_names[-1]) + 1
-    header = f"{' ':>{colwidth}} "
+    header = f"{' ':>{colwidth}} |"
     for x in unit_names:
         header += f"{x:>{colwidth}} "
     print(header)
+    # print("-"*(dim + 1)*(colwidth + 1))
+    print("-"*colwidth + "-+" + "-"*(dim)*(colwidth + 1))
 
     # Print the table's rows
     for x in unit_names:
-        row = f"{x:>{colwidth}} "
+        row = f"{x:>{colwidth}} |"
         for y in unit_names:
             prod = rev[units[x] * units[y]]
             row += f"{prod:>{colwidth}} "
