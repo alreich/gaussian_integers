@@ -3,6 +3,7 @@
 from random import randint
 from math import sqrt
 from numbers import Number
+import numpy as np
 import re
 
 import generic_utils as utils
@@ -493,6 +494,49 @@ def hypercomplex_string_to_array(qs):
     else:
         return result  # octonion (8 elements)
 
+def print_unit_mult_table(order):
+    """Derive and print a units multiplication table of a given
+    order. e.g., order=3 produces the table in Wikipedia, shown
+    here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
+
+    dim = 2 ** order
+
+    # Create a dictionary of units, where
+    # Key = unit name (str)
+    # Value = unit element (Zi)
+    units = dict()
+    for pos in range(dim):
+        arr = np.zeros(dim, dtype=int)
+        arr[pos] = 1
+        units['e' + str(pos)] = Zi.from_array(list(arr.data))
+
+    # Create a reverse dictionary from the one above,
+    # then create a reverse dictionary of the negative units,
+    # and use that to augment the original reverse dictionary
+    rev = {val: key for key, val in units.items()}
+    negs = {-z: '-' + e for z, e in rev.items()}
+    rev.update(negs)
+
+    # Extract a list of the unit names (str)
+    unit_names = list(units.keys())
+
+    # Print the table's column headings
+    colwidth = len(unit_names[-1]) + 1
+    header = f"{' ':>{colwidth}} "
+    for x in unit_names:
+        header += f"{x:>{colwidth}} "
+    print(header)
+
+    # Print the table's rows
+    for x in unit_names:
+        row = f"{x:>{colwidth}} "
+        for y in unit_names:
+            prod = rev[units[x] * units[y]]
+            row += f"{prod:>{colwidth}} "
+        print(row)
+
+    return None
+
 class SetScalarMult(utils.SetClassVariable):
     """A context manager that, on entry, stores the current value of
     scalar_mult, and then sets it to the input value. On exit, it restores
@@ -537,5 +581,9 @@ if __name__ == "__main__":
     print(f"{str(Zi(Zi(1, 2), Zi(3, 4))) = }")
     print(f"{Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4))) = }")
     print(f"{str(Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4)))) = }")
+
+    print("\nOctonion unit element multiplication table:")
+    print("(see https://en.wikipedia.org/wiki/Octonion#Multiplication)")
+    print_unit_mult_table(3)
 
     print("\n=== End of Demo ===\n")
