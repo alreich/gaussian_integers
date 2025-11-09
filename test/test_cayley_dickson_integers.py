@@ -135,6 +135,13 @@ class TestZi(TestCase):
         # None - None
         self.assertEqual(Zi(), Zi(0, 0))
 
+        # str - complex
+        # str - Zi
+        # str - tuple
+        # str - list
+        # str - None
+        self.assertEqual(Zi('10-7i'), Zi(10, -7))
+
     def test_random(self):
         seed(42)
         n = 4
@@ -203,7 +210,6 @@ class TestZi(TestCase):
         self.assertEqual(o1 + o2, Zi(Zi(Zi(7, -1), Zi(-1, -12)), Zi(Zi(4, -7), Zi(4, 0))))
         self.assertEqual(o1 - o2, Zi(Zi(Zi(13, -13), Zi(-19, 8)), Zi(Zi(-10, 1), Zi(-16, -14))))
         self.assertEqual(o1 * o2, Zi(Zi(Zi(200, 204), Zi(1, -15)), Zi(Zi(163, -135), Zi(90, 148))))
-        #self.assertEqual(o1.hamilton_product(o2), Zi(Zi(Zi(200, 204), Zi(1, -15)), Zi(Zi(163, -135), Zi(90, 148))))
         self.assertEqual(o1 + 2, Zi(Zi(Zi(12, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(2 + o1, Zi(Zi(Zi(12, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))
         self.assertEqual(o1 - 2, Zi(Zi(Zi(8, -7), Zi(-10, -2)), Zi(Zi(-3, -3), Zi(-6, -7))))

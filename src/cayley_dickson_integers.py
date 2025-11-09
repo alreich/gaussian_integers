@@ -40,6 +40,7 @@ class Zi(CayleyDicksonBase):
                 raise TypeError(f"An integer real value is not compatible with imag={imag}")
 
         elif isinstance(real, complex):
+            # TODO: Why can't I code this like I did for real is Zi, below?
             if imag is not None:
                 _re = Zi(real)
             if isinstance(imag, complex):
@@ -70,20 +71,35 @@ class Zi(CayleyDicksonBase):
                 raise TypeError(f"A Zi real value is not compatible with imag={imag}")
 
         elif isinstance(real, (tuple, list)):
+            _re = Zi.from_array(real)
             if isinstance(imag, complex):
-                _re = Zi.from_array(real)
                 _im = Zi(imag)
             elif isinstance(imag, Zi):
-                _re = Zi.from_array(real)
                 _im = imag
             elif isinstance(imag, (tuple, list)):
-                _re = Zi.from_array(real)
                 _im = Zi.from_array(imag)
             elif imag is None:
                 _re = round(real[0])
                 _im = round(real[1])
             else:
                 raise TypeError(f"A tuple or list real value is not compatible with imag={imag}")
+
+        elif isinstance(real, str):
+            _re = Zi.from_array(hypercomplex_string_to_array(real))
+            if isinstance(imag, str):
+                _im = Zi.from_array(hypercomplex_string_to_array(imag))
+            elif isinstance(imag, complex):
+                _im = Zi(imag)
+            elif isinstance(imag, Zi):
+                _im = imag
+            elif isinstance(imag, (tuple, list)):
+                _im = Zi.from_array(imag)
+            elif imag is None:
+                a, b = _re
+                _re = a
+                _im = b
+            else:
+                raise TypeError(f"A string real value is not compatible with imag={imag}")
 
         elif real is None and imag is None:
             _re = 0
@@ -494,98 +510,6 @@ def hypercomplex_string_to_array(qs):
     else:
         return result  # octonion (8 elements)
 
-# def print_unit_mult_table(order):
-#     """Derive and print a units multiplication table of a given
-#     order. e.g., order=3 produces the table in Wikipedia, shown
-#     here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
-#
-#     dim = 2 ** order
-#
-#     # Create a dictionary of units, where
-#     # Key = unit name (str)
-#     # Value = unit element (Zi)
-#     units = dict()
-#     for pos in range(dim):
-#         arr = np.zeros(dim, dtype=int)
-#         arr[pos] = 1
-#         units['e' + str(pos)] = Zi.from_array(list(arr.data))
-#
-#     # Create a reverse dictionary from the one above,
-#     # then create a reverse dictionary of the negative units,
-#     # and use that to augment the original reverse dictionary
-#     rev = {val: key for key, val in units.items()}
-#     negs = {-z: '-' + e for z, e in rev.items()}
-#     rev.update(negs)
-#
-#     # Extract a list of the unit names (str)
-#     unit_names = list(units.keys())
-#
-#     # Print the table's column headings
-#     colwidth = len(unit_names[-1]) + 1
-#     header = f"{' ':>{colwidth}} "
-#     for x in unit_names:
-#         header += f"{x:>{colwidth}} "
-#     print(header)
-#
-#     # Print the table's rows
-#     for x in unit_names:
-#         row = f"{x:>{colwidth}} "
-#         for y in unit_names:
-#             prod = rev[units[x] * units[y]]
-#             row += f"{prod:>{colwidth}} "
-#         print(row)
-#
-#     return None
-
-# def print_unit_mult_table(order, unit_strs=Zi.DEFAULT_UNIT_STRINGS):
-#     """Derive and print a units multiplication table of a given
-#     order. e.g., order=3 produces the table in Wikipedia, shown
-#     here https://en.wikipedia.org/wiki/Octonion#Multiplication"""
-#
-#     dim = 2 ** order
-#
-#     if isinstance(unit_strs, str):
-#         unit_strs = Zi.unit_strings(prefix=unit_strs, size=dim)
-#
-#     # Create a dictionary of units, where
-#     # Key = unit name (str)
-#     # Value = unit element (Zi)
-#     units = dict()
-#     for pos in range(dim):
-#         arr = np.zeros(dim, dtype=int)
-#         arr[pos] = 1
-#         # units['e' + str(pos)] = Zi.from_array(list(arr.data))
-#         units[unit_strs[pos]] = Zi.from_array(list(arr.data))
-#
-#     # Create a reverse dictionary from the one above,
-#     # then create a reverse dictionary of the negative units,
-#     # and use that to augment the original reverse dictionary
-#     rev = {val: key for key, val in units.items()}
-#     negs = {-z: '-' + e for z, e in rev.items()}
-#     rev.update(negs)
-#
-#     # Extract a list of the unit names (str)
-#     unit_names = list(units.keys())
-#
-#     # Print the table's column headings
-#     colwidth = len(unit_names[-1]) + 1
-#     header = f"{' ':>{colwidth}} |"
-#     for x in unit_names:
-#         header += f"{x:>{colwidth}} "
-#     print(header)
-#     # print("-"*(dim + 1)*(colwidth + 1))
-#     print("-"*colwidth + "-+" + "-"*(dim)*(colwidth + 1))
-#
-#     # Print the table's rows
-#     for x in unit_names:
-#         row = f"{x:>{colwidth}} |"
-#         for y in unit_names:
-#             prod = rev[units[x] * units[y]]
-#             row += f"{prod:>{colwidth}} "
-#         print(row)
-#
-#     return None
-
 def print_unit_mult_table(order, prefix=None):
     """Derive and print a units multiplication table of a given
     order. e.g., order=3 produces the table in Wikipedia, shown
@@ -655,38 +579,55 @@ class SetScalarMult(utils.SetClassVariable):
 # Example usage and testing:
 if __name__ == "__main__":
 
-    print("\n=== Zi Demo ===\n")
+    print("\n=== Zi Demo ===")
+    print("\nThe class Zi represents a hypercomplex integer.")
+    print("(e.g., complex, quaternion, octonion, etc. with integer components)\n")
 
+    print(f"{repr(Zi(1, 2))}, at the lowest 'level' (order=1) it's a Gaussian integer")
+    print(f"\n*** Zi in string form uses 'i' instead of Python's 'j':")
+    print(f"{str(Zi(1, 2)) = }")
+    print(f"*** Zi can convert that string back into a Gaussian integer:")
+    print(f"{Zi('1+2i') = }")
+    print(f"*** But Zi will convert a Python complex string into a quaternion:")
+    print(f"{Zi('1+2j') = } = 1+0i+2j+0k\n")
     print(f"{Zi() = }")
     print(f"{Zi(1) = }")
+    print(f"{Zi(2) = }")
     print(f"{Zi.zero() = }")
     print(f"{Zi.eye() = }")
     print(f"{Zi.two() = }")
-
-    # floats get rounded
+    print(f"\n*** Floats get rounded;")
     print(f"{Zi(2.3, 3.8) = }")
-    print(f"{Zi(-2.3, 3.8) = }")
-    print(f"{Zi(2.3, -3.8) = }")
-    print(f"{Zi(-2.3, -3.8) = }")
-    print(f"{Zi(2.3, 4) = }")
-    print(f"{Zi(-2.3, 4) = }")
     print(f"{Zi(2, 3.8) = }")
-    print(f"{Zi(2, -3.8) = }")
     print(f"{Zi(2.3) = }")
-    print(f"{Zi(2) = }")
+    print(f"\n*** Complexes become Zi's of order 1:")
     print(f"{Zi((2.3 - 3.7j)) = }")
     print(f"{Zi(-3.3j) = }")
-    print(f"{Zi(-3.3j).norm = }")
+    print(f"{Zi(3, 7).order = }")
+    print(f"{Zi(3, 7).dim = }")
+    print(f"{Zi(3, 7).norm = }")
     print(f"{Zi.two().norm = }")
-
+    print(f"{Zi(3, 7).conjugate() = }")
     print(f"{str(Zi(2, 3)) = }")
+    print(f"{Zi(3, 7).conjugate() = }")
+    print(f"{Zi(3, 7).to_array() = }")
+
+    print("\nQuaternions:")
     print(f"{Zi(Zi(1, 2), Zi(3, 4)) = }")
     print(f"{str(Zi(Zi(1, 2), Zi(3, 4))) = }")
+    print(f"{Zi(Zi(1, 2), Zi(3, 4)).order = }")
+    print(f"{Zi(Zi(1, 2), Zi(3, 4)).dim = }")
+    print(f"{Zi(Zi(1, 2), Zi(3, 4)).conjugate() = }")
+    print(f"{Zi(Zi(1, 2), Zi(3, 4)).to_array() = }")
+
+    print("\nOctonions:")
     print(f"{Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4))) = }")
     print(f"{str(Zi(Zi(Zi(1, 2), Zi(3, 4)), Zi(Zi(-1, -2), Zi(-3, -4)))) = }")
 
     print("\nOctonion unit element multiplication table:")
     print("(see https://en.wikipedia.org/wiki/Octonion#Multiplication)")
+    print_unit_mult_table(3, prefix='e')
+    print("\nor with default unit elements")
     print_unit_mult_table(3)
 
     print("\n=== End of Demo ===\n")
