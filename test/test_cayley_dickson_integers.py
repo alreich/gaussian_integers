@@ -1,12 +1,12 @@
 from unittest import TestCase
-from cayley_dickson_integers import Zi, SetScalarMult, hypercomplex_string_to_array
+from cayley_dickson_integers import Zi, hypercomplex_string_to_array  # SetScalarMult
 import generic_utils as utils
 from random import seed
 
 class TestZi(TestCase):
 
     def setUp(self) -> None:
-        pass
+        Zi.include_zero_coefs = False
 
     def test_constructor_v1(self):
         seed(42)
@@ -182,15 +182,17 @@ class TestZi(TestCase):
         self.assertEqual(q1.hamilton_product(q2), q1 * q2)
         self.assertEqual(q2.hamilton_product(q1), q2 * q1)
         # Mult by a real number. Scalar_mult setting shouldn't matter.
-        self.assertFalse(Zi.scalar_mult())
-        with SetScalarMult(True):
-            self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-            self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        # self.assertFalse(Zi.scalar_mult)
+        Zi.scalar_mult = True
+        # with SetScalarMult(True):
+        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
         # Zi.scalar_mult(False)  # ==> increase_order first, instead of scalar mult
-        with SetScalarMult(False):
-            self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
-            self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        self.assertFalse(Zi.scalar_mult())
+        # with SetScalarMult(False):
+        Zi.scalar_mult = False
+        self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
+        self.assertFalse(Zi.scalar_mult)
 
     def test_octonion(self):
         q1 = Zi(Zi(10, -7), Zi(-10, -2))

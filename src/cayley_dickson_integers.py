@@ -114,15 +114,16 @@ class Zi(CayleyDicksonBase):
             raise TypeError(f"Inputs must resolve to two ints or two Zi's of equal order.")
 
     def __str__(self):
+        """Return the string representation of the Zi using the current list of unit_strings."""
         result = ""
         unit_str = Zi.UNIT_STRINGS
         # If the Zi represents a complex (1), quaternion (2), or octonion (3):
         if self.order <= 3:
             for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
-                # Don't include terms with 0 coefficient
                 if idx == 0:
                     if coef == 0:
-                        pass
+                        if Zi.include_zero_coefs:  # TODO: Simplify this logic, maybe
+                            result = '0'
                     else:
                         result = str(coef)
                 else:
@@ -131,17 +132,24 @@ class Zi(CayleyDicksonBase):
                             if result == "":
                                 result = f"{unit_str[idx]}"
                             else:
-                                result = result + f"+{unit_str[idx]}"
+                                # result = result + f"+{unit_str[idx]}"
+                                result += f"+{unit_str[idx]}"
                         else:
                             if result == "":
                                 result = f"{coef}{unit_str[idx]}"
                             else:
-                                result = result + f"+{coef}{unit_str[idx]}"
+                                # result = result + f"+{coef}{unit_str[idx]}"
+                                result += f"+{coef}{unit_str[idx]}"
+                    elif coef == 0:
+                        if Zi.include_zero_coefs:
+                            result += f"+0{unit_str[idx]}"
                     elif coef < 0:
                         if coef == -1:
-                            result = result + f"-{unit_str[idx]}"
+                            # result = result + f"-{unit_str[idx]}"
+                            result += f"-{unit_str[idx]}"
                         else:
-                            result = result + f"{coef}{unit_str[idx]}"
+                            # result = result + f"{coef}{unit_str[idx]}"
+                            result += f"{coef}{unit_str[idx]}"
                     else:
                         pass
         # Otherwise, for sedenion or greater, return a flat array in string form
@@ -205,12 +213,12 @@ class Zi(CayleyDicksonBase):
             return Zi(real_part, imag_part)
         # Otherwise, scalar-like (default) or increase_order first multiplication
         elif n > m:
-            if Zi.SCALAR_MULTIPLICATION:
+            if Zi.scalar_mult:
                 return Zi(self.real * oth, self.imag * oth)
             else:
                 return self * oth.increase_order(self.order)
         elif n < m:
-            if Zi.SCALAR_MULTIPLICATION:
+            if Zi.scalar_mult:
                 return Zi(self * oth.real, self * oth.imag)
             else:
                 return self.increase_order(oth.order) * oth
@@ -564,17 +572,17 @@ def print_unit_mult_table(order, prefix=None):
 
     return None
 
-class SetScalarMult(utils.SetClassVariable):
-    """A context manager that, on entry, stores the current value of
-    scalar_mult, and then sets it to the input value. On exit, it restores
-    the current value."""
-
-    def __init__(self, new_value):
-        super().__init__(Zi.scalar_mult, new_value)
-
-    def __enter__(self):
-        super().__enter__()
-        print(f"\nNOTE: Scalar Multiplication set to {self.new_value}")
+# class SetScalarMult(utils.SetClassVariable):
+#     """A context manager that, on entry, stores the current value of
+#     scalar_mult, and then sets it to the input value. On exit, it restores
+#     the current value."""
+#
+#     def __init__(self, new_value):
+#         super().__init__(Zi.scalar_mult, new_value)
+#
+#     def __enter__(self):
+#         super().__enter__()
+#         print(f"\nNOTE: Scalar Multiplication set to {self.new_value}")
 
 # Example usage and testing:
 if __name__ == "__main__":

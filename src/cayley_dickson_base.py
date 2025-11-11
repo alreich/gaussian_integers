@@ -10,7 +10,12 @@ class CayleyDicksonBase(ABC):
     of some type (e.g., integer, Fraction) or another instance of CayleyDicksonBase subclass.
     """
 
-    SCALAR_MULTIPLICATION: bool = False  # See the classmethod, scalar_mult
+    # SCALAR_MULTIPLICATION: bool = False  # See the classmethod, scalar_mult
+    # INCLUDE_ZERO_COEFFICENTS: bool = False  # for __str__ output
+    _scalar_mult = False
+    _include_zero_coefs = False
+
+    # TODO: Setup unit_strings similar to the two boolean variables, above
 
     # See the Fano plane figure at https://en.wikipedia.org/wiki/Octonion
     # The default list of case-sensitive unit strings, below, corresponds to
@@ -107,21 +112,41 @@ class CayleyDicksonBase(ABC):
 
         return cls.UNIT_STRINGS
 
-    @classmethod
-    def scalar_mult(cls, value=False):
-        """Determines how multiplication of two elements of different orders works.
-        If scalar_mult is True, then the lower order element is treated like a scalar
-        w.r.t. the higher order element, otherwise, prior to multiplication, the lower
-        order element is cast to the same order as the higher order element.
-        Calling scalar_mult() without an argument will simply return it's current
-        value, which by default is False."""
-        if value is None:
-            return cls.SCALAR_MULTIPLICATION
-        elif isinstance(value, bool):
-            cls.SCALAR_MULTIPLICATION = value
-            return cls.SCALAR_MULTIPLICATION
-        else:
-            raise ValueError("scalar_mult must be a boolean value")
+    @property
+    def scalar_mult(self):
+        return self._scalar_mult
+
+    @scalar_mult.setter
+    def scalar_mult(self, new_value):
+        if not isinstance(new_value, bool):
+            raise ValueError("Value must be True or False")
+        self._scalar_mult = new_value
+
+    @property
+    def include_zero_coefs(self):
+        return self._include_zero_coefs
+
+    @include_zero_coefs.setter
+    def include_zero_coefs(self, new_value):
+        if not isinstance(new_value, bool):
+            raise ValueError("Value must be True or False")
+        self._include_zero_coefs = new_value
+
+    # @classmethod
+    # def scalar_mult(cls, value=None):
+    #     """Determines how multiplication of two elements of different orders works.
+    #     If scalar_mult is True, then the lower order element is treated like a scalar
+    #     w.r.t. the higher order element, otherwise, prior to multiplication, the lower
+    #     order element is cast to the same order as the higher order element.
+    #     Calling scalar_mult() without an argument will simply return it's current
+    #     value, which by default is False."""
+    #     if value is None:
+    #         return cls.SCALAR_MULTIPLICATION
+    #     elif isinstance(value, bool):
+    #         cls.SCALAR_MULTIPLICATION = value
+    #         return cls.SCALAR_MULTIPLICATION
+    #     else:
+    #         raise ValueError("scalar_mult must be a boolean value")
 
     @property
     def order(self):
