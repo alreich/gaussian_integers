@@ -572,18 +572,6 @@ def print_unit_mult_table(order, prefix=None):
 
     return None
 
-# class SetScalarMult(utils.SetClassVariable):
-#     """A context manager that, on entry, stores the current value of
-#     scalar_mult, and then sets it to the input value. On exit, it restores
-#     the current value."""
-#
-#     def __init__(self, new_value):
-#         super().__init__(Zi.scalar_mult, new_value)
-#
-#     def __enter__(self):
-#         super().__enter__()
-#         print(f"\nNOTE: Scalar Multiplication set to {self.new_value}")
-
 # Example usage and testing:
 if __name__ == "__main__":
 

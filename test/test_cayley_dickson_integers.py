@@ -1,5 +1,5 @@
 from unittest import TestCase
-from cayley_dickson_integers import Zi, hypercomplex_string_to_array  # SetScalarMult
+from cayley_dickson_integers import Zi, hypercomplex_string_to_array
 import generic_utils as utils
 from random import seed
 
@@ -181,14 +181,19 @@ class TestZi(TestCase):
         self.assertEqual(q1 * q2, Zi(Zi(-125, 49), Zi(-73, -52)))
         self.assertEqual(q1.hamilton_product(q2), q1 * q2)
         self.assertEqual(q2.hamilton_product(q1), q2 * q1)
-        # Mult by a real number. Scalar_mult setting shouldn't matter.
-        # self.assertFalse(Zi.scalar_mult)
+
+        # TODO: Need more tests of Zi.scalar_mult (like those below)
+
+        # Treat the lower order value, 2, as a scalar
+        # So, it is multiplied by each component of the higher
+        # order value, q1.
         Zi.scalar_mult = True
-        # with SetScalarMult(True):
         self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
         self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
-        # Zi.scalar_mult(False)  # ==> increase_order first, instead of scalar mult
-        # with SetScalarMult(False):
+
+        # Don't treat the lower order term like a scalar,
+        # rather, increase it's order first to match that of
+        # the higher order term.
         Zi.scalar_mult = False
         self.assertEqual(q1 * 2, Zi(Zi(20, -14), Zi(-20, -4)))
         self.assertEqual(2 * q1, Zi(Zi(20, -14), Zi(-20, -4)))
@@ -324,3 +329,21 @@ class TestZi(TestCase):
         self.assertEqual(hypercomplex_string_to_array('2i-1+3k-4j'), [-1, 2, -4, 3])
         self.assertEqual(hypercomplex_string_to_array('L-k'), [0, 0, 0, -1, 1, 0, 0, 0])
         self.assertEqual(hypercomplex_string_to_array('7-2.4e-3i+3.75j-4.0k'), [7, -2.4e-3, 3.75, -4.0])
+
+    def test_include_zero_coefs(self):
+        Zi.include_zero_coefs = True
+        self.assertTrue(Zi.include_zero_coefs)
+        self.assertEqual(str(Zi(Zi(4, 5), Zi(0, -2))), "4+5i+0j-2k")
+        Zi.include_zero_coefs = False
+        self.assertFalse(Zi.include_zero_coefs)
+        self.assertEqual(str(Zi(Zi(4, 5), Zi(0, -2))), "4+5i-2k")
+
+    def test_scalar_mult(self):
+        Zi.scalar_mult = True
+        print(f"\n{Zi.scalar_mult = }")
+        self.assertTrue(Zi.scalar_mult)
+        self.assertEqual(2 * Zi(4, 5), Zi(8, 10))
+        Zi.scalar_mult = False
+        print(f"{Zi.scalar_mult = }")
+        self.assertFalse(Zi.scalar_mult)
+        self.assertEqual(2 * Zi(4, 5), Zi(8, 10))

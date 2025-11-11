@@ -42,24 +42,26 @@ def make_int_or_float(st: str):
     i_st = int(f_st)
     return i_st if i_st == f_st else f_st
 
-# class SetClassVariable:
-#     """A generic context manager to temporarily set a new value for a
-#     class variable, and then reset it back to its original value.
-#     It expects to use a getter/setter method to indirectly get/set
-#     the class variable, where calling the method without an argument
-#     will return the current value of the class variable, and calling
-#     with an argument will set the class variable to that value.
-#     """
-#     def __init__(self, getter_setter_method, new_value):
-#         self.get_set_method = getter_setter_method
-#         self.new_value = new_value
-#         self.original_value = None
-#
-#     def __enter__(self):
-#         self.original_value = self.get_set_method()
-#         self.get_set_method(self.new_value)
-#
-#     def __exit__(self, exc_type, exc_value, exc_traceback):
-#         if exc_type:
-#             print(f"Something went wrong: {exc_value}")
-#         self.get_set_method(self.original_value)
+# This class is no longer used for this project, but might come in
+# handy in the future.
+class SetClassVariable:
+    """A generic context manager to temporarily set a new value for a
+    class variable, and then reset it back to its original value.
+    It expects to use a getter/setter method to indirectly get/set
+    the class variable, where calling the method without an argument
+    will return the current value of the class variable, and calling
+    with an argument will set the class variable to that value.
+    """
+    def __init__(self, getter_setter_method, new_value):
+        self.get_set_method = getter_setter_method
+        self.new_value = new_value
+        self.original_value = None
+
+    def __enter__(self):
+        self.original_value = self.get_set_method()
+        self.get_set_method(self.new_value)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        if exc_type:
+            print(f"Something went wrong: {exc_value}")
+        self.get_set_method(self.original_value)
