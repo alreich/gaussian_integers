@@ -9,6 +9,10 @@ import re
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
 
+CayleyDicksonBase.scalar_mult = False
+CayleyDicksonBase.include_zero_coefs = False
+CayleyDicksonBase.unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
+
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
 
@@ -116,7 +120,7 @@ class Zi(CayleyDicksonBase):
     def __str__(self):
         """Return the string representation of the Zi using the current list of unit_strings."""
         result = ""
-        unit_str = Zi.UNIT_STRINGS
+        unit_str: list[str] = Zi.unit_strings()
         # If the Zi represents a complex (1), quaternion (2), or octonion (3):
         if self.order <= 3:
             for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
@@ -389,7 +393,7 @@ class Zi(CayleyDicksonBase):
         # two inputs have the same order. So, for example, two octonions can be "multiplied"
         # like this -- the a, b, c, & d values would be complexes (Zi's). However, the resulting
         # product will not match the corresponding cayley-dickson product for octonions.
-        # Perhaps there's a modification of the Hanilton product that will work.
+        # TODO: Generalize the Hamilton product to handle this.
         if self.is_quaternion and other.is_quaternion:
             # Decompose each quaternion into its component complex values (e.g., Zi's)
             z0, z1 = self
@@ -526,12 +530,12 @@ def print_unit_mult_table(order, prefix=None):
     dim = 2 ** order
 
     if dim > 8:
-        unit_strs = Zi.unit_strings(prefix='e', size=dim)
+        unit_strs = Zi.generate_unit_strings(prefix='e', size=dim)
     else:
         if prefix is None:
-            unit_strs = Zi.DEFAULT_UNIT_STRINGS
+            unit_strs = Zi.unit_strings
         else:
-            unit_strs = Zi.unit_strings(prefix=prefix, size=dim)
+            unit_strs = Zi.generate_unit_strings(prefix=prefix, size=dim)
 
     # Create a dictionary of units, where
     # Key = unit name (str)
@@ -560,7 +564,7 @@ def print_unit_mult_table(order, prefix=None):
         header += f"{x:>{colwidth}} "
     print(header)
     # print("-"*(dim + 1)*(colwidth + 1))
-    print("-"*colwidth + "-+" + "-"*(dim)*(colwidth + 1))
+    print("-"*colwidth + "-+" + "-"*dim*(colwidth + 1))
 
     # Print the table's rows
     for x in unit_names:

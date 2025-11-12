@@ -10,9 +10,6 @@ class CayleyDicksonBase(ABC):
     of some type (e.g., integer, Fraction) or another instance of CayleyDicksonBase subclass.
     """
 
-    _scalar_mult = False
-    _include_zero_coefs = False
-
     # TODO: Setup unit_strings similar to the two boolean variables, above
 
     # See the Fano plane figure at https://en.wikipedia.org/wiki/Octonion
@@ -22,10 +19,17 @@ class CayleyDicksonBase(ABC):
     # i = e_1 (I),       I = e_5 (IL)
     # j = e_2 (J),       J = e_6 (JL)
     # k = e_3 (IJ),      K = e_7 (IJL)
-    DEFAULT_UNIT_STRINGS: list[str] = ["1", "i", "j", "k", "L", "I", "J", "K"]
-    UNIT_STRINGS = DEFAULT_UNIT_STRINGS
+    _default_unit_strings: list[str] = ["1", "i", "j", "k", "L", "I", "J", "K"]
+    # UNIT_STRINGS = _default_unit_strings
+
+    _scalar_mult: bool = False
+    _include_zero_coefs: bool = False
+    _unit_strings: list[str] = ["1", "i", "j", "k", "L", "I", "J", "K"]
 
     def __init__(self, real=None, imag=None):
+        # self._scalar_mult = False
+        # self._include_zero_coefs = False
+        # self._unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
         self._re = real
         self._im = imag
 
@@ -36,6 +40,73 @@ class CayleyDicksonBase(ABC):
     @property
     def imag(self):
         return self._im
+
+    @classmethod
+    def scalar_mult(cls, value=None):
+        if value is None:
+            return cls._scalar_mult
+        elif isinstance(value, bool):
+            cls._scalar_mult = value
+            return value
+        else:
+            raise ValueError("Value must be None or a Boolean")
+
+    @classmethod
+    def include_zero_coefs(cls, value=None):
+        if value is None:
+            return cls._include_zero_coefs
+        elif isinstance(value, bool):
+            cls._include_zero_coefs = value
+            return value
+        else:
+            raise ValueError("Value must be None or a Boolean")
+
+    @classmethod
+    def unit_strings(cls, value=None):
+        if value is None:
+            return cls._flag
+        elif isinstance(value, bool):
+            cls._flag = value
+            return value
+        else:
+            raise ValueError("Value must be None or a Boolean")
+
+    # @classmethod
+    # def scalar_mult(cls) -> bool:
+    #     return cls._scalar_mult
+    #
+    # @classmethod
+    # def include_zero_coefs(cls) -> bool:
+    #     return cls._include_zero_coefs
+
+    # @property
+    # def unit_strings(self) -> list[str]:
+    #     return self._unit_strings
+
+    @classmethod
+    def unit_strings(cls) -> list[str]:
+        return cls._unit_strings
+
+    @scalar_mult.setter
+    def scalar_mult(self, new_value: bool):
+        if not isinstance(new_value, bool):
+            raise ValueError("New value must be True or False")
+        self._scalar_mult = new_value
+
+    @include_zero_coefs.setter
+    def include_zero_coefs(self, new_value: bool):
+        if not isinstance(new_value, bool):
+            raise ValueError("New value must be True or False")
+        self._include_zero_coefs = new_value
+
+    # @unit_strings.setter
+    # def unit_strings(self, new_list: list[str]):
+    #     if not all(isinstance(unit_str, str) for unit_str in new_list):
+    #         raise ValueError("New list must be a list of strings")
+    #     self._unit_strings = new_list
+
+    def reset_unit_strings(self):
+        self._unit_strings = CayleyDicksonBase._default_unit_strings
 
     def __repr__(self):
         if isinstance(self.real, (int, float, complex, Fraction)):
@@ -73,7 +144,7 @@ class CayleyDicksonBase(ABC):
         return not self.__eq__(other)
 
     @classmethod
-    def unit_strings(cls, value=None, prefix=None, size=None):
+    def generate_unit_strings(cls, value=None, prefix=None, size=None):
         """
         value -- Custom, user-provided list of unit strings
         prefix - Prefix to use for each element, if generating unit strings
@@ -103,32 +174,12 @@ class CayleyDicksonBase(ABC):
 
         # Reset the list of unit strings to their default value
         elif isinstance(value, bool) and value:
-            cls.UNIT_STRINGS = cls.DEFAULT_UNIT_STRINGS  # Reset to default
+            cls.UNIT_STRINGS = cls._default_unit_strings  # Reset to default
 
         else:
             raise TypeError(f"inputs inconsistent")
 
         return cls.UNIT_STRINGS
-
-    @property
-    def scalar_mult(self) -> bool:
-        return self._scalar_mult
-
-    @scalar_mult.setter
-    def scalar_mult(self, new_value: bool):
-        if not isinstance(new_value, bool):
-            raise ValueError("Value must be True or False")
-        self._scalar_mult = new_value
-
-    @property
-    def include_zero_coefs(self) -> bool:
-        return self._include_zero_coefs
-
-    @include_zero_coefs.setter
-    def include_zero_coefs(self, new_value: bool):
-        if not isinstance(new_value, bool):
-            raise ValueError("Value must be True or False")
-        self._include_zero_coefs = new_value
 
     @property
     def order(self):
