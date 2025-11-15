@@ -4,14 +4,10 @@ from random import randint
 from math import sqrt
 from numbers import Number
 import numpy as np
-import re
+import re as reg  # Because 're' is used often here as an abbreviation for 'real'
 
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
-
-# CayleyDicksonBase.scalar_mult = False
-# CayleyDicksonBase.include_zero_coefs = False
-# CayleyDicksonBase.unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
 
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
@@ -119,46 +115,64 @@ class Zi(CayleyDicksonBase):
 
     def __str__(self):
         """Return the string representation of the Zi using the current list of unit_strings."""
-        result = ""
-        unit_str = Zi.unit_strings.current
-        # If the Zi represents a complex (1), quaternion (2), or octonion (3):
+
+        result = ""  # Start with an empty string, and add to it as we go
+
+        # If this is a complex (order=1), quaternion (order=2), or octonion (order=3),
+        # then use the current value of Zi.unit_strings
         if self.order <= 3:
-            for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
-                if idx == 0:
-                    if coef == 0:
-                        if Zi.include_zero_coefs:  # TODO: Simplify this logic, maybe
-                            result = '0'
-                    else:
-                        result = str(coef)
-                else:
-                    if coef > 0:
-                        if coef == 1:
-                            if result == "":
-                                result = f"{unit_str[idx]}"
-                            else:
-                                # result = result + f"+{unit_str[idx]}"
-                                result += f"+{unit_str[idx]}"
-                        else:
-                            if result == "":
-                                result = f"{coef}{unit_str[idx]}"
-                            else:
-                                # result = result + f"+{coef}{unit_str[idx]}"
-                                result += f"+{coef}{unit_str[idx]}"
-                    elif coef == 0:
-                        if Zi.include_zero_coefs:
-                            result += f"+0{unit_str[idx]}"
-                    elif coef < 0:
-                        if coef == -1:
-                            # result = result + f"-{unit_str[idx]}"
-                            result += f"-{unit_str[idx]}"
-                        else:
-                            # result = result + f"{coef}{unit_str[idx]}"
-                            result += f"{coef}{unit_str[idx]}"
-                    else:
-                        pass
-        # Otherwise, for sedenion or greater, return a flat array in string form
+            unit_str = Zi.unit_strings.current
+        # Otherwise, generate a list of generic unit strings
         else:
-            return str(list(utils.flatten(self.to_array())))
+            generic_unit_strings = utils.generate_unit_strings(size = self.order ** 2)
+            unit_str = Zi.unit_strings.new(generic_unit_strings)
+
+        for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
+
+            # Handle the first element, i.e., the real part, of the hypercomplex number
+            if idx == 0:
+                if coef == 0:
+                    if Zi.include_zero_coefs():
+                        result = '0'
+                    else:
+                        pass  # Don't include the real part if it's zeroa
+                else:
+                    result = str(coef)
+
+            # Handle the remainder of the hypercomplex number
+            else:
+                if coef > 0:
+                    if coef == 1:
+                        # If coef is +1 and nothing has been appended to the result yet,
+                        # then begin the result with just the corresponding unit string.
+                        if result == "":
+                            result = f"{unit_str[idx]}"
+                        # Otherwise, 'add' just the corresponding unit string to the result.
+                        else:
+                            result += f"+{unit_str[idx]}"
+                    else:
+                        # Else, if the coef is positive, not 1, and nothing has been appended
+                        # to the result yet, then begin the result with the coef & corresponding
+                        # unit string.
+                        if result == "":
+                            result = f"{coef}{unit_str[idx]}"
+                        # Otherwise, 'add' the coef & the corresponding unit string to the result.
+                        else:
+                            result += f"+{coef}{unit_str[idx]}"
+                # Include a zero coef depending on the value returned by 'include_zero_coef()'
+                elif coef == 0:
+                    if Zi.include_zero_coefs():
+                        result += f"+0{unit_str[idx]}"
+                # The logic below is similar to that for the 'coef > 0' case above, except simpler
+                # because we always include the negative sign.
+                elif coef < 0:
+                    if coef == -1:
+                        result += f"-{unit_str[idx]}"
+                    else:
+                        result += f"{coef}{unit_str[idx]}"
+                else:
+                    pass
+        # If the result is still the empty string, then return '0'; otherwise, return the result.
         if result == "":
             return '0'
         else:
@@ -388,7 +402,6 @@ class Zi(CayleyDicksonBase):
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product.
         For verification purposes."""
-        # TODO: Can the restriction to quaternions be replaced with a restriction to equal orders?
         # The following code will work without the restriction to quaternions, as long as the
         # two inputs have the same order. So, for example, two octonions can be "multiplied"
         # like this -- the a, b, c, & d values would be complexes (Zi's). However, the resulting
@@ -489,17 +502,17 @@ def hypercomplex_string_to_array(qs):
     # Remove spaces, add '-1' or '+1' whenever '-' or '+' are not followed by a number,
     # and add '1' to a lone 'i', 'j', or 'k', at the front of the string.
     qstr = qs.strip().replace(' ', '')
-    # qstr = re.sub('[-](?![0-9])','-1', qstr)
-    qstr = re.sub('-(?![0-9])','-1', qstr)
-    qstr = re.sub('[+](?![0-9])','+1', qstr)
-    qstr = re.sub(r"^([ijkLIJK])", r"1\1", qstr)
+    # qstr = reg.sub('[-](?![0-9])','-1', qstr)
+    qstr = reg.sub('-(?![0-9])','-1', qstr)
+    qstr = reg.sub('[+](?![0-9])','+1', qstr)
+    qstr = reg.sub(r"^([ijkLIJK])", r"1\1", qstr)
 
     # Construct a dictionary of terms with keys, 'i', 'j', and 'k'.
     # However, this does not find the real term, if it exists.
     unit_term_pat = r'[-+]?((\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?)?[ijkLIJK]'
     terms = []
     term_dict = {'real': 0, 'i': 0, 'j': 0, 'k': 0, 'L': 0, 'I': 0, 'J': 0, 'K': 0}
-    for match in re.finditer(unit_term_pat, qstr):
+    for match in reg.finditer(unit_term_pat, qstr):
         term = match.group(0)
         terms.append(term)
         term_dict[term[-1:]] = utils.make_int_or_float(term[:-1])
@@ -530,12 +543,12 @@ def print_unit_mult_table(order, prefix=None):
     dim = 2 ** order
 
     if dim > 8:
-        unit_strs = Zi.generate_unit_strings(prefix='e', size=dim)
+        unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
     else:
         if prefix is None:
             unit_strs = Zi.unit_strings.current
         else:
-            unit_strs = Zi.generate_unit_strings(prefix=prefix, size=dim)
+            unit_strs = utils.generate_unit_strings(prefix=prefix, size=dim)
 
     # Create a dictionary of units, where
     # Key = unit name (str)

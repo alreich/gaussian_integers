@@ -6,15 +6,16 @@ __copyright__ = "Copyright (C) 2024 Alfred J. Reich, Ph.D."
 __license__ = "MIT"
 __version__ = "1.0.0"
 
-def generic_unit_strings(prefix: str = 'e', n: int = 8) -> list[str]:
-    """Returns a list of strings of size 'n' similar to this:
-    ['1', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
-    """
-    count: int = 1
-    result = ['1']
-    for x in range(n-1):
-        result.append(prefix + str(count))
-        count += 1
+def generate_unit_strings(prefix='e', size=8):
+    """Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ..."""
+    if isinstance(prefix, str) and isinstance(size, int) and size > 0:
+        count = 1
+        result = ['1']
+        for x in range(size - 1):
+            result.append(prefix + str(count))
+            count += 1
+    else:
+        raise TypeError(f"{prefix} is not a string or {size} is not an integer.")
     return result
 
 def flatten(nested_list):
@@ -45,7 +46,7 @@ def make_int_or_float(st: str):
 class ResettableValue:
     """A object with a 'current' value, that is initialized
     with a 'default' value. The object's value can be set to
-    a 'new' value or 'reset' to it's default value. All methods,
+    a 'new' value or 'reset' to its default value. All methods,
     except for 'new', are properties; and all methods, except for
     'default', return the current value."""
 

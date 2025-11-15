@@ -20,6 +20,8 @@ class CayleyDicksonBase(ABC):
     _default_unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
     unit_strings = utils.ResettableValue(_default_unit_strings)
 
+    _alternative_unit_strings = ["1", "I", "J", "IJ", "L", "IL", "JL", "IJL"]
+
     _use_scalar_mult: bool = False
     _include_zero_coefs: bool = False
 
@@ -51,58 +53,9 @@ class CayleyDicksonBase(ABC):
             return cls._include_zero_coefs
         elif isinstance(value, bool):
             cls._include_zero_coefs = value
-            return value
+            return cls._include_zero_coefs
         else:
             raise ValueError("Value must be None or a Boolean")
-
-    # @classmethod
-    # def unit_strings(cls, new_list=None):
-    #     if new_list is None:
-    #         return cls._unit_strings
-    #     elif all(isinstance(unit_str, str) for unit_str in new_list):
-    #         cls._unit_strings = new_list
-    #         return new_list
-    #     else:
-    #         raise ValueError("New list must be None or a list of strings")
-
-    @classmethod
-    def reset_unit_strings(cls):
-        cls._unit_strings = cls._default_unit_strings
-        return cls._unit_strings
-
-    # @classmethod
-    # def use_scalar_mult(cls) -> bool:
-    #     return cls._use_scalar_mult
-    #
-    # @classmethod
-    # def include_zero_coefs(cls) -> bool:
-    #     return cls._include_zero_coefs
-    #
-    # @property
-    # def unit_strings(self) -> list[str]:
-    #     return self._unit_strings
-    #
-    # @classmethod
-    # def unit_strings(cls) -> list[str]:
-    #     return cls._unit_strings
-    #
-    # @scalar_mult.setter
-    # def scalar_mult(self, new_value: bool):
-    #     if not isinstance(new_value, bool):
-    #         raise ValueError("New value must be True or False")
-    #     self._scalar_mult = new_value
-    #
-    # @include_zero_coefs.setter
-    # def include_zero_coefs(self, new_value: bool):
-    #     if not isinstance(new_value, bool):
-    #         raise ValueError("New value must be True or False")
-    #     self._include_zero_coefs = new_value
-
-    # @unit_strings.setter
-    # def unit_strings(self, new_list: list[str]):
-    #     if not all(isinstance(unit_str, str) for unit_str in new_list):
-    #         raise ValueError("New list must be a list of strings")
-    #     self._unit_strings = new_list
 
     def __repr__(self):
         if isinstance(self.real, (int, float, complex, Fraction)):
@@ -139,43 +92,42 @@ class CayleyDicksonBase(ABC):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    @classmethod
-    def generate_unit_strings(cls, value=None, prefix=None, size=None):
-        """
-        value -- Custom, user-provided list of unit strings
-        prefix - Prefix to use for each element, if generating unit strings
-        size --- Number of unit strings to generate
-        """
-
-        if value is None:
-
-            # No changes; output current list of unit strings
-            if prefix is None and size is None:
-                pass
-
-            # Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ...
-            elif isinstance(prefix, str) and isinstance(size, int) and size > 0:
-                count = 1
-                generic_list = ['1']
-                for x in range(size - 1):
-                    generic_list.append(prefix + str(count))
-                    count += 1
-                cls.UNIT_STRINGS = generic_list
-            else:
-                raise TypeError(f"Inconsistent inputs")
-
-        # Use a custom, user-provided list of unit strings
-        elif isinstance(value, list):
-            cls.UNIT_STRINGS = value
-
-        # Reset the list of unit strings to their default value
-        elif isinstance(value, bool) and value:
-            cls.UNIT_STRINGS = cls._default_unit_strings  # Reset to default
-
-        else:
-            raise TypeError(f"inputs inconsistent")
-
-        return cls.UNIT_STRINGS
+    # def generate_unit_strings(value=None, prefix=None, size=None):
+    #     """
+    #     value -- Custom, user-provided list of unit strings
+    #     prefix - Prefix to use for each element, if generating unit strings
+    #     size --- Number of unit strings to generate
+    #     """
+    #
+    #     if value is None:
+    #
+    #         # No changes; output current list of unit strings
+    #         if prefix is None and size is None:
+    #             pass
+    #
+    #         # Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ...
+    #         elif isinstance(prefix, str) and isinstance(size, int) and size > 0:
+    #             count = 1
+    #             generic_list = ['1']
+    #             for x in range(size - 1):
+    #                 generic_list.append(prefix + str(count))
+    #                 count += 1
+    #             result = generic_list
+    #         else:
+    #             raise TypeError(f"Inconsistent inputs")
+    #
+    #     # Use a custom, user-provided list of unit strings
+    #     elif isinstance(value, list):
+    #         result = value
+    #
+    #     # Reset the list of unit strings to their default value
+    #     elif isinstance(value, bool) and value:
+    #         result = cls._default_unit_strings  # Reset to default
+    #
+    #     else:
+    #         raise TypeError(f"inputs inconsistent")
+    #
+    #     return result
 
     @property
     def order(self):

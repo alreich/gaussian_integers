@@ -6,7 +6,7 @@ from random import seed
 class TestZi(TestCase):
 
     def setUp(self) -> None:
-        Zi.include_zero_coefs = False
+        Zi.include_zero_coefs(False)
 
     def test_constructor_v1(self):
         seed(42)
@@ -331,11 +331,9 @@ class TestZi(TestCase):
         self.assertEqual(hypercomplex_string_to_array('7-2.4e-3i+3.75j-4.0k'), [7, -2.4e-3, 3.75, -4.0])
 
     def test_include_zero_coefs(self):
-        Zi.include_zero_coefs = True
-        self.assertTrue(Zi.include_zero_coefs)
+        self.assertTrue(Zi.include_zero_coefs(True))
         self.assertEqual(str(Zi(Zi(4, 5), Zi(0, -2))), "4+5i+0j-2k")
-        Zi.include_zero_coefs = False
-        self.assertFalse(Zi.include_zero_coefs)
+        self.assertFalse(Zi.include_zero_coefs(False))
         self.assertEqual(str(Zi(Zi(4, 5), Zi(0, -2))), "4+5i-2k")
 
     def test_scalar_mult(self):
