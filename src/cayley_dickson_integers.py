@@ -9,9 +9,9 @@ import re
 import generic_utils as utils
 from cayley_dickson_base import CayleyDicksonBase
 
-CayleyDicksonBase.scalar_mult = False
-CayleyDicksonBase.include_zero_coefs = False
-CayleyDicksonBase.unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
+# CayleyDicksonBase.scalar_mult = False
+# CayleyDicksonBase.include_zero_coefs = False
+# CayleyDicksonBase.unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
 
 class Zi(CayleyDicksonBase):
     """Cayley-Dickson Algebra with integer components"""
@@ -120,7 +120,7 @@ class Zi(CayleyDicksonBase):
     def __str__(self):
         """Return the string representation of the Zi using the current list of unit_strings."""
         result = ""
-        unit_str: list[str] = Zi.unit_strings()
+        unit_str = Zi.unit_strings.current
         # If the Zi represents a complex (1), quaternion (2), or octonion (3):
         if self.order <= 3:
             for idx, coef in enumerate(list(utils.flatten(self.to_array()))):
@@ -217,12 +217,12 @@ class Zi(CayleyDicksonBase):
             return Zi(real_part, imag_part)
         # Otherwise, scalar-like (default) or increase_order first multiplication
         elif n > m:
-            if Zi.scalar_mult:
+            if Zi.use_scalar_mult():
                 return Zi(self.real * oth, self.imag * oth)
             else:
                 return self * oth.increase_order(self.order)
         elif n < m:
-            if Zi.scalar_mult:
+            if Zi.use_scalar_mult():
                 return Zi(self * oth.real, self * oth.imag)
             else:
                 return self.increase_order(oth.order) * oth
@@ -533,7 +533,7 @@ def print_unit_mult_table(order, prefix=None):
         unit_strs = Zi.generate_unit_strings(prefix='e', size=dim)
     else:
         if prefix is None:
-            unit_strs = Zi.unit_strings
+            unit_strs = Zi.unit_strings.current
         else:
             unit_strs = Zi.generate_unit_strings(prefix=prefix, size=dim)
 

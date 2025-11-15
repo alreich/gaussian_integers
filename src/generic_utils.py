@@ -7,8 +7,8 @@ __license__ = "MIT"
 __version__ = "1.0.0"
 
 def generic_unit_strings(prefix: str = 'e', n: int = 8) -> list[str]:
-    """Returns a list of strings of the following form:
-    ['', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
+    """Returns a list of strings of size 'n' similar to this:
+    ['1', 'e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7']
     """
     count: int = 1
     result = ['1']
@@ -41,6 +41,34 @@ def make_int_or_float(st: str):
         raise ValueError(f"{st} is not a float nor an int")
     i_st = int(f_st)
     return i_st if i_st == f_st else f_st
+
+class ResettableValue:
+    """A object with a 'current' value, that is initialized
+    with a 'default' value. The object's value can be set to
+    a 'new' value or 'reset' to it's default value. All methods,
+    except for 'new', are properties; and all methods, except for
+    'default', return the current value."""
+
+    def __init__(self, default_value):
+        self._default_value = default_value
+        self._current_value = default_value
+
+    @property
+    def current(self):
+        return self._current_value
+
+    @property
+    def reset(self):
+        self._current_value = self._default_value
+        return self._current_value
+
+    @property
+    def default(self):
+        return self._default_value
+
+    def new(self, new_value):
+        self._current_value = new_value
+        return self._current_value
 
 # This class is no longer used for this project, but might come in
 # handy in the future.
