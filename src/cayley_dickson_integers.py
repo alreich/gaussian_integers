@@ -542,13 +542,24 @@ def print_unit_mult_table(order, prefix=None):
 
     dim = 2 ** order
 
-    if dim > 8:
-        unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
-    else:
+    if dim <= 8:
         if prefix is None:
             unit_strs = Zi.unit_strings.current
         else:
+            unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
+    else:
+        if prefix is None:
+            unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
+        else:
             unit_strs = utils.generate_unit_strings(prefix=prefix, size=dim)
+
+    # if dim > 8:
+    #     unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
+    # else:
+    #     if prefix is None:
+    #         unit_strs = Zi.unit_strings.current
+    #     else:
+    #         unit_strs = utils.generate_unit_strings(prefix=prefix, size=dim)
 
     # Create a dictionary of units, where
     # Key = unit name (str)
@@ -639,6 +650,7 @@ if __name__ == "__main__":
 
     print("\nOctonion unit element multiplication table:")
     print("(see https://en.wikipedia.org/wiki/Octonion#Multiplication)")
+    print("(Also Table 5 near the bottom of this webpage http://tamivox.org/eugene/octonion480/index.html)")
     print_unit_mult_table(3, prefix='e')
     print("\nor with default unit elements")
     print_unit_mult_table(3)
