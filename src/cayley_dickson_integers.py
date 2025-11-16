@@ -79,8 +79,10 @@ class Zi(CayleyDicksonBase):
             elif isinstance(imag, (tuple, list)):
                 _im = Zi.from_array(imag)
             elif imag is None:
-                _re = round(real[0])
-                _im = round(real[1])
+                # At this point, _re is a Zi already, so break it up
+                # _a = _re[0]; _b = _re[1]
+                # _re = _a; _im = _b
+                _re, _im = _re[0], _re[1]
             else:
                 raise TypeError(f"A tuple or list real value is not compatible with imag={imag}")
 
@@ -382,22 +384,22 @@ class Zi(CayleyDicksonBase):
         else:
             raise ValueError(f"Can't make Zi out of {arr}")
 
-    @staticmethod
-    def from_string(s):
-        return Zi.from_array(hypercomplex_string_to_array(s))
+    # @staticmethod
+    # def from_string(s):
+    #     return Zi.from_array(hypercomplex_string_to_array(s))
 
-    @staticmethod
-    def quaternion(quat):
-        """Create a Zi of order 2 (i.e., a quaternion) from a list of 4 elements
-        or a string representation of a quaternion."""
-        if isinstance(quat, list) and len(quat) == 4:
-            _re = Zi(quat[0], quat[1])
-            _im = Zi(quat[2], quat[3])
-            return Zi(_re, _im)
-        elif isinstance(quat, str):
-            return Zi(hypercomplex_string_to_array(quat))
-        else:
-            raise ValueError(f"Cannot create a quaternion from {quat}")
+    # @staticmethod
+    # def quaternion(quat):
+    #     """Create a Zi of order 2 (i.e., a quaternion) from a list of 4 elements
+    #     or a string representation of a quaternion."""
+    #     if isinstance(quat, list) and len(quat) == 4:
+    #         _re = Zi(quat[0], quat[1])
+    #         _im = Zi(quat[2], quat[3])
+    #         return Zi(_re, _im)
+    #     elif isinstance(quat, str):
+    #         return Zi(hypercomplex_string_to_array(quat))
+    #     else:
+    #         raise ValueError(f"Cannot create a quaternion from {quat}")
 
     def hamilton_product(self, other):
         """Multiplication of two quaternions according to the classic Hamilton product.
@@ -553,14 +555,6 @@ def print_unit_mult_table(order, prefix=None):
         else:
             unit_strs = utils.generate_unit_strings(prefix=prefix, size=dim)
 
-    # if dim > 8:
-    #     unit_strs = utils.generate_unit_strings(prefix='e', size=dim)
-    # else:
-    #     if prefix is None:
-    #         unit_strs = Zi.unit_strings.current
-    #     else:
-    #         unit_strs = utils.generate_unit_strings(prefix=prefix, size=dim)
-
     # Create a dictionary of units, where
     # Key = unit name (str)
     # Value = unit element (Zi)
@@ -569,7 +563,8 @@ def print_unit_mult_table(order, prefix=None):
         arr = np.zeros(dim, dtype=int)
         arr[pos] = 1
         # units['e' + str(pos)] = Zi.from_array(list(arr.data))
-        units[unit_strs[pos]] = Zi.from_array(list(arr.data))
+        # units[unit_strs[pos]] = Zi.from_array(list(arr.data))
+        units[unit_strs[pos]] = Zi(list(arr.data))
 
     # Create a reverse dictionary from the one above,
     # then create a reverse dictionary of the negative units,
