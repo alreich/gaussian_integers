@@ -84,6 +84,9 @@ class TestZi(TestCase):
         # complex - list
         self.assertEqual(Zi((-1.7+2j), [-1, 2]), Zi(Zi(-2, 2), Zi(-1, 2)))
 
+        # complex - string
+        self.assertEqual(Zi((-1.7 + 2j), '-1+2i'), Zi(Zi(-2, 2), Zi(-1, 2)))
+
         # complex - None
         self.assertEqual(Zi((-1.7+2j)), Zi(-2, 2))
 
@@ -98,6 +101,9 @@ class TestZi(TestCase):
 
         # Zi - list
         self.assertEqual(Zi(Zi(3, -7), [-1, 2]), Zi(Zi(3, -7), Zi(-1, 2)))
+
+        # Zi - string
+        self.assertEqual(Zi(Zi(-1.7, 2), '-1+2i'), Zi(Zi(-2, 2), Zi(-1, 2)))
 
         # Zi - None
         self.assertEqual(Zi(Zi(3, -7)), Zi(3, -7))
@@ -114,6 +120,9 @@ class TestZi(TestCase):
         # tuple - list
         self.assertEqual(Zi((9, 4), [-1, 2]), Zi(Zi(9, 4), Zi(-1, 2)))
 
+        # tuple - string
+        self.assertEqual(Zi((-1.7, 2), '-1+2i'), Zi(Zi(-2, 2), Zi(-1, 2)))
+
         # tuple - None
         self.assertEqual(Zi((9, 4)), Zi(9, 4))
 
@@ -129,6 +138,9 @@ class TestZi(TestCase):
         # list - list
         self.assertEqual(Zi([-6, 1], [-1, 2]), Zi(Zi(-6, 1), Zi(-1, 2)))
 
+        # list - string
+        self.assertEqual(Zi([-1.7, 2], '-1+2i'), Zi(Zi(-2, 2), Zi(-1, 2)))
+
         # list - None
         self.assertEqual(Zi([-6, 1]), Zi(-6, 1))
 
@@ -136,9 +148,17 @@ class TestZi(TestCase):
         self.assertEqual(Zi(), Zi(0, 0))
 
         # str - complex
+        self.assertEqual(Zi('-1+2i', (-1.7 + 2j)), Zi(Zi(-1, 2), Zi(-2, 2)))
+
         # str - Zi
+        self.assertEqual(Zi('-1+2i', Zi(-1.7, 2)), Zi(Zi(-1, 2), Zi(-2, 2)))
+
         # str - tuple
+        self.assertEqual(Zi('-1+2i', (-1.7, 2)), Zi(Zi(-1, 2), Zi(-2, 2)))
+
         # str - list
+        self.assertEqual(Zi('-1+2i', [-1.7, 2]), Zi(Zi(-1, 2), Zi(-2, 2)))
+
         # str - None
         self.assertEqual(Zi('10-7i'), Zi(10, -7))
 

@@ -92,43 +92,6 @@ class CayleyDicksonBase(ABC):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    # def generate_unit_strings(value=None, prefix=None, size=None):
-    #     """
-    #     value -- Custom, user-provided list of unit strings
-    #     prefix - Prefix to use for each element, if generating unit strings
-    #     size --- Number of unit strings to generate
-    #     """
-    #
-    #     if value is None:
-    #
-    #         # No changes; output current list of unit strings
-    #         if prefix is None and size is None:
-    #             pass
-    #
-    #         # Create generic list of unit strings, e.g., 'e1', 'e2', 'e3', ...
-    #         elif isinstance(prefix, str) and isinstance(size, int) and size > 0:
-    #             count = 1
-    #             generic_list = ['1']
-    #             for x in range(size - 1):
-    #                 generic_list.append(prefix + str(count))
-    #                 count += 1
-    #             result = generic_list
-    #         else:
-    #             raise TypeError(f"Inconsistent inputs")
-    #
-    #     # Use a custom, user-provided list of unit strings
-    #     elif isinstance(value, list):
-    #         result = value
-    #
-    #     # Reset the list of unit strings to their default value
-    #     elif isinstance(value, bool) and value:
-    #         result = cls._default_unit_strings  # Reset to default
-    #
-    #     else:
-    #         raise TypeError(f"inputs inconsistent")
-    #
-    #     return result
-
     @property
     def order(self):
         """Order is the number levels contained in the Zi.
