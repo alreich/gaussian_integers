@@ -188,22 +188,54 @@ class Zi(CayleyDicksonBase):
         return Zi(- self.real, - self.imag)
 
     def __add__(self, other):
-        return Zi(self.real + other.real, self.imag + other.imag)
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        elif isinstance(other, Zi):
+            oth = other
+        else:
+            raise TypeError(f"{other} is not a valid type for creating a Zi.")
+        n = self.order
+        k = oth.order
+        if n == k:
+            return Zi(self.real + other.real, self.imag + other.imag)
+        elif n > k:
+            return self + oth.increase_order(n)
+        else:
+            return self.increase_order(k) + oth
 
     def __radd__(self, other):
-        """The reflected (swapped) operand for addition: other + self"""
-        return Zi(other) + self
-
-    def __iadd__(self, other):
-        """Implements the += operation: self += other"""
-        return Zi(self.real + other.real, self.imag + other.imag)
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        elif isinstance(other, Zi):
+            oth = other
+        else:
+            raise TypeError(f"{other} is not a valid type for creating a Zi.")
+        return oth + self
 
     def __sub__(self, other):
-        return Zi(self.real - other.real, self.imag - other.imag)
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        elif isinstance(other, Zi):
+            oth = other
+        else:
+            raise TypeError(f"{other} is not a valid type for creating a Zi.")
+        n = self.order
+        k = oth.order
+        if n == k:
+            return Zi(self.real - other.real, self.imag - other.imag)
+        elif n > k:
+            return self - oth.increase_order(n)
+        else:
+            return self.increase_order(k) - oth
 
     def __rsub__(self, other):
-        """The reflected (swapped) operand for subtraction: other - self"""
-        return Zi(other) - self
+        if isinstance(other, (int, float, complex)):
+            oth = Zi(other)
+        elif isinstance(other, Zi):
+            oth = other
+        else:
+            raise TypeError(f"{other} is not a valid type for creating a Zi.")
+        return oth - self
 
     def __isub__(self, other):
         """Implements the -= operation: self -= other"""
@@ -228,29 +260,35 @@ class Zi(CayleyDicksonBase):
         else:
             oth = other
         n = self.order
-        m = oth.order
-        # If n == m, then Cayley-Dickson multiplication
-        if n == m:
+        k = oth.order
+        if n == k:
             a, b, c, d = self.real, self.imag, oth.real, oth.imag
             real_part = a * c - d.conjugate() * b
             imag_part = d * a + b * c.conjugate()
             return Zi(real_part, imag_part)
-        # Otherwise, scalar-like (default) or increase_order first multiplication
-        elif n > m:
+        elif n > k:
             if Zi.use_scalar_mult():
+                # Treat other like a lower-order scalar
                 return Zi(self.real * oth, self.imag * oth)
             else:
-                return self * oth.increase_order(self.order)
-        elif n < m:
+                # Increase other's order first, then multiply
+                return self * oth.increase_order(n)
+        elif n < k:
             if Zi.use_scalar_mult():
+                # Treat self like a lower order scalar
                 return Zi(self * oth.real, self * oth.imag)
             else:
-                return self.increase_order(oth.order) * oth
+                # Increase self's order first, then multiply
+                return self.increase_order(k) * oth
         else:
             raise Exception(f"Multiplication should never reach this line!")
 
     def __rmul__(self, other):
-        return Zi(other) * self
+        if not isinstance(other, Zi):
+            oth = Zi(other)
+        else:
+            oth = other
+        return oth * self
 
     def __imul__(self, other):
         """Implements the *= operation: self *= other"""
@@ -553,8 +591,6 @@ def print_unit_mult_table(order, prefix=None):
     for pos in range(dim):
         arr = np.zeros(dim, dtype=int)
         arr[pos] = 1
-        # units['e' + str(pos)] = Zi.from_array(list(arr.data))
-        # units[unit_strs[pos]] = Zi.from_array(list(arr.data))
         units[unit_strs[pos]] = Zi(list(arr.data))
 
     # Create a reverse dictionary from the one above,
