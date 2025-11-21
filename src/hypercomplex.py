@@ -8,7 +8,7 @@ import generic_utils as utils
 class Hypercomplex(ABC):
     _unit_strings = ["1", "i", "j", "k", "L", "I", "J", "K"]
 
-    def __init__(self, real, imag):
+    def __init__(self, real=None, imag=None) -> None:
         self._real = real
         self._imag = imag
 
@@ -163,32 +163,41 @@ class Hypercomplex(ABC):
             raise ValueError(f"{d = }, is not an integer >= 1")
 
 
-class Z(Hypercomplex):
-
-    def __init__(self, real=0, imag=0):
-        super().__init__(real, imag)
-
-
 class Zi(Hypercomplex):
 
-    def __init__(self, real: Hypercomplex = 0, imag: Hypercomplex = 0) -> None:
+    def __init__(self, real=None, imag=None) -> None:
 
         re = real
         im = imag
 
         if isinstance(real, (int, float)):
             re = round(real)
+            if isinstance(imag, (int, float)):
+                im = round(imag)
+            elif imag is None:
+                im = 0
+            else:
+                raise Exception(f"{imag} must be an int, float, or None.")
 
-        if isinstance(imag, (int, float)):
-            im = round(imag)
+        elif real is None:
+            re = 0
+            if imag is None:
+                im = 0
+            else:
+                raise Exception(f"If real is None, then imag must also be None.")
 
-        super().__init__(re, im)
+        if ((isinstance(re, int) and isinstance(im, int))
+            or (isinstance(re, Zi) and isinstance(im, Zi) and (re.order == im.order))):
+            super().__init__(re, im)
 
+        else:
+            raise TypeError(f"Inputs must resolve to two ints or two Zi's of equal order.")
 
 class Qi(Hypercomplex):
+
     _max_denominator = 1_000_000
 
-    def __init__(self, real=Fraction(0, 1), imag=Fraction(0, 1)):
+    def __init__(self, real=None, imag=None) -> None:
 
         re = real
         im = imag
