@@ -57,7 +57,7 @@ def gaussian_rational(fnc):
     return gaussian_rational_wrapper
 
 
-class Zi():
+class Zi:
     """Gaussian Integer Class with arithmetic and related functionality.
 
     A Gaussian integer, Zi, has two integer input values, re & im.
@@ -509,7 +509,7 @@ def isprime(n: int) -> bool:
     # else:
     #     raise False
 
-class Qi():
+class Qi:
     """Gaussian Rational Number Class"""
 
     __max_denominator = 1_000_000

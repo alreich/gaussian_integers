@@ -1,10 +1,5 @@
-from unittest import TestCase # TextTestRunner, defaultTestLoader
-from cayley_dickson_integers import Zi
-from cayley_dickson_rationals import Qi
-# from random import seed
-
-# from unittest import TestCase
-# from src.gaussians import Zi, Qi
+from unittest import TestCase
+from src.gaussians import Zi, Qi
 
 class TestZi(TestCase):
 
@@ -118,7 +113,7 @@ class TestZi(TestCase):
 
     def test_conj(self):
         # self.assertEqual(self.c1.conjugate, self.c1_conj)
-        self.assertEqual(self.c1.conjugate(), self.c1_conj)
+        self.assertEqual(self.c1.conjugate, self.c1_conj)
 
     def test_norm(self):
         self.assertEqual(self.c1.norm, 41)
@@ -126,62 +121,62 @@ class TestZi(TestCase):
     def test_associates(self):
         self.assertEqual(self.c1.associates(), [Zi(-4, -5), Zi(-5, 4), Zi(5, -4)])
 
-    # def test_is_associate(self):
-    #     self.assertTrue(self.c1.is_associate(Zi(-4, -5)))
-    #     self.assertFalse(self.c1.is_associate(self.c2))
-    #
-    # def test_divmod_1(self):
-    #     a = Zi(4, 5)
-    #     b = Zi(1, -2)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_divmod_2(self):
-    #     a = Zi(27, -23)
-    #     b = Zi(8, 1)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_divmod_3(self):
-    #     a = Zi(11, 10)
-    #     b = Zi(4, 1)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_divmod_4(self):
-    #     a = Zi(41, 24)
-    #     b = Zi(11, -2)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_divmod_5(self):
-    #     a = Zi(37, 2)
-    #     b = Zi(11, 2)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_divmod_6(self):
-    #     a = Zi(1, 8)
-    #     b = Zi(2, -4)
-    #     q, r = Zi.modified_divmod(a, b)
-    #     self.assertEqual(a, b * q + r)
-    #
-    # def test_mod_1(self):
-    #     a = Zi(4, 5)
-    #     b = Zi(1, -2)
-    #     self.assertEqual(a % b, -1)
-    #
-    # def test_gcd_1(self):
-    #     alpha = Zi(32, 9)
-    #     beta = Zi(4, 11)
-    #     self.assertEqual(Zi.gcd(alpha, beta), Zi(0, -1))
-    #
-    # def test_gcd_2(self):
-    #     alpha = Zi(32, 9)
-    #     beta = Zi(4, 11)
-    #     self.assertEqual(Zi.gcd(beta, alpha), Zi(0, -1))
-    #
-    # def test_gcd_3(self):
-    #     alpha = Zi(11, 3)
-    #     beta = Zi(1, 8)
-    #     self.assertEqual(Zi.gcd(alpha, beta), Zi(1, -2))
+    def test_is_associate(self):
+        self.assertTrue(self.c1.is_associate(Zi(-4, -5)))
+        self.assertFalse(self.c1.is_associate(self.c2))
+
+    def test_divmod_1(self):
+        a = Zi(4, 5)
+        b = Zi(1, -2)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_2(self):
+        a = Zi(27, -23)
+        b = Zi(8, 1)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_3(self):
+        a = Zi(11, 10)
+        b = Zi(4, 1)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_4(self):
+        a = Zi(41, 24)
+        b = Zi(11, -2)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_5(self):
+        a = Zi(37, 2)
+        b = Zi(11, 2)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_divmod_6(self):
+        a = Zi(1, 8)
+        b = Zi(2, -4)
+        q, r = Zi.modified_divmod(a, b)
+        self.assertEqual(a, b * q + r)
+
+    def test_mod_1(self):
+        a = Zi(4, 5)
+        b = Zi(1, -2)
+        self.assertEqual(a % b, -1)
+
+    def test_gcd_1(self):
+        alpha = Zi(32, 9)
+        beta = Zi(4, 11)
+        self.assertEqual(Zi.gcd(alpha, beta), Zi(0, -1))
+
+    def test_gcd_2(self):
+        alpha = Zi(32, 9)
+        beta = Zi(4, 11)
+        self.assertEqual(Zi.gcd(beta, alpha), Zi(0, -1))
+
+    def test_gcd_3(self):
+        alpha = Zi(11, 3)
+        beta = Zi(1, 8)
+        self.assertEqual(Zi.gcd(alpha, beta), Zi(1, -2))
