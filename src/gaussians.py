@@ -144,6 +144,9 @@ class Zi:
         else:
             return str(complex(self))
 
+    def __getitem__(self, index):
+        return self.to_array()[index]
+
     # NOTE: Python ints and floats have both 'real' and 'imag' properties, so
     # no conversion to Gaussian integers is necessary to use them in the arithmetic
     # operations, below.
@@ -360,6 +363,10 @@ class Zi:
     def to_gaussian_rational(self):
         """Convert this Gaussian integer to an equivalent Gaussian rational."""
         return Qi(self.real, self.imag)
+
+    def to_array(self):
+        """"Convert this Gaussian integer to a two-integer array."""
+        return self.real, self.imag
 
     @staticmethod
     def norms_divide(a, b):
