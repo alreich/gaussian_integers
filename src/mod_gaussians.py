@@ -59,6 +59,15 @@ class Zni:
         else:
             raise Exception("We should never get to this point in the code")
 
+    @staticmethod
+    def modulo_value():
+        return Zni.__n
+
+    @staticmethod
+    def set_modulo_value(value):
+        Zni.__n = value
+        return Zni.__n
+
     @property
     def real(self):
         return self.__re
