@@ -67,27 +67,6 @@ class Zi:
     will be rounded to the nearest integers and used as inputs for re & im, resp.
     """
 
-    # def __init__(self, re: (int, np.int64, float, complex) = 0, im: (int, float) = 0) -> None:
-    #     """Instantiate a Gaussian integer, Zi(re=0, im=0)."""
-    #
-    #     if isinstance(re, (int, np.int64)):
-    #         self.__real = int(re)
-    #     elif isinstance(re, float):
-    #         self.__real = round(re)
-    #     elif isinstance(re, complex):
-    #         self.__real = round(re.real)
-    #     else:
-    #         raise TypeError(f"{re} cannot be used for the real part of a Zi instance")
-    #
-    #     if isinstance(re, complex):  # This way, im is ignored if re is complex
-    #         self.__imag = round(re.imag)
-    #     elif isinstance(im, (int, np.int64)):
-    #         self.__imag = int(im)
-    #     elif isinstance(im, float):
-    #         self.__imag = round(im)
-    #     else:
-    #         raise TypeError(f"{im} cannot be used for the imaginary part of a Zi instance")
-
     def __init__(self, re=None, im=None):
         if isinstance(re, (float, int)):
             self.__re = round(re)
@@ -175,14 +154,6 @@ class Zi:
         """Implements the -= operation: self -= other"""
         return Zi(self.real - other.real, self.imag - other.imag)
 
-    # def __mul__(self, other):  # self * other
-    #     """Implements the multiplication operator: self * other"""
-    #     a = self.real
-    #     b = self.imag
-    #     c = round(other.real)
-    #     d = round(other.imag)
-    #     return Zi(a * c - b * d, a * d + b * c)
-
     def __mul__(self, other):  # self * other
         """Implements the multiplication operator: self * other"""
         if isinstance(other, Qi):
@@ -221,8 +192,6 @@ class Zi:
                     result = result * self
             else:  # n < 0
                 result = 1 / (self ** abs(n))
-        # else:
-        #     raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
     def __complex__(self) -> complex:
@@ -521,8 +490,6 @@ class Qi:
 
     __max_denominator = 1_000_000
 
-    # def __init__(self, re: (str, int, float, complex, Zi, Fraction) = Fraction(0, 1),
-    #              im: (str, int, float, Fraction) = Fraction(0, 1)):
     def __init__(self, re=Fraction(0, 1), im=Fraction(0, 1)):
 
         if isinstance(re, Fraction):
@@ -616,8 +583,6 @@ class Qi:
                     result = result * self
             else:  # n < 0
                 result = 1 / self ** abs(n)
-        # else:
-        #     raise TypeError(f"The power, {n}, must be an integer.")
         return result
 
     @gaussian_rational
