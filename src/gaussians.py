@@ -492,6 +492,8 @@ class Qi:
 
     __max_denominator = 1_000_000
 
+    __slots__ = ("__real", "__imag")
+
     def __init__(self, re=Fraction(0, 1), im=Fraction(0, 1)):
 
         if isinstance(re, Fraction):
