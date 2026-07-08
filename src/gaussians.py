@@ -32,7 +32,7 @@ __version__ = "1.0.0"
 # from math import sqrt, floor, ceil
 import math
 from fractions import Fraction
-from numbers import Complex
+from numbers import Complex  # Only used for equality tests
 from random import randint
 from functools import wraps
 # import numpy as np
@@ -66,6 +66,8 @@ class Zi:
     im will be ignored. Additionally, the complex number's components, real & imag,
     will be rounded to the nearest integers and used as inputs for re & im, resp.
     """
+
+    __slots__ = ("__re", "__im")
 
     def __init__(self, re=None, im=None):
         if isinstance(re, (float, int)):
