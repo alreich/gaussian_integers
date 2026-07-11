@@ -1,6 +1,6 @@
 from unittest import TestCase
 # from src.gaussians import Zi, Qi
-from src.new_zi import Zi
+from src.new_zi_OLD import Zi
 
 class TestZi(TestCase):
 
