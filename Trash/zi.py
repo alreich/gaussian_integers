@@ -73,9 +73,6 @@ class Zi(Complex):
         return self.real == oth.real and self.imag == oth.imag
 
     def __ne__(self, other):
-        """Inverse of __eq__. Must correctly propagate NotImplemented so that
-        Python falls back to the other operand's __eq__/__ne__ instead of
-        treating an incomparable type as simply 'not equal'."""
         result = self.__eq__(other)
         if result is NotImplemented:
             return result
@@ -154,10 +151,6 @@ class Zi(Complex):
         return self.__mul__(other)
 
     def __truediv__(self, other):
-        """Division rounded to the nearest Gaussian integer. Uses exact
-        integer arithmetic (multiply by conjugate, divide by norm) rather
-        than floating-point complex division, so it stays precise for
-        arbitrarily large coefficients."""
         oth = Zi._ensure_zi(other)
         n = oth.norm()
         if n == 0:
@@ -170,13 +163,11 @@ class Zi(Complex):
         return oth.__truediv__(self)
 
     def __floordiv__(self, other):
-        """Gaussian integers have no natural total order, so 'floor'
-        division is defined the same way as __truediv__: round to the
-        nearest Gaussian integer. Delegates to __truediv__ so both operators
-        agree exactly (previously this used float-based complex division,
-        which could disagree with __truediv__'s exact result on large
-        coefficients due to floating-point rounding)."""
-        return self.__truediv__(other)
+        other_c = complex(Zi._ensure_zi(other))
+        if other_c == 0:
+            raise ZeroDivisionError("division by zero Zi")
+        q = complex(self) / other_c
+        return Zi(q)
 
     def __rfloordiv__(self, other):
         other_zi = Zi._ensure_zi(other)
@@ -220,10 +211,7 @@ class Zi(Complex):
     # ---------- Prime Numbers ----------
 
     @staticmethod
-    def _is_rational_prime(n):
-        """True if the plain (rational) integer n is prime. This is a
-        helper for is_gaussian_prime, not a statement about Gaussian
-        primality."""
+    def is_real_prime(n):
         n = abs(int(n))
         if n < 2:
             return False
@@ -240,12 +228,6 @@ class Zi(Complex):
 
     @staticmethod
     def is_gaussian_prime(x):
-        """A Gaussian integer a+bi is prime iff:
-        - both a,b are nonzero and a^2+b^2 is a rational prime, or
-        - one of a,b is zero and the other has absolute value c, where c is
-          a rational prime with c % 4 == 3 (primes p == 2 or p == 1 mod 4
-          are NOT Gaussian primes: 2 ramifies as -i(1+i)^2, and p == 1 mod 4
-          splits into two conjugate Gaussian primes)."""
         if isinstance(x, Zi):
             a, b = x.real, x.imag
         elif isinstance(x, int):
@@ -258,20 +240,15 @@ class Zi(Complex):
 
         if a != 0 and b != 0:
             n = a * a + b * b
-            return Zi._is_rational_prime(n)
+            return Zi.is_real_prime(n)
         else:
             c = abs(a) if b == 0 else abs(b)
-            return Zi._is_rational_prime(c) and c % 4 == 3
+            return Zi.is_real_prime(c) and c % 4 == 3
 
     # ---------- Number Theory ----------
 
     @staticmethod
     def modified_divmod(a, b):
-        """Divide a by b, rounding the quotient to the nearest Gaussian
-        integer (rather than truncating), so that the remainder has
-        strictly smaller norm than b. This is what makes gcd/xgcd below
-        terminate correctly, since Z[i] is a Euclidean domain under the
-        norm only when division rounds to nearest."""
         a = Zi._ensure_zi(a)
         b = Zi._ensure_zi(b)
         if b == Zi(0, 0):
@@ -291,8 +268,6 @@ class Zi(Complex):
 
     @staticmethod
     def xgcd(a, b):
-        """Extended Euclidean algorithm. Returns (g, s, t) such that
-        a*s + b*t == g == gcd(a, b) (up to a unit factor)."""
         a = Zi._ensure_zi(a)
         b = Zi._ensure_zi(b)
         old_r, r = a, b
@@ -325,9 +300,7 @@ class Zi(Complex):
 
     @property
     def is_unit(self):
-        """A Gaussian integer is a unit iff it has norm 1 (equivalent to,
-        but cheaper than, checking membership in Zi.units())."""
-        return self.norm() == 1
+        return self in Zi.units()
 
     @staticmethod
     def two():
