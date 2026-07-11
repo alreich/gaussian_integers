@@ -1,8 +1,5 @@
-"""Unit tests for the Zi (Gaussian integer) class.
+"""Unit tests for the Zi (Gaussian integer) class."""
 
-Assumes Zi lives in a sibling module `zi.py` (adjust the import below to
-match your actual project layout, e.g. `from gauss import Zi`).
-"""
 import random
 import unittest
 
@@ -11,6 +8,7 @@ from src.zi import Zi
 # ----------------------------------------------------------------------
 # Construction
 # ----------------------------------------------------------------------
+
 class TestInit(unittest.TestCase):
     def test_default_is_zero(self):
         z = Zi()
@@ -56,6 +54,7 @@ class TestInit(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Basic protocol: repr/str/hash/getitem/bool/complex
 # ----------------------------------------------------------------------
+
 class TestProtocols(unittest.TestCase):
     def test_repr(self):
         self.assertEqual(repr(Zi(3, -4)), "Zi(3, -4)")
@@ -96,6 +95,7 @@ class TestProtocols(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Equality
 # ----------------------------------------------------------------------
+
 class TestEquality(unittest.TestCase):
     def test_equal_zi(self):
         self.assertEqual(Zi(3, 4), Zi(3, 4))
@@ -123,6 +123,7 @@ class TestEquality(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Unary ops
 # ----------------------------------------------------------------------
+
 class TestUnary(unittest.TestCase):
     def test_neg(self):
         self.assertEqual(-Zi(3, -4), Zi(-3, 4))
@@ -143,6 +144,7 @@ class TestUnary(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Addition / subtraction, including reflected operators
 # ----------------------------------------------------------------------
+
 class TestAddSub(unittest.TestCase):
     def test_add_zi(self):
         self.assertEqual(Zi(1, 2) + Zi(3, 4), Zi(4, 6))
@@ -167,6 +169,7 @@ class TestAddSub(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Multiplication, including reflected operator
 # ----------------------------------------------------------------------
+
 class TestMul(unittest.TestCase):
     def test_mul_zi(self):
         # (1+2i)(3+4i) = 3 + 4i + 6i + 8i^2 = -5 + 10i
@@ -184,6 +187,7 @@ class TestMul(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Division, including reflected operator and zero division
 # ----------------------------------------------------------------------
+
 class TestDiv(unittest.TestCase):
     def test_exact_division(self):
         # (3+4i) = (1+2i)*(1-2i)? check an exact multiple instead:
@@ -211,6 +215,7 @@ class TestDiv(unittest.TestCase):
 # ----------------------------------------------------------------------
 # Power, including reflected operator
 # ----------------------------------------------------------------------
+
 class TestPow(unittest.TestCase):
     def test_pow_zero(self):
         self.assertEqual(Zi(3, 4) ** 0, Zi(1, 0))

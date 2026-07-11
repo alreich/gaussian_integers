@@ -1,12 +1,5 @@
-"""Gaussian integer (Zi) class: a + bi with a, b in Z.
+"""Gaussian integer (Zi) class: a + bi with a, b in Z."""
 
-Consolidates fixes for:
-  - duplicate __radd__ definitions (dead code shadowing the real impl)
-  - self._re typos (should be self._real) in __neg__, __pos__, conjugate, __str__
-  - __eq__ raising TypeError instead of returning NotImplemented for
-    incomparable types
-  - missing/broken __rmul__, __truediv__, __rtruediv__, __pow__, __rpow__
-"""
 from math import sqrt
 from numbers import Complex
 
@@ -14,7 +7,8 @@ from numbers import Complex
 class Zi(Complex):
     __slots__ = ('_real', '_imag')
 
-    def __init__(self, real: (int, float, complex) = None, imag: (int, float) = None):
+    # def __init__(self, real: (int, float, complex) = None, imag: (int, float) = None) -> None:
+    def __init__(self, real = None, imag = None) -> None:
         if isinstance(real, (complex, Zi)):
             if imag is None:
                 super().__setattr__('_real', round(real.real))
@@ -61,6 +55,8 @@ class Zi(Complex):
         raise IndexError("Zi index out of range (must be 0 or 1)")
 
     def __eq__(self, other):
+        """If other can be cast to a Zi, and if self is equal to that,
+        then self == other."""
         try:
             oth = Zi._ensure_zi(other)
         except TypeError:
@@ -138,7 +134,7 @@ class Zi(Complex):
         if n == 0:
             raise ZeroDivisionError("division by zero Gaussian integer")
         num = self * oth.conjugate()
-        return Zi(round(num.real / n), round(num.imag / n))
+        return Zi(round(num.real / n), round(num.imag / n))  # type: ignore
 
     def __rtruediv__(self, other):
         oth = Zi._ensure_zi(other)
