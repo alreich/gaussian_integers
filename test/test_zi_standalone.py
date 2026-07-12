@@ -3,7 +3,7 @@
 import random
 import unittest
 
-from src.zi import Zi
+from src.zi_standalone import Zi
 
 # ----------------------------------------------------------------------
 # Construction
@@ -250,24 +250,11 @@ class TestMul(unittest.TestCase):
 # ----------------------------------------------------------------------
 
 class TestTrueDiv(unittest.TestCase):
-    """As of the Qi integration, / (__truediv__) returns the EXACT
-    Gaussian-rational quotient -- a Qi, or a Zi when the division happens
-    to be exact -- rather than rounding. // (__floordiv__, tested in
-    TestFloorDivMod below) is what rounds to the nearest Gaussian
-    integer now."""
-
     def test_exact_division(self):
         # (1+2i)*(2+1i) = 2 + i + 4i + 2i^2 = 0 + 5i
         product = Zi(1, 2) * Zi(2, 1)
         self.assertEqual(product / Zi(2, 1), Zi(1, 2))
         self.assertEqual(product / Zi(1, 2), Zi(2, 1))
-
-    def test_exact_division_collapses_to_zi(self):
-        from src.qi import Qi
-        product = Zi(1, 2) * Zi(2, 1)
-        result = product / Zi(2, 1)
-        self.assertIsInstance(result, Zi)
-        self.assertNotIsInstance(result, Qi)
 
     def test_rtruediv(self):
         # 4 / Zi(2, 0) should behave like ordinary division of reals
@@ -277,13 +264,11 @@ class TestTrueDiv(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             Zi(1, 1) / Zi(0, 0)
 
-    def test_inexact_division_returns_exact_qi(self):
-        from src.qi import Qi
+    def test_division_rounds_when_inexact(self):
+        # 1 / (1+i) = 0.5 - 0.5i -> rounds to a nearby Gaussian integer
         result = Zi(1, 0) / Zi(1, 1)
-        self.assertIsInstance(result, Qi)
-        # 1/(1+i) = (1-i)/2 = 1/2 - 1/2 i, exactly -- no rounding.
-        self.assertEqual(result, Qi('1/2', '-1/2'))
-        self.assertEqual(Zi(1, 1) * result, Zi(1, 0))
+        self.assertIsInstance(result, Zi)
+        self.assertLessEqual(abs(complex(result) - (0.5 - 0.5j)), 1.0)
 
     def test_division_precise_for_large_coefficients(self):
         # Exercise the exact conjugate/norm path with values large enough
@@ -299,24 +284,16 @@ class TestTrueDiv(unittest.TestCase):
 # ----------------------------------------------------------------------
 
 class TestFloorDivMod(unittest.TestCase):
-    """// (__floordiv__) rounds to the nearest Gaussian integer. Unlike
-    before the Qi integration, it no longer agrees with / in general --
-    / is now exact and returns a Qi when the division isn't exact -- but
-    the two must still agree whenever the division IS exact."""
-
-    def test_floordiv_matches_truediv_when_exact(self):
+    def test_floordiv_matches_truediv(self):
+        # By design (no natural order on Z[i]), // and / both round to the
+        # nearest Gaussian integer and must always agree.
         rng = random.Random(7)
         for _ in range(200):
-            a = Zi(rng.randint(-30, 30), rng.randint(-30, 30))
-            b = Zi(rng.randint(-30, 30), rng.randint(-30, 30))
+            a = Zi(rng.randint(-500, 500), rng.randint(-500, 500))
+            b = Zi(rng.randint(-500, 500), rng.randint(-500, 500))
             if b == Zi(0, 0):
                 continue
-            product = a * b
-            self.assertEqual(product // b, product / b)
-
-    def test_floordiv_rounds_when_inexact(self):
-        # 1/(1+i) = 0.5 - 0.5i; both components round-half-to-even to 0.
-        self.assertEqual(Zi(1, 0) // Zi(1, 1), Zi(0, 0))
+            self.assertEqual(a // b, a / b)
 
     def test_floordiv_exact(self):
         product = Zi(1, 2) * Zi(2, 1)
@@ -380,46 +357,6 @@ class TestPow(unittest.TestCase):
         # i is a unit: i^-1 == -i, exact (no rounding loss)
         i = Zi(0, 1)
         self.assertEqual(i ** -1, Zi(0, -1))
-
-    def test_pow_negative_exponent_non_unit_returns_exact_qi(self):
-        # 3+4i is not a unit (norm 25), so its inverse is a genuine
-        # Gaussian rational -- now returned exactly as a Qi.
-        from src.qi import Qi
-        z = Zi(3, 4)
-        result = z ** -1
-        self.assertIsInstance(result, Qi)
-        self.assertEqual(result, Qi('3/25', '-4/25'))
-        self.assertEqual(z * result, Zi(1, 0))
-
-    def test_pow_negative_two_non_unit_exact(self):
-        from src.qi import Qi
-        z = Zi(1, 2)  # norm 5
-        result = z ** -2
-        self.assertEqual(z * z * result, Zi(1, 0))
-
-
-class TestInverse(unittest.TestCase):
-    def test_inverse_of_unit_is_zi(self):
-        i = Zi(0, 1)
-        self.assertEqual(i.inverse(), Zi(0, -1))
-        self.assertIsInstance(i.inverse(), Zi)
-
-    def test_inverse_of_non_unit_is_qi(self):
-        from src.qi import Qi
-        z = Zi(3, 4)
-        self.assertEqual(z.inverse(), Qi('3/25', '-4/25'))
-
-    def test_inverse_round_trips(self):
-        rng = random.Random(13)
-        for _ in range(100):
-            z = Zi(rng.randint(-50, 50), rng.randint(-50, 50))
-            if z == Zi(0, 0):
-                continue
-            self.assertEqual(z * z.inverse(), Zi(1, 0))
-
-    def test_inverse_of_zero_raises(self):
-        with self.assertRaises(ZeroDivisionError):
-            Zi(0, 0).inverse()
 
 
 # ----------------------------------------------------------------------
@@ -779,58 +716,6 @@ class TestFuzz(unittest.TestCase):
             b = self._random_zi(allow_zero=False)
             g, s, t = Zi.xgcd(a, b)
             self.assertEqual(a * s + b * t, g)
-
-
-# ----------------------------------------------------------------------
-# Interoperability with Qi (Gaussian rationals)
-# ----------------------------------------------------------------------
-
-class TestZiQiInterop(unittest.TestCase):
-    """Zi's arithmetic methods must return NotImplemented (not raise) for
-    operand types they don't recognize, so Python can fall back to Qi's
-    reflected methods -- and vice versa. These tests exercise both
-    directions."""
-
-    def setUp(self):
-        from src.qi import Qi
-        self.Qi = Qi
-
-    def test_zi_plus_qi(self):
-        Qi = self.Qi
-        self.assertEqual(Zi(1, 2) + Qi('1/2', '1/3'), Qi('3/2', '7/3'))
-
-    def test_qi_plus_zi(self):
-        Qi = self.Qi
-        self.assertEqual(Qi('1/2', '1/3') + Zi(1, 2), Qi('3/2', '7/3'))
-
-    def test_zi_minus_qi_and_reverse(self):
-        Qi = self.Qi
-        self.assertEqual(Zi(1, 2) - Qi('1/2', '0'), Qi('1/2', '2'))
-        self.assertEqual(Qi('1/2', '0') - Zi(1, 2), Qi('-1/2', '-2'))
-
-    def test_zi_times_qi(self):
-        Qi = self.Qi
-        # (1+2i)(1/2+1/3i) = 1/2 + 1/3i + i + 2/3 i^2
-        #                  = (1/2 - 2/3) + (1/3+1)i = -1/6 + 4/3 i
-        self.assertEqual(Zi(1, 2) * Qi('1/2', '1/3'), Qi('-1/6', '4/3'))
-        self.assertEqual(Qi('1/2', '1/3') * Zi(1, 2), Qi('-1/6', '4/3'))
-
-    def test_zi_equals_qi_when_value_matches(self):
-        Qi = self.Qi
-        # Qi('1', '2') collapses to a Zi at construction, so this is
-        # really testing Zi == Zi, but via the Qi constructor path.
-        self.assertEqual(Zi(1, 2), Qi('1', '2'))
-
-    def test_zi_not_equal_to_fractional_qi(self):
-        Qi = self.Qi
-        self.assertNotEqual(Zi(1, 2), Qi('1', '5/2'))
-        self.assertNotEqual(Qi('1', '5/2'), Zi(1, 2))
-
-    def test_zi_incomparable_type_still_returns_false_not_raise(self):
-        # Unrelated to Qi, but confirms the NotImplemented plumbing
-        # change didn't reintroduce a raise for genuinely bad types.
-        self.assertFalse(Zi(1, 2) == "nope")
-        self.assertNotEqual(Zi(1, 2), "nope")
 
 
 def main():

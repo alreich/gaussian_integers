@@ -3,7 +3,7 @@
 import random
 import unittest
 
-from src.zi import Zi
+from src.zi_standalone import Zi
 
 # ----------------------------------------------------------------------
 # Construction

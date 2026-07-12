@@ -1,6 +1,5 @@
 """Gaussian integer (Zi) class: a + bi with a, b in Z."""
 
-from fractions import Fraction
 from math import sqrt
 from numbers import Complex
 import random as rnd
@@ -54,38 +53,22 @@ class Zi(Complex):
 
     @staticmethod
     def _ensure_zi(x):
-        """Best-effort conversion of x to a Zi, for use inside Zi's own
-        arithmetic dunder methods. Returns None (rather than raising) for
-        types it doesn't understand -- such as Qi -- so that operator
-        methods can return NotImplemented and let Python fall back to the
-        other operand's reflected method (e.g. Qi.__radd__) instead of
-        failing outright. See _require_zi for a raising variant used by
-        static utilities that have no such fallback available."""
         if isinstance(x, Zi):
             return x
         if isinstance(x, complex):
             return Zi(x)
         if isinstance(x, (int, float)):
             return Zi(x, 0)
-        return None
-
-    @staticmethod
-    def _require_zi(x):
-        """Like _ensure_zi, but raises TypeError on failure. Used by static
-        utility methods (modified_divmod, gcd, xgcd) where there's no
-        operator-dispatch fallback to defer to."""
-        oth = Zi._ensure_zi(x)
-        if oth is None:
-            raise TypeError(f"Cannot convert {type(x)} to Zi")
-        return oth
+        raise TypeError(f"Cannot convert {type(x)} to Zi")
 
     # ---------------- Equality -----------------------
 
     def __eq__(self, other):
         """If other can be cast to a Zi, and if self is equal to that,
         then self == other."""
-        oth = Zi._ensure_zi(other)
-        if oth is None:
+        try:
+            oth = Zi._ensure_zi(other)
+        except TypeError:
             return NotImplemented
         return self.real == oth.real and self.imag == oth.imag
 
@@ -137,14 +120,10 @@ class Zi(Complex):
 
     def __add__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return Zi(self.real + oth.real, self.imag + oth.imag)
 
     def __radd__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return oth + self
 
     def __iadd__(self, other):
@@ -152,14 +131,10 @@ class Zi(Complex):
 
     def __sub__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return Zi(self.real - oth.real, self.imag - oth.imag)
 
     def __rsub__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return oth - self
 
     def __isub__(self, other):
@@ -167,85 +142,56 @@ class Zi(Complex):
 
     def __mul__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         a, b = self
         c, d = oth
         return Zi(a * c - b * d, a * d + b * c)
 
     def __rmul__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return oth * self
 
     def __imul__(self, other):
         return self.__mul__(other)
 
     def __truediv__(self, other):
-        """Exact division. Returns the precise Gaussian-rational quotient
-        as a Qi (or as a Zi, via Qi's auto-collapse, when the division is
-        exact). Uses exact integer/Fraction arithmetic throughout, so it
-        never loses precision regardless of coefficient size.
-
-        Note this is a deliberate change from rounding-to-nearest, which
-        is what // (see __floordiv__) is for now that Qi exists to
-        represent the exact result."""
+        """Division rounded to the nearest Gaussian integer. Uses exact
+        integer arithmetic (multiply by conjugate, divide by norm) rather
+        than floating-point complex division, so it stays precise for
+        arbitrarily large coefficients."""
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         n = oth.norm()
         if n == 0:
             raise ZeroDivisionError("division by zero Gaussian integer")
-        from src.qi import Qi  # local import: avoids a circular import,
-                                # since qi.py imports Zi at module level
         num = self * oth.conjugate()
-        return Qi(Fraction(num.real, n), Fraction(num.imag, n))
+        return Zi(round(num.real / n), round(num.imag / n))  # type: ignore
 
     def __rtruediv__(self, other):
         oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
         return oth.__truediv__(self)
 
     def __floordiv__(self, other):
         """Gaussian integers have no natural total order, so 'floor'
-        division is defined as rounding to the nearest Gaussian integer
-        (using exact Fraction arithmetic, so it stays precise regardless
-        of coefficient size). This is distinct from __truediv__, which
-        now returns the exact quotient as a Qi."""
-        oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
-        n = oth.norm()
-        if n == 0:
-            raise ZeroDivisionError("division by zero Zi")
-        num = self * oth.conjugate()
-        return Zi(round(Fraction(num.real, n)), round(Fraction(num.imag, n)))
+        division is defined the same way as __truediv__: round to the
+        nearest Gaussian integer. Delegates to __truediv__ so both operators
+        agree exactly (previously this used float-based complex division,
+        which could disagree with __truediv__'s exact result on large
+        coefficients due to floating-point rounding)."""
+        return self.__truediv__(other)
 
     def __rfloordiv__(self, other):
-        oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
-        return oth.__floordiv__(self)
+        other_zi = Zi._ensure_zi(other)
+        return other_zi.__floordiv__(self)
 
     def __mod__(self, other):
-        oth = Zi._ensure_zi(other)
-        if oth is None:
-            return NotImplemented
-        q = self // oth
-        return self - oth * q
+        other_zi = Zi._ensure_zi(other)
+        q = self // other_zi
+        return self - other_zi * q
 
     def __pow__(self, exponent):
         if not isinstance(exponent, int):
             return NotImplemented
         if exponent == 0:
             return Zi(1, 0)
-        # For a negative exponent, Zi(1, 0) / self now returns the EXACT
-        # inverse (a Qi, unless self is a unit) rather than a rounded
-        # approximation. The multiplication loop below works correctly
-        # even when base/result become Qi partway through, since Qi's
-        # arithmetic methods handle mixed Zi/Qi operands transparently.
         base, exp = (self, exponent) if exponent > 0 else (Zi(1, 0) / self, -exponent)
         result = Zi(1, 0)
         while exp > 0:
@@ -258,17 +204,7 @@ class Zi(Complex):
     def __rpow__(self, base):
         if self.imag != 0:
             return NotImplemented
-        oth = Zi._ensure_zi(base)
-        if oth is None:
-            return NotImplemented
-        return oth.__pow__(self.real)
-
-    def inverse(self):
-        """The exact multiplicative inverse of this Gaussian integer.
-        Returns a Zi if self is a unit, otherwise a Qi. Provided so that
-        inverse() works uniformly on any value coming out of Qi's
-        arithmetic, since a Qi with denominator 1 collapses into a Zi."""
-        return Zi(1, 0) / self
+        return Zi._ensure_zi(base).__pow__(self.real)
 
     # ---------- Array Conversion ----------
 
@@ -336,8 +272,8 @@ class Zi(Complex):
         strictly smaller norm than b. This is what makes gcd/xgcd below
         terminate correctly, since Z[i] is a Euclidean domain under the
         norm only when division rounds to nearest."""
-        a = Zi._require_zi(a)
-        b = Zi._require_zi(b)
+        a = Zi._ensure_zi(a)
+        b = Zi._ensure_zi(b)
         if b == Zi(0, 0):
             raise ZeroDivisionError("division by zero Zi")
         q = a // b  # rounds to nearest Gaussian integer
@@ -346,8 +282,8 @@ class Zi(Complex):
 
     @staticmethod
     def gcd(a, b):
-        a = Zi._require_zi(a)
-        b = Zi._require_zi(b)
+        a = Zi._ensure_zi(a)
+        b = Zi._ensure_zi(b)
         while b != Zi(0, 0):
             _, r = Zi.modified_divmod(a, b)
             a, b = b, r
@@ -357,8 +293,8 @@ class Zi(Complex):
     def xgcd(a, b):
         """Extended Euclidean algorithm. Returns (g, s, t) such that
         a*s + b*t == g == gcd(a, b) (up to a unit factor)."""
-        a = Zi._require_zi(a)
-        b = Zi._require_zi(b)
+        a = Zi._ensure_zi(a)
+        b = Zi._ensure_zi(b)
         old_r, r = a, b
         old_s, s = Zi(1, 0), Zi(0, 0)
         old_t, t = Zi(0, 0), Zi(1, 0)
